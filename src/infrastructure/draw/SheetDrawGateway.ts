@@ -11,6 +11,7 @@ import { toParticipant, type AccreditedRow } from './sheetRows';
 interface ListResponse {
   accredited: AccreditedRow[];
   teams: SavedTeam[];
+  testSheet?: string | null;
 }
 
 // adapter: a porta DrawGateway sobre o protocolo da planilha (draw-list, draw-save, draw-name)
@@ -41,6 +42,11 @@ export class SheetDrawGateway implements DrawGateway {
 
   async loadAccredited(): Promise<DrawParticipant[]> {
     return (await this.list()).accredited.map(toParticipant);
+  }
+
+  async loadTestLabel(): Promise<string | null> {
+    const label = (await this.list()).testSheet;
+    return typeof label === 'string' && label !== '' ? label : null;
   }
 
   async loadSavedTeams(): Promise<SavedTeam[]> {

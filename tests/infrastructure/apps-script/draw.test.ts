@@ -212,6 +212,36 @@ describe('Apps Script · sorteio das equipes (Draw.gs)', () => {
     ]);
   });
 
+  it('só avisa que é planilha de ensaio quando o nome da planilha tem "cópia" ou "teste"', () => {
+    const { script, call } = setup();
+    expect(call({ action: 'draw-list' })['testSheet']).toBeNull();
+    script.book.name = 'Cópia de Teste HackaRun · Inscrições';
+    expect(call({ action: 'draw-list' })['testSheet']).toBe('Cópia de Teste HackaRun · Inscrições');
+    script.book.name = 'HackaRun 2026 · Inscrições';
+    expect(call({ action: 'draw-list' })['testSheet']).toBeNull();
+  });
+
+  it('a insígnia da equipe nomeada mostra a arte do Pokémon; a do Drive, se existir, ganha; sortear de novo volta ao padrão', () => {
+    const { script, teams, call } = setup();
+    call({ action: 'draw-save', teams: TWO_TEAMS });
+    call({
+      action: 'draw-names',
+      items: [
+        { number: 1, pokemonId: 6, name: 'Equipe Charizard' },
+        { number: 2, pokemonId: 9, name: 'Equipe Blastoise' },
+      ],
+    });
+    const badge = script.column(teams, 'Insígnia');
+    const formula = (row: number) => teams.formulaAt(row, badge) ?? '';
+    expect(formula(3)).toContain('official-artwork/6.png');
+    expect(formula(4)).toContain('official-artwork/9.png');
+    // Drive primeiro: o ID da insígnia (coluna ID da insígnia) vem antes da arte
+    expect(formula(3)).toMatch(/^=IF\(H3<>"";?,?IMAGE\(/);
+    expect(formula(3)).toContain('lh3.googleusercontent.com');
+    // a equipe montada à mão (linha 2) não ganhou arte
+    expect(formula(2)).not.toContain('official-artwork');
+  });
+
   it('com o lock ocupado responde "busy" sem gravar', () => {
     const { script, call } = setup();
     script.lock.busy = true;
