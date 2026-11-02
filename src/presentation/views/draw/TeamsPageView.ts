@@ -74,11 +74,11 @@ export function mountTeamsPage(services: DrawServices): TeamDrawViewModel {
       stat('credenciados', state.sheet ? String(state.sheet.accredited) : '–'),
       stat('equipes', preview ? String(preview.result.report.teams) : '–'),
       stat(
-        'salvo na planilha',
+        'sorteio salvo',
         state.sheet
           ? state.sheet.saved.length > 0
             ? `${state.sheet.saved.length} equipes`
-            : 'ainda não'
+            : 'não definido'
           : '–',
       ),
     );
