@@ -18,6 +18,11 @@ const DRAW_TOKEN_PROPERTY = 'SORTEIO_TOKEN';
 // chave curta demais não vale (evita ligar o sorteio com uma senha fraca por engano)
 const DRAW_TOKEN_MIN = 24;
 const DRAW_ACTIONS = ['draw-list', 'draw-save', 'draw-names', 'draw-publish'];
+// arte oficial dos Pokémon (repositório público da PokeAPI): vira a insígnia da equipe na aba Equipes
+const DRAW_ARTWORK_URL =
+  'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/';
+// planilha de ensaio: o nome tem "cópia" ou "teste" e as telas do sorteio avisam. A oficial não mostra nada
+const DRAW_TEST_SHEET = /c[oó]pia|teste/i;
 
 function drawAction_(body) {
   if (!drawAuthorized_(body.token)) return json_({ ok: false, error: 'unauthorized' });
@@ -91,6 +96,7 @@ function drawContext_(book) {
     draw.setFrozenRows(1);
   }
   return {
+    bookName: String(book.getName ? book.getName() : ''),
     registrations: registrations,
     teams: teams,
     draw: draw,
@@ -136,7 +142,13 @@ function drawList_(ctx) {
       .filter((r) => drawText_(r[RCOL.team]) === t.name && drawStatus_(r[RCOL.status]) !== 'cancelado')
       .map((r) => ({ id: drawText_(r[RCOL.protocol]), name: drawText_(r[RCOL.name]) })),
   }));
-  return { ok: true, accredited: accredited, teams: teams };
+  return {
+    ok: true,
+    accredited: accredited,
+    teams: teams,
+    // só nas planilhas de ensaio: o nome da planilha, para a tela avisar que não é a oficial
+    testSheet: DRAW_TEST_SHEET.test(ctx.bookName) ? ctx.bookName : null,
+  };
 }
 
 // grava as equipes do sorteio. `replace` troca um sorteio salvo antes, desde que nenhuma equipe tenha nome ainda
@@ -229,6 +241,7 @@ function drawWriteTeamRows_(ctx, oldNames, names) {
     rows[index] = [name, 'pendente'];
   });
   ctx.teams.getRange(2, TCOL.name + 1, rows.length, 1).setValues(rows.map((r) => [r[0]]));
+  drawRestoreBadges_(ctx, rows.length, () => true);
   ctx.teams.getRange(2, TCOL.status + 1, rows.length, 1).setValues(rows.map((r) => [r[1]]));
   // linhas além das que o configurarPlanilha preparou (passou de TEAM_ROWS equipes)
   fresh.forEach((row) => {
@@ -238,6 +251,46 @@ function drawWriteTeamRows_(ctx, oldNames, names) {
     );
   });
   if (fresh.length) ctx.teams.setRowHeights(fresh[0], fresh.length, BADGE_ROW_HEIGHT);
+}
+
+// insígnia = miniatura. Com Pokémon sorteado ela mostra a arte dele; a insígnia do Drive (coluna ID da insígnia), se a
+// organização colar uma, ganha. Só enfeite da aba: se falhar, o sorteio segue
+function drawBadgeFormula_(row, pokemonId) {
+  const id = colLetter_(TCOL.badgeId) + row;
+  const drive = '"https://lh3.googleusercontent.com/d/"&' + id + '&"=w' + BADGE_THUMB_WIDTH + '"';
+  const art = '"' + DRAW_ARTWORK_URL + pokemonId + '.png"';
+  return '=IF(' + id + '<>"",IMAGE(' + drive + '),IMAGE(' + art + '))';
+}
+
+function drawPokemonBadges_(ctx, plan) {
+  try {
+    if (!ctx.teamRows.length) return;
+    const range = ctx.teams.getRange(2, TCOL.badge + 1, ctx.teamRows.length, 1);
+    const formulas = range.getFormulas();
+    ctx.teamRows.forEach((r, i) => {
+      const step = plan.find((p) => p.from === drawText_(r[TCOL.name]));
+      if (step)
+        formulas[i] = [localizeFormula_(drawBadgeFormula_(i + 2, step.pokemonId), formulaSeparator_())];
+    });
+    range.setFormulas(formulas);
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+// volta a insígnia padrão (Drive) nas linhas da aba Equipes escolhidas por `pick(índice)`
+function drawRestoreBadges_(ctx, count, pick) {
+  try {
+    if (count < 1) return;
+    const range = ctx.teams.getRange(2, TCOL.badge + 1, count, 1);
+    const formulas = range.getFormulas();
+    for (let i = 0; i < count; i++) {
+      if (pick(i)) formulas[i] = [localizeFormula_(teamFormulas_(i + 2)[TCOL.badge], formulaSeparator_())];
+    }
+    range.setFormulas(formulas);
+  } catch (err) {
+    console.error(err);
+  }
 }
 
 // dá nome (Pokémon) a uma ou várias equipes. Confere tudo antes: ou grava todas, ou nenhuma
@@ -291,6 +344,7 @@ function drawNames_(ctx, body) {
     return step ? [step.to, step.pokemonId] : [r[1], r[2]];
   });
   ctx.draw.getRange(2, 2, drawCells.length, 2).setValues(drawCells);
+  drawPokemonBadges_(ctx, plan);
   CacheService.getScriptCache().remove(TEAMS_CACHE_KEY);
   return { ok: true, named: plan.length };
 }

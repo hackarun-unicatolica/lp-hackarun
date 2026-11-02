@@ -7,7 +7,7 @@ import Wordmark from '@presentation/components/ui/Wordmark.astro';
 import PrivacyNotice from '@presentation/components/privacy/PrivacyNotice.astro';
 import { CONSENT_VERSION } from '@application/index';
 import { serverContainer } from '@composition/server';
-import type { AppConfig } from '@presentation/app/AppConfig';
+import { teamsEndpointFor, type AppConfig } from '@presentation/app/AppConfig';
 import { registrationHref } from '@presentation/view-models/registration/registrationOrigin';
 import '@presentation/sections/sections.css';
 
@@ -16,7 +16,7 @@ const { event } = await serverContainer().getLandingPage.execute();
 const appConfig: AppConfig = {
   milestones: event.milestones,
   registration: event.registration,
-  teamsEndpoint: event.registration.endpoint,
+  teamsEndpoint: teamsEndpointFor(event.registration.endpoint),
 };
 
 const seo = {

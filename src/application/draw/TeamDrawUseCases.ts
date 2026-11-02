@@ -35,6 +35,8 @@ export function newSeed(now: Date, random: Random): string {
 export interface DrawStatus {
   accredited: number;
   saved: SavedTeam[];
+  // planilha de ensaio (nome dela); ausente na oficial
+  testLabel?: string | null;
 }
 
 // o que a planilha tem agora: quantos credenciados e se já existe sorteio salvo (as telas abrem mostrando isto)
@@ -42,11 +44,16 @@ export class GetDrawStatus {
   constructor(private readonly gateway: DrawGateway) {}
 
   async execute(): Promise<DrawStatus> {
-    const [participants, saved] = await Promise.all([
+    const [participants, saved, testLabel] = await Promise.all([
       this.gateway.loadAccredited(),
       this.gateway.loadSavedTeams(),
+      this.gateway.loadTestLabel(),
     ]);
-    return { accredited: participants.length, saved: [...saved].sort((a, b) => a.number - b.number) };
+    return {
+      accredited: participants.length,
+      saved: [...saved].sort((a, b) => a.number - b.number),
+      testLabel,
+    };
   }
 }
 

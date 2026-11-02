@@ -26,6 +26,8 @@ export interface DrawGateway {
   // credenciados (Status = credenciado) com o que o sorteio precisa; quem já tem equipe também vem (o caso de uso avisa)
   loadAccredited(): Promise<DrawParticipant[]>;
   loadSavedTeams(): Promise<SavedTeam[]>;
+  // nome da planilha quando ela é de ensaio ("Cópia de Teste ..."); null na planilha oficial
+  loadTestLabel(): Promise<string | null>;
   // grava Equipe N em cada pessoa e cria as equipes. replace = apaga antes o sorteio anterior (só se nenhuma equipe
   // já ganhou nome)
   saveTeams(result: DrawResult, options: { replace: boolean }): Promise<void>;

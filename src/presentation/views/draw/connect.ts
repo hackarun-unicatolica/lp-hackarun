@@ -9,13 +9,14 @@ interface LocalConfig {
 // "1" só no `npm run sorteio` (a integração local define no Vite); no site publicado é sempre a planilha real
 const LOCAL = import.meta.env.SORTEIO_LOCAL === '1';
 
-export function showSource(services: DrawServices): void {
+// faixa no topo: na cópia local e nas planilhas de ensaio avisa "CÓPIA DE TESTE"; na planilha oficial não mostra nada
+export function showSource(services: DrawServices, testLabel: string | null = null): void {
   const badge = mustFind<HTMLElement>('[data-source]');
-  const real = services.source.mode === 'site';
-  badge.textContent = real
-    ? `PLANILHA REAL · ${services.source.label}`
-    : `CÓPIA DE TESTE · ${services.source.label}`;
-  badge.dataset['mode'] = real ? 'real' : 'test';
+  const local = services.source.mode === 'local';
+  const label = local ? services.source.label : testLabel;
+  badge.hidden = label === null;
+  badge.textContent = label === null ? '' : `CÓPIA DE TESTE · ${label}`;
+  badge.dataset['mode'] = 'test';
 }
 
 // botões que só existem no teste (cópia local): "Recomeçar teste" (equipes e nomes) e "Sortear nomes de novo". Na
@@ -56,7 +57,9 @@ export async function connect(): Promise<DrawServices> {
     return services;
   }
   const services = createDrawServices({ mode: 'site', label: 'planilha do HackaRun' });
-  showSource(services);
-  await services.status.execute();
+  // a faixa só aparece depois de saber qual planilha é (não mostra "oficial" nem "cópia" antes da hora)
+  mustFind<HTMLElement>('[data-source]').hidden = true;
+  const status = await services.status.execute();
+  showSource(services, status.testLabel ?? null);
   return services;
 }

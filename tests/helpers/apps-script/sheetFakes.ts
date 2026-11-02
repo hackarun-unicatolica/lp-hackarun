@@ -63,6 +63,24 @@ export class FakeRange {
     return this;
   }
 
+  getFormulas(): string[][] {
+    return Array.from({ length: this.numRows }, (_, r) =>
+      Array.from({ length: this.numCols }, (_, c) => this.sheet.formulaAt(this.row + r, this.col + c) ?? ''),
+    );
+  }
+
+  setFormulas(formulas: string[][]): this {
+    formulas.forEach((line, r) =>
+      line.forEach((formula, c) => {
+        const key = `${this.row + r},${this.col + c}`;
+        if (formula) this.sheet.formulas.set(key, formula);
+        else this.sheet.formulas.delete(key);
+        this.sheet.write(this.row + r, this.col + c, '');
+      }),
+    );
+    return this;
+  }
+
   setValue(value: Cell): this {
     return this.setValues([[value]]);
   }
@@ -204,7 +222,9 @@ export class FakeBook {
   readonly sheets: FakeSheet[] = [];
   // idioma da planilha: define o separador de argumento das fórmulas (pt_BR usa ";")
   locale = 'en_US';
+  name = 'HackaRun 2026 · Inscrições';
 
+  getName = () => this.name;
   getSpreadsheetLocale = () => this.locale;
 
   getSheets = () => [...this.sheets];
