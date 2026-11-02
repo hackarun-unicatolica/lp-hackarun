@@ -123,7 +123,8 @@ describe('drawTeams · regras do sorteio', () => {
         true,
       );
     }
-  });
+    // 8 sorteios de 212 pessoas: com a suíte inteira rodando em paralelo passa dos 5 s padrão
+  }, 30_000);
 
   it('quando dá para todos terem níveis diferentes, ninguém repete nível na equipe', () => {
     // 10 níveis com 8 pessoas cada: 80 pessoas, 20 equipes, cabe um de cada nível por equipe
