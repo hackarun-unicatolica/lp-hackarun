@@ -115,17 +115,11 @@ export function mountNamesPage(services: DrawServices): TeamNamesViewModel {
   const render = (state: TeamNamesState) => {
     const namedCount = state.teams.filter((t) => t.pokemonId !== null).length;
     stats.replaceChildren(
-      ...[
-        [String(state.teams.length), 'equipes'],
-        [String(namedCount), 'já com nome'],
-        [String(state.remaining), 'Pokémon restantes'],
-      ].map(([value, label]) =>
-        h(
-          'div',
-          { class: 'stat' },
-          h('span', { class: 'stat__value' }, value as string),
-          h('span', { class: 'stat__label' }, label as string),
-        ),
+      h(
+        'div',
+        { class: 'stat' },
+        h('span', { class: 'stat__value' }, String(state.teams.length)),
+        h('span', { class: 'stat__label' }, 'equipes'),
       ),
     );
     const pending = state.teams.length - namedCount;
