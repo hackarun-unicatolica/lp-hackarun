@@ -10,6 +10,7 @@ import { setupStage } from './fx/stage';
 import { cascadeDelays, NAME_REVEAL, prefersReducedMotion, typeColor, typeLabel } from './fx/timing';
 
 const SPIN_MS = 90;
+const AUTO_RETRY_MS = 4000;
 
 // 2ª tela do sorteio: "Quem é esse Pokémon?". Enquanto a planilha grava, silhuetas passam rápido; depois a silhueta do
 // Pokémon sorteado fica um instante e a cor aparece com um flash, junto com o nome da equipe. "Sortear todas" revela em
@@ -29,6 +30,7 @@ export function mountNamesPage(services: DrawServices): TeamNamesViewModel {
   const drawAll = mustFind<HTMLButtonElement>('[data-draw-all]');
   const skipButton = mustFind<HTMLButtonElement>('[data-skip]');
   const publishButton = mustFind<HTMLButtonElement>('[data-publish]');
+  const viewTeams = mustFind<HTMLAnchorElement>('[data-view-teams]');
   const reduced = prefersReducedMotion();
 
   // equipe -> instante em que a revelação dela começa (performance.now); some quando a animação termina
@@ -131,25 +133,25 @@ export function mountNamesPage(services: DrawServices): TeamNamesViewModel {
         ? 'Todas sorteadas ✓'
         : 'Sortear todas';
     skipButton.hidden = !running && revealAt.size === 0;
-    // publicar só com todas as equipes nomeadas e depois que a revelação terminou
+    // a publicação sai sozinha quando a revelação termina; o botão é só reserva (falhou, ou a página abriu depois) e o
+    // link para a página das equipes aparece quando já está publicado
     const allNamed = state.teams.length > 0 && pending === 0;
     const published = allNamed && state.teams.every((t) => t.published);
-    publishButton.hidden = !allNamed || running || revealAt.size > 0;
-    publishButton.disabled = state.publishing || published;
-    publishButton.textContent = published
-      ? 'Publicado no site ✓'
-      : state.publishing
-        ? 'Publicando…'
+    const revealed = !running && revealAt.size === 0;
+    publishButton.hidden = !allNamed || published || !revealed;
+    publishButton.disabled = state.publishing;
+    publishButton.textContent = state.publishing
+      ? 'Publicando…'
+      : state.error
+        ? 'Tentar publicar de novo'
         : 'Publicar no site';
+    viewTeams.hidden = !published || !revealed;
 
     message.replaceChildren();
     message.dataset['kind'] = state.error ? 'error' : published ? 'ok' : '';
     if (state.error) message.append(state.error);
-    else if (published && revealAt.size === 0) {
-      message.append(
-        'Equipes publicadas no site. ',
-        h('a', { href: '/equipes', target: '_blank', rel: 'noopener' }, 'Ver a página das equipes →'),
-      );
+    else if (published && revealed) {
+      message.append('Equipes publicadas no site. A página das equipes atualiza em até 1 minuto.');
     } else if (!state.loading && state.teams.length === 0) {
       message.append(
         'Ainda não há equipes salvas. ',
@@ -166,7 +168,11 @@ export function mountNamesPage(services: DrawServices): TeamNamesViewModel {
     const fresh = [...now].filter((n) => !named.has(n)).sort((a, b) => a - b);
     const firstLoad = named.size === 0 && state.spinning.length === 0 && revealAt.size === 0 && !drawing;
     named = now;
-    if (fresh.length === 0 || firstLoad || reduced) return;
+    if (fresh.length === 0 || firstLoad) return;
+    if (reduced) {
+      void autoPublish();
+      return;
+    }
     const base = performance.now();
     const delays = cascadeDelays(fresh.length, NAME_REVEAL.staggerMs, NAME_REVEAL.maxTotalMs);
     fresh.forEach((number, i) => {
@@ -187,8 +193,24 @@ export function mountNamesPage(services: DrawServices): TeamNamesViewModel {
         render(vm.state.value);
         if (fresh.length > 1)
           finale('Equipes batizadas!', `${fresh.length} equipes com nome de Pokémon`, reduced);
+        void autoPublish();
       }, last),
     );
+  };
+
+  // fim do sorteio: publica em /equipes em segundo plano, sem confirmação. Se falhar, tenta mais uma vez e, persistindo
+  // o erro, o botão "Tentar publicar de novo" aparece. Nunca roda ao abrir a página, só depois de uma revelação
+  const autoPublish = async (): Promise<void> => {
+    const ready = () => {
+      const { teams, publishing } = vm.state.value;
+      return !publishing && teams.length > 0 && teams.every((t) => t.pokemonId !== null && !t.published);
+    };
+    if (!ready()) return;
+    await vm.publish();
+    if (vm.state.value.error && ready()) {
+      await new Promise((resolve) => window.setTimeout(resolve, AUTO_RETRY_MS));
+      if (ready()) await vm.publish();
+    }
   };
 
   const skip = () => {
@@ -197,6 +219,7 @@ export function mountNamesPage(services: DrawServices): TeamNamesViewModel {
     timers.splice(0).forEach((t) => window.clearTimeout(t));
     revealAt.clear();
     render(vm.state.value);
+    void autoPublish();
   };
 
   vm.state.subscribe((state) => {
