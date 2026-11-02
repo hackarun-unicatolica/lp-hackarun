@@ -161,6 +161,12 @@ main {
   font-weight: 700;
 }
 
+.btn--link {
+  display: inline-block;
+  text-decoration: none;
+  text-align: center;
+}
+
 .btn:hover:not(:disabled) {
   border-color: var(--c-cyan, #00e5ff);
 }
