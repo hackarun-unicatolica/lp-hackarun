@@ -22,6 +22,14 @@ export const TEAM_REVEAL = {
   slotTickMs: 55,
 } as const;
 
+// holofote do sorteio dos nomes: cada equipe no pop-up grande (silhueta, flash de cor, nome e integrantes)
+export const NAME_SPOTLIGHT = {
+  // tempo de cada equipe no "Sortear" (46 equipes ≈ 1 min 20 s; "Revelar tudo" pula)
+  stepMs: 1_800,
+  // sorteio de uma equipe só (botão do card): fica um pouco mais
+  singleMs: 3_000,
+} as const;
+
 export const NAME_REVEAL = {
   // entre um Pokémon e o próximo no "Sortear" (a cascata inteira cabe em ~2 s, e o suspense todo em uns 6 s)
   staggerMs: 240,

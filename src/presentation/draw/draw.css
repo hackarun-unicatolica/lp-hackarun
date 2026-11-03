@@ -1088,3 +1088,158 @@ body.presenting .poke__name {
 body.presenting .btn--test {
   display: none;
 }
+
+/* ===================== holofote do sorteio dos nomes (pop-up de cada equipe) ===================== */
+.spotlight {
+  position: fixed;
+  inset: 0;
+  z-index: 42;
+  display: grid;
+  place-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: radial-gradient(circle at center, rgb(18 100 255 / 0.22), rgb(2 3 11 / 0.92) 62%);
+  backdrop-filter: blur(6px);
+}
+
+.spotlight__card {
+  display: grid;
+  justify-items: center;
+  gap: 0.9rem;
+  width: min(92vw, 36rem);
+  padding: clamp(1.25rem, 3vw, 2.25rem);
+  border: 1px solid color-mix(in srgb, var(--type, #00e5ff) 45%, transparent);
+  border-radius: 1.25rem;
+  background: linear-gradient(170deg, rgb(14 20 56 / 0.95), rgb(4 5 20 / 0.97));
+  box-shadow: 0 0 60px color-mix(in srgb, var(--type, #00e5ff) 30%, transparent);
+  text-align: center;
+}
+
+.spotlight__card.is-in {
+  animation: spot-card var(--step, 1800ms) both;
+}
+
+.spotlight__count {
+  margin: 0;
+  color: var(--ink-cyan, #8ff3ff);
+  font-family: 'JetBrains Mono Variable', ui-monospace, monospace;
+  font-size: clamp(0.85rem, 1.6vw, 1.05rem);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.spotlight__logo {
+  display: grid;
+  place-items: center;
+  width: min(44vh, 20rem);
+  aspect-ratio: 1;
+  border: 4px solid var(--type, #00e5ff);
+  border-radius: 50%;
+  background: #0b0e1c;
+  box-shadow: 0 0 50px color-mix(in srgb, var(--type, #00e5ff) 55%, transparent);
+}
+
+.spotlight__logo img {
+  width: 84%;
+  height: 84%;
+  object-fit: contain;
+}
+
+.spotlight__card.is-in .spotlight__logo img {
+  animation: spot-art var(--step, 1800ms) both;
+}
+
+.spotlight__name {
+  margin: 0;
+  font-family: 'Orbitron Variable', system-ui, sans-serif;
+  font-size: clamp(1.6rem, 4.5vw, 3rem);
+  line-height: 1.1;
+  color: #fff;
+  text-shadow: 0 0 22px color-mix(in srgb, var(--type, #00e5ff) 70%, transparent);
+}
+
+.spotlight__members {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.4rem 0.6rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.spotlight__members li {
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  background: rgb(130 160 255 / 0.14);
+  color: #f2f5ff;
+  font-size: clamp(0.9rem, 1.8vw, 1.1rem);
+  font-weight: 600;
+}
+
+.spotlight__card.is-in .spotlight__name,
+.spotlight__card.is-in .spotlight__members {
+  animation: spot-text var(--step, 1800ms) both;
+}
+
+.spotlight__skip {
+  position: absolute;
+  right: 1.5rem;
+  bottom: 1.5rem;
+}
+
+@keyframes spot-card {
+  0% {
+    opacity: 0;
+    transform: scale(0.88);
+  }
+
+  10%,
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* silhueta "Quem é esse Pokémon?" e depois o flash de cor */
+@keyframes spot-art {
+  0%,
+  34% {
+    filter: brightness(0);
+    transform: scale(0.94);
+  }
+
+  42% {
+    filter: brightness(2.4) saturate(1.4);
+    transform: scale(1.06);
+  }
+
+  56%,
+  100% {
+    filter: none;
+    transform: none;
+  }
+}
+
+@keyframes spot-text {
+  0%,
+  38% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  52%,
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spotlight__card.is-in,
+  .spotlight__card.is-in .spotlight__logo img,
+  .spotlight__card.is-in .spotlight__name,
+  .spotlight__card.is-in .spotlight__members {
+    animation: none;
+  }
+}

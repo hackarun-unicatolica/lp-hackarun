@@ -7,7 +7,8 @@ import { confirmDialog } from './confirmDialog';
 import { follow, h, mustFind, pokemonImage } from './dom';
 import { countdown, type Countdown } from './fx/countdown';
 import { finale } from './fx/finale';
-import { cascadeDelays, NAME_REVEAL, prefersReducedMotion, typeColor } from './fx/timing';
+import { createSpotlight } from './fx/spotlight';
+import { NAME_SPOTLIGHT, prefersReducedMotion, typeColor } from './fx/timing';
 
 const SPIN_MS = 90;
 const AUTO_RETRY_MS = 4000;
@@ -164,28 +165,45 @@ export function mountNamesPage(services: DrawServices, root: ParentNode = docume
       void autoPublish();
       return;
     }
+    // uma equipe por vez no holofote (pop-up grande); o card da grade revela junto, atrás do pop-up
+    const single = fresh.length === 1;
+    const step = single ? NAME_SPOTLIGHT.singleMs : NAME_SPOTLIGHT.stepMs;
     const base = performance.now();
-    const delays = cascadeDelays(fresh.length, NAME_REVEAL.staggerMs, NAME_REVEAL.maxTotalMs);
     fresh.forEach((number, i) => {
-      const at = base + (delays[i] ?? 0);
-      revealAt.set(number, at);
-      // a tela rola até o card quando a revelação dele começa (descontando o menu fixo do topo)
+      const delay = i * step;
+      revealAt.set(number, base + delay);
       timers.push(
         window.setTimeout(() => {
+          const team = vm.state.value.teams.find((t) => t.number === number);
+          const pokemon = team?.pokemonId != null ? byId.get(team.pokemonId) : undefined;
+          if (team && pokemon) {
+            spotlight.show(
+              {
+                number,
+                name: team.name,
+                image: pokemonImage(pokemon.id),
+                color: typeColor(pokemon.types),
+                members: team.members.map((m) => personName(m.name)),
+                index: i,
+                total: fresh.length,
+              },
+              step,
+            );
+          }
+          // a tela rola até o card (que aparece ao fechar o pop-up), descontando o menu fixo do topo
           const el = grid.querySelector(`[data-logo="${number}"]`)?.closest('.poke');
           if (el) follow(el, reduced);
-        }, delays[i] ?? 0),
+        }, delay),
       );
     });
-    const last = (delays.at(-1) ?? 0) + NAME_REVEAL.revealMs;
     timers.push(
       window.setTimeout(() => {
+        spotlight.close();
         revealAt.clear();
         render(vm.state.value);
-        if (fresh.length > 1)
-          finale('Equipes nomeadas!', `${fresh.length} equipes com nome de Pokémon`, reduced);
+        if (!single) finale('Equipes nomeadas!', `${fresh.length} equipes com nome de Pokémon`, reduced);
         void autoPublish();
-      }, last),
+      }, fresh.length * step),
     );
   };
 
@@ -208,10 +226,14 @@ export function mountNamesPage(services: DrawServices, root: ParentNode = docume
     pendingCountdown?.skip();
     if (revealAt.size === 0) return;
     timers.splice(0).forEach((t) => window.clearTimeout(t));
+    spotlight.close();
     revealAt.clear();
     render(vm.state.value);
     void autoPublish();
   };
+
+  // pop-up de cada equipe; o "Revelar tudo" dele faz o mesmo que o da tela
+  const spotlight = createSpotlight(() => skip());
 
   vm.state.subscribe((state) => {
     scheduleReveals(state);
