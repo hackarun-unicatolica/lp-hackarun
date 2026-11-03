@@ -6,13 +6,13 @@ import { confirmDialog } from './confirmDialog';
 import { follow, h, mustFind, pokemonImage } from './dom';
 import { countdown, type Countdown } from './fx/countdown';
 import { finale } from './fx/finale';
-import { cascadeDelays, NAME_REVEAL, prefersReducedMotion, typeColor, typeLabel } from './fx/timing';
+import { cascadeDelays, NAME_REVEAL, prefersReducedMotion, typeColor } from './fx/timing';
 
 const SPIN_MS = 90;
 const AUTO_RETRY_MS = 4000;
 
 // 2ª tela do sorteio: "Quem é esse Pokémon?". Enquanto a planilha grava, silhuetas passam rápido; depois a silhueta do
-// Pokémon sorteado fica um instante e a cor aparece com um flash, junto com o nome da equipe. "Sortear todas" revela em
+// Pokémon sorteado fica um instante e a cor aparece com um flash, junto com o nome da equipe. "Sortear" revela em
 // cascata; "Revelar tudo" pula para o fim
 export function mountNamesPage(services: DrawServices, root: ParentNode = document): TeamNamesViewModel {
   const { catalog } = services;
@@ -88,11 +88,6 @@ export function mountNamesPage(services: DrawServices, root: ParentNode = docume
         spinning ? 'Quem é esse Pokémon?' : pokemon ? team.name : `Equipe ${team.number}`,
       ),
       h(
-        'p',
-        { class: 'poke__meta' },
-        pokemon ? pokemon.types.map(typeLabel).join(' · ') : spinning ? '' : 'Aguardando o sorteio',
-      ),
-      h(
         'details',
         { class: 'poke__members' },
         h('summary', {}, `${team.members.length} integrantes`),
@@ -124,11 +119,9 @@ export function mountNamesPage(services: DrawServices, root: ParentNode = docume
     const pending = state.teams.length - namedCount;
     const running = state.spinning.length > 0 || pendingCountdown !== null;
     drawAll.disabled = state.loading || running || pending === 0;
-    drawAll.textContent = running
-      ? 'Sorteando…'
-      : pending === 0 && state.teams.length > 0
-        ? 'Todas sorteadas ✓'
-        : 'Sortear todas';
+    drawAll.textContent = running ? 'Sorteando…' : 'Sortear';
+    // tudo sorteado: o botão sai de cena e o próximo passo (ver a página das equipes) fica sozinho em destaque
+    drawAll.hidden = !running && pending === 0 && state.teams.length > 0;
     skipButton.hidden = !running && revealAt.size === 0;
     // a publicação sai sozinha quando a revelação termina; o botão é só reserva (falhou, ou a página abriu depois) e o
     // link para a página das equipes aparece quando já está publicado
@@ -228,10 +221,13 @@ export function mountNamesPage(services: DrawServices, root: ParentNode = docume
     if (drawAll.disabled) return;
     drawing = true;
     pendingCountdown = countdown(reduced);
+    // o sorteio grava na planilha enquanto a contagem 3-2-1 roda (o suspense não espera a rede depois da contagem);
+    // a revelação só começa quando as duas coisas terminaram (o view model segura o mínimo de suspense)
+    const run = vm.drawAll();
     render(vm.state.value);
     await pendingCountdown.done;
     pendingCountdown = null;
-    await vm.drawAll();
+    await run;
     drawing = false;
   });
   grid.addEventListener('click', (event) => {

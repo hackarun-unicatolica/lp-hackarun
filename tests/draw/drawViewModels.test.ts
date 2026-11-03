@@ -144,8 +144,14 @@ function namesVm(teams: SavedTeam[]) {
       return ok({ team: team(n, 100 + n), pokemon: { id: 100 + n, name: 'X', types: [] } });
     }),
     drawAll: vi.fn(async () => {
+      const drawn = current
+        .filter((t) => t.pokemonId === null)
+        .map((t) => ({
+          team: team(t.number, 100 + t.number),
+          pokemon: { id: 100 + t.number, name: 'X', types: [] },
+        }));
       current = current.map((t) => (t.pokemonId === null ? team(t.number, 100 + t.number) : t));
-      return ok([]);
+      return ok(drawn);
     }),
   };
   const catalog = Array.from({ length: 10 }, (_, i) => ({ id: 101 + i, name: `P${i}`, types: [] }));
@@ -156,7 +162,7 @@ function namesVm(teams: SavedTeam[]) {
     }),
   };
   const vm = new TeamNamesViewModel({ status: { execute: status }, names, publish, catalog, minSpinMs: 0 });
-  return { vm, names, publish };
+  return { vm, names, publish, status };
 }
 
 describe('TeamNamesViewModel', () => {
@@ -185,6 +191,26 @@ describe('TeamNamesViewModel', () => {
     expect(seen.some((s) => s.join() === '1,2')).toBe(true);
     expect(vm.pending).toEqual([]);
     expect(vm.state.value.spinning).toEqual([]);
+  });
+
+  it('o resultado do sorteio é aplicado direto, sem reler a planilha (a releitura era a parte lenta)', async () => {
+    const { vm, status } = namesVm([team(1), team(2)]);
+    await vm.load();
+    status.mockClear();
+    await vm.drawAll();
+    expect(status).not.toHaveBeenCalled();
+    expect(vm.state.value.teams.map((t) => t.pokemonId)).toEqual([101, 102]);
+    expect(vm.state.value.remaining).toBe(8);
+  });
+
+  it('se o sorteio falha, mostra o erro e relê a planilha para a tela refletir o que ficou salvo', async () => {
+    const { vm, status, names } = namesVm([team(1)]);
+    await vm.load();
+    names.drawAll.mockResolvedValueOnce({ ok: false, error: 'Esse Pokémon já foi sorteado.' } as never);
+    status.mockClear();
+    await vm.drawAll();
+    expect(vm.state.value.error).toBe('Esse Pokémon já foi sorteado.');
+    expect(status).toHaveBeenCalledTimes(1);
   });
 
   it('sem pendentes não faz nada; clique repetido enquanto gira é ignorado', async () => {

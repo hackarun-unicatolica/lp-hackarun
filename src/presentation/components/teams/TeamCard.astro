@@ -1,10 +1,10 @@
 ---
 // card da página /equipes: foto/logo num quadro quadrado (contain sobre uma cópia borrada, logo nunca corta),
 // iniciais como reserva. Equipe do sorteio dos nomes (mascote Pokémon) vira o círculo com a cor do tipo, igual ao
-// telão do sorteio. Sem props vira o molde do <template> que o TeamsView clona (TeamCardRenderer)
+// telão do sorteio (só a arte e o nome, sem os tipos). Sem props vira o molde do <template> que o TeamsView clona (TeamCardRenderer)
 import { memberCountLabel } from '@presentation/formatters/TeamLabels';
 import { softHyphenate } from '@presentation/formatters/SoftHyphens';
-import { mascotStyle, mascotTypes } from '@presentation/formatters/pokemonTypes';
+import { mascotStyle } from '@presentation/formatters/pokemonTypes';
 import TeamCardFrame from './TeamCardFrame.astro';
 
 interface Props {
@@ -28,9 +28,6 @@ const { name = '', memberCount = 0, imageUrl = null, mascot = null, members = []
     <h2 class="team-card__name" data-team-name>
       {softHyphenate(name)}
     </h2>
-    <p class="team-card__types" data-team-types hidden={!mascot}>
-      {mascot ? mascotTypes(mascot.types) : ''}
-    </p>
     <p class="team-card__members">
       <span
         class="team-card__pips"
@@ -108,12 +105,6 @@ const { name = '', memberCount = 0, imageUrl = null, mascot = null, members = []
     font-size: var(--fs-hud);
     letter-spacing: 0.12em;
     text-transform: uppercase;
-  }
-
-  .team-card__types {
-    margin: 0;
-    color: var(--text-dim);
-    font-size: var(--fs-xs, 0.8rem);
   }
 
   /* quem está na equipe: só os nomes, um por linha */

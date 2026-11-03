@@ -30,7 +30,10 @@ interface Deps {
   sleep?: (ms: number) => Promise<void>;
 }
 
-const DEFAULT_MIN_SPIN_MS = 1800;
+// suspense mínimo: um sorteio só (o card gira um instante) e "Sortear" de todas (cobre a contagem 3-2-1 e deixa a
+// roleta girar um pouco antes da cascata)
+const DEFAULT_MIN_SPIN_ONE_MS = 1200;
+const DEFAULT_MIN_SPIN_ALL_MS = 2600;
 
 const message = (error: unknown) => (error instanceof Error ? error.message : 'Algo deu errado.');
 
@@ -73,10 +76,19 @@ export class TeamNamesViewModel {
   }
 
   // espera o que falta do tempo mínimo de suspense, contado desde que o sorteio começou
-  private async hold(startedAt: number): Promise<void> {
-    const wanted = this.deps.minSpinMs ?? DEFAULT_MIN_SPIN_MS;
+  private async hold(startedAt: number, fallbackMs: number): Promise<void> {
+    const wanted = this.deps.minSpinMs ?? fallbackMs;
     const left = wanted - (Date.now() - startedAt);
     if (left > 0) await (this.deps.sleep ?? wait)(left);
+  }
+
+  // o que o sorteio devolveu já diz como ficou cada equipe: aplica direto, sem reler a planilha (a leitura é a parte
+  // mais lenta do Apps Script e fazia o suspense passar dos 10 s)
+  private apply(drawn: readonly { team: SavedTeam }[]): void {
+    const byNumber = new Map(drawn.map(({ team }) => [team.number, team]));
+    const teams = this.state.value.teams.map((t) => byNumber.get(t.number) ?? t);
+    const used = new Set(teams.map((t) => t.pokemonId).filter((id): id is number => id !== null));
+    this.patch({ teams, remaining: this.deps.catalog.filter((p) => !used.has(p.id)).length });
   }
 
   async drawOne(number: number): Promise<void> {
@@ -85,9 +97,12 @@ export class TeamNamesViewModel {
     this.patch({ spinning: [...this.state.value.spinning, number], error: null });
     try {
       const result = await this.deps.names.drawOne(number);
-      if (!result.ok) this.patch({ error: result.error });
-      await this.hold(startedAt);
-      await this.refresh();
+      await this.hold(startedAt, DEFAULT_MIN_SPIN_ONE_MS);
+      if (result.ok) this.apply([result.value]);
+      else {
+        this.patch({ error: result.error });
+        await this.refresh();
+      }
     } catch (error) {
       this.patch({ error: message(error) });
     } finally {
@@ -102,9 +117,12 @@ export class TeamNamesViewModel {
     this.patch({ spinning: pending, error: null });
     try {
       const result = await this.deps.names.drawAll();
-      if (!result.ok) this.patch({ error: result.error });
-      await this.hold(startedAt);
-      await this.refresh();
+      await this.hold(startedAt, DEFAULT_MIN_SPIN_ALL_MS);
+      if (result.ok) this.apply(result.value);
+      else {
+        this.patch({ error: result.error });
+        await this.refresh();
+      }
     } catch (error) {
       this.patch({ error: message(error) });
     } finally {
@@ -118,8 +136,11 @@ export class TeamNamesViewModel {
     this.patch({ publishing: true, error: null });
     try {
       const result = await this.deps.publish.execute();
-      if (!result.ok) this.patch({ error: result.error });
-      await this.refresh();
+      if (result.ok) this.patch({ teams: this.state.value.teams.map((t) => ({ ...t, published: true })) });
+      else {
+        this.patch({ error: result.error });
+        await this.refresh();
+      }
     } catch (error) {
       this.patch({ error: message(error) });
     } finally {

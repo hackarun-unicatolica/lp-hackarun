@@ -2,7 +2,7 @@ import { qs } from '@shared/utils/dom';
 import type { PublicTeam } from '@presentation/view-models/teams/TeamsViewModel';
 import { memberCountLabel, teamImageAlt, teamInitials } from '@presentation/formatters/TeamLabels';
 import { softHyphenate } from '@presentation/formatters/SoftHyphens';
-import { mascotTypes, typeColor } from '@presentation/formatters/pokemonTypes';
+import { typeColor } from '@presentation/formatters/pokemonTypes';
 
 const MISSING = 'is-image-missing';
 // mesma largura que o driveImageUrl pede ao Google (=w600): reserva o espaço e evita pulo de layout
@@ -79,13 +79,9 @@ function setPeople(card: HTMLElement, members: readonly string[]): void {
   list.hidden = members.length === 0;
 }
 
-// equipe do sorteio dos nomes: círculo com a cor do tipo e os tipos embaixo do nome (o CSS do TeamCard faz o resto)
+// equipe do sorteio dos nomes: círculo com a cor do tipo (o CSS do TeamCard faz o resto)
 function setMascot(card: HTMLElement, mascot: PublicTeam['mascot']): void {
   card.classList.toggle('is-mascot', mascot !== null);
   if (mascot) card.style.setProperty('--type', typeColor(mascot.types));
   else card.style.removeProperty('--type');
-  const types = qs<HTMLElement>('[data-team-types]', card);
-  if (!types) return;
-  types.hidden = mascot === null;
-  types.textContent = mascot ? mascotTypes(mascot.types) : '';
 }

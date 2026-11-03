@@ -12,7 +12,7 @@ const local = import.meta.env.SORTEIO_LOCAL === '1';
 <section class="screen" data-screen="teams" hidden={initial !== 'teams'}>
   <section class="stats" data-stats aria-live="polite"></section>
   <div class="actions">
-    <button class="btn btn--primary btn--xl" type="button" data-draw>
+    <button class="btn btn--primary btn--xl" type="button" data-draw disabled>
       Sortear equipes
     </button>
     <button class="btn btn--xl" type="button" data-save disabled>
@@ -43,7 +43,7 @@ const local = import.meta.env.SORTEIO_LOCAL === '1';
   <section class="stats" data-stats aria-live="polite"></section>
   <div class="actions">
     <button class="btn btn--primary btn--xl" type="button" data-draw-all disabled>
-      Sortear todas
+      Sortear
     </button>
     <button class="btn btn--ghost btn--xl" type="button" data-skip hidden>
       Revelar tudo
