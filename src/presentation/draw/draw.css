@@ -1001,8 +1001,7 @@ body.presenting .top__source,
 body.presenting .top__keys,
 body.presenting .seed,
 body.presenting [data-save],
-body.presenting .stats,
-body.presenting .poke .btn {
+body.presenting .stats {
   display: none !important;
 }
 
