@@ -70,5 +70,33 @@
       "Fora do ambiente empresarial, é corredor de rua amador, atividade que reforça sua identificação com disciplina, persistência e superação de desafios."
     ],
     "linkedin": "https://www.linkedin.com/in/heliobarreira/"
+  },
+  {
+    "id": "judge-6",
+    "name": "Augusto Oliveira",
+    "role": "judge",
+    "roleLabel": "Avaliador",
+    "headline": "Diretor de Projetos e Tecnologia · TO HOST",
+    "topic": null,
+    "avatarUrl": "/convidados/augusto-oliveira.jpg",
+    "bio": [
+      "Diretor de Projetos e Tecnologia com mais de 30 anos de carreira em TI, iniciada em 1992 numa revenda RM em Goiânia. Hoje lidero a operação de data center da TO HOST Data Centers e atuo também como diretor de projetos e tecnologia da WPI Soluções em TI, do mesmo grupo econômico, conduzindo equipes de Infraestrutura, Redes e Serviços em operação 24x7.",
+      "Participei ativamente do processo de certificação ANSI/TIA-942 Rated-3 do data center, e sigo atuando na sua manutenção.",
+      "Ao longo da carreira atuei em implantação de ERP e sistemas de gestão, coordenação de infraestrutura para operações de grande porte, gestão de empresas de tecnologia e gestão de TI pública. Na ATI-TO, superintendi a infraestrutura e os serviços de TI que atendem 41 entes do poder executivo estadual, implantando ITIL e indicadores de produtividade, conceitos ainda pouco usados no estado."
+    ],
+    "linkedin": "https://www.linkedin.com/in/augustoayres/"
+  },
+  {
+    "id": "judge-7",
+    "name": "Lucas Wendel",
+    "role": "judge",
+    "roleLabel": "Avaliador",
+    "headline": "Coord. de Operações · Capim Dourado Shopping",
+    "topic": null,
+    "avatarUrl": "/convidados/lucas-wendel.jpg",
+    "bio": [
+      "Engenheiro Civil (UTFPR), Empreendedor da construção civil, Coord. de Operações do Capim Dourado Shopping e “Vibecoder” nas horas vagas."
+    ],
+    "linkedin": "https://www.linkedin.com/in/lucaswendel/"
   }
 ]
