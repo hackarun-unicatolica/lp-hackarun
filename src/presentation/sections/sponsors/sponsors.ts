@@ -8,6 +8,8 @@ import playerLogo from '../../../assets/brand/player-contabilidade.png';
 import pontoAgilLogo from '../../../assets/brand/ponto-agil-white.png';
 import impostogramaLogo from '../../../assets/brand/impostograma.png';
 import brInfoLogo from '../../../assets/brand/br-info-white.png';
+import maxdataLogo from '../../../assets/brand/maxdata.png';
+import quantumLogo from '../../../assets/brand/quantum-white.png';
 
 // patrocinadores na ordem da seção: os 3 em destaque (featured) primeiro, depois as placas médias.
 // Novo patrocinador: logo sem fundo (versão clara) em src/assets/brand e mais um item aqui. height = altura da logo no desktop em rem (marca larga pede menos, quadrada pede mais);
@@ -134,6 +136,35 @@ export const SPONSORS: readonly Sponsor[] = [
     about: [
       'A BR Informática é uma empresa de tecnologia sediada em Palmas, Tocantins, especializada no fornecimento de equipamentos, produtos e acessórios de informática. Com atuação voltada ao mercado regional, oferece soluções que abrangem desde computadores, hardware e periféricos até equipamentos de redes, impressão, telefonia e tecnologia gamer.',
       'Além da comercialização de produtos, atua nos segmentos de segurança residencial e predial, manutenção e suporte técnico em TI empresarial, atendendo às diferentes necessidades de clientes e organizações. Com foco em inovação, variedade e qualidade no atendimento, a BR Informática busca aproximar pessoas e empresas das soluções tecnológicas, contribuindo para o desenvolvimento e a transformação digital da região.',
+    ],
+  },
+  {
+    id: 'maxdata',
+    name: 'MaxData',
+    logo: maxdataLogo,
+    height: 3.2,
+    accent: '#e0262c',
+    url: 'https://maxdata.com.br/',
+    about: [
+      'A MaxData Sistemas é uma empresa brasileira de tecnologia com sede em Palmas (TO) e atuação nacional, especializada no desenvolvimento de sistemas de gestão empresarial integrados (softwares ERP). Fundada em 2002, a empresa atua prestando suporte tecnológico e soluções de automação comercial focadas em otimizar e simplificar a operação de pequenas e médias empresas em diversos segmentos de mercado.',
+      'Formalmente registrada no setor de tecnologia, a atividade principal da MaxData envolve o desenvolvimento, suporte técnico, comercialização e implantação de softwares de gestão empresarial (ERP).',
+      'A atuação central da empresa baseia-se em:',
+      'Automação de Processos Comerciais: fornecimento de ferramentas para faturamento, controle de estoque, frente de caixa (PDV) e gestão financeira.',
+      'Conformidade Fiscal: emissão de documentos fiscais eletrônicos (NF-e, NFC-e, NFS-e, CT-e, MDF-e, SAT) e integração com exigências regulatórias, como o SNGPC (para farmácias) e obrigações acessórias (EFD ICMS/IPI, EFD Contribuições).',
+      'Consultoria e Diagnóstico Personalizado: avaliação das necessidades operacionais de cada cliente para alinhar a implementação do software às metas do negócio.',
+    ],
+  },
+  {
+    id: 'quantum',
+    name: 'Quantum',
+    logo: quantumLogo,
+    height: 3.4,
+    accent: '#3b82f6',
+    url: 'https://home.quantumsistemas.com.br/',
+    about: [
+      'A Quantum é uma empresa de tecnologia fundada em Palmas, Tocantins, especializada no desenvolvimento de soluções de software para gestão empresarial. Com mais de 20 anos de experiência no mercado, a empresa tem como propósito simplificar a rotina dos negócios por meio da tecnologia, oferecendo ferramentas que tornam a administração mais prática, eficiente e segura.',
+      'Seu principal produto é um sistema de gestão empresarial (ERP) que integra diferentes setores de uma empresa, como vendas, estoque, financeiro e fiscal, reunindo informações em uma única plataforma. A solução atende a diversos segmentos do comércio e serviços, adaptando-se às necessidades de cada negócio.',
+      'Além da tecnologia, ela valoriza o atendimento próximo aos clientes, oferecendo suporte especializado, implantação e treinamento. Seu compromisso é utilizar a inovação para otimizar processos, facilitar a tomada de decisões e contribuir para o crescimento das empresas.',
     ],
   },
 ];
