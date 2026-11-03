@@ -4,11 +4,11 @@ import type { DrawServices } from '@composition/draw';
 import { TeamNamesViewModel, type TeamNamesState } from '@presentation/view-models/draw/TeamNamesViewModel';
 import { personName } from '@presentation/formatters/personName';
 import { confirmDialog } from './confirmDialog';
-import { follow, h, mustFind, pokemonImage } from './dom';
+import { h, mustFind, pokemonImage } from './dom';
 import { countdown, type Countdown } from './fx/countdown';
 import { finale } from './fx/finale';
-import { createSpotlight } from './fx/spotlight';
-import { NAME_SPOTLIGHT, prefersReducedMotion, typeColor } from './fx/timing';
+import { createCarousel, type CarouselItem } from './fx/carousel';
+import { NAME_CAROUSEL, prefersReducedMotion, typeColor } from './fx/timing';
 
 const SPIN_MS = 90;
 const AUTO_RETRY_MS = 4000;
@@ -36,7 +36,6 @@ export function mountNamesPage(services: DrawServices, root: ParentNode = docume
 
   // equipe -> instante em que a revelação dela começa (performance.now); some quando a animação termina
   const revealAt = new Map<number, number>();
-  const timers: number[] = [];
   let named = new Set<number>();
   let spinTimer = 0;
   let pendingCountdown: Countdown | null = null;
@@ -165,46 +164,34 @@ export function mountNamesPage(services: DrawServices, root: ParentNode = docume
       void autoPublish();
       return;
     }
-    // uma equipe por vez no holofote (pop-up grande); o card da grade revela junto, atrás do pop-up
+    // carrossel por cima da tela: uma equipe por vez, a do centro em foco e as vizinhas desfocadas. A grade por trás
+    // só mostra o resultado quando o carrossel termina
     const single = fresh.length === 1;
-    const step = single ? NAME_SPOTLIGHT.singleMs : NAME_SPOTLIGHT.stepMs;
-    const base = performance.now();
-    fresh.forEach((number, i) => {
-      const delay = i * step;
-      revealAt.set(number, base + delay);
-      timers.push(
-        window.setTimeout(() => {
-          const team = vm.state.value.teams.find((t) => t.number === number);
-          const pokemon = team?.pokemonId != null ? byId.get(team.pokemonId) : undefined;
-          if (team && pokemon) {
-            spotlight.show(
-              {
-                number,
-                name: team.name,
-                image: pokemonImage(pokemon.id),
-                color: typeColor(pokemon.types),
-                members: team.members.map((m) => personName(m.name)),
-                index: i,
-                total: fresh.length,
-              },
-              step,
-            );
-          }
-          // a tela rola até o card (que aparece ao fechar o pop-up), descontando o menu fixo do topo
-          const el = grid.querySelector(`[data-logo="${number}"]`)?.closest('.poke');
-          if (el) follow(el, reduced);
-        }, delay),
-      );
+    const step = single ? NAME_CAROUSEL.singleMs : NAME_CAROUSEL.stepMs;
+    const items = fresh.flatMap((number): CarouselItem[] => {
+      const team = vm.state.value.teams.find((t) => t.number === number);
+      const pokemon = team?.pokemonId != null ? byId.get(team.pokemonId) : undefined;
+      if (!team || !pokemon) return [];
+      return [
+        {
+          number,
+          name: team.name,
+          image: pokemonImage(pokemon.id),
+          color: typeColor(pokemon.types),
+          members: team.members.map((m) => personName(m.name)),
+        },
+      ];
     });
-    timers.push(
-      window.setTimeout(() => {
-        spotlight.close();
-        revealAt.clear();
-        render(vm.state.value);
-        if (!single) finale('Equipes nomeadas!', `${fresh.length} equipes com nome de Pokémon`, reduced);
-        void autoPublish();
-      }, fresh.length * step),
-    );
+    // (a animação do card da grade fica esperando: o carrossel é que mostra o resultado primeiro)
+    fresh.forEach((number) => revealAt.set(number, performance.now() + 600_000));
+    void carousel.play(items, step).then(() => {
+      revealAt.clear();
+      render(vm.state.value);
+      if (!single && items.length > 0) {
+        finale('Equipes nomeadas!', `${items.length} equipes com nome de Pokémon`, reduced);
+      }
+      void autoPublish();
+    });
   };
 
   // fim do sorteio: publica em /equipes em segundo plano, sem confirmação. Se falhar, tenta mais uma vez e, persistindo
@@ -225,15 +212,12 @@ export function mountNamesPage(services: DrawServices, root: ParentNode = docume
   const skip = () => {
     pendingCountdown?.skip();
     if (revealAt.size === 0) return;
-    timers.splice(0).forEach((t) => window.clearTimeout(t));
-    spotlight.close();
-    revealAt.clear();
-    render(vm.state.value);
-    void autoPublish();
+    // encerrar o carrossel resolve o play(), que limpa a tela e publica
+    carousel.stop();
   };
 
-  // pop-up de cada equipe; o "Revelar tudo" dele faz o mesmo que o da tela
-  const spotlight = createSpotlight(() => skip());
+  // carrossel das equipes; o "Revelar tudo" dele faz o mesmo que o da tela
+  const carousel = createCarousel(() => skip());
 
   vm.state.subscribe((state) => {
     scheduleReveals(state);
