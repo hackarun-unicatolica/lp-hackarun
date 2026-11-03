@@ -94,16 +94,6 @@ export function mountNamesPage(services: DrawServices, root: ParentNode = docume
         h('summary', {}, `${team.members.length} integrantes`),
         h('ul', {}, ...team.members.map((m) => h('li', {}, personName(m.name)))),
       ),
-      h(
-        'button',
-        {
-          class: 'btn btn--primary',
-          type: 'button',
-          'data-draw-one': String(team.number),
-          disabled: pokemon !== undefined || spinning || undefined,
-        },
-        pokemon ? 'Já sorteada' : 'Sortear nome',
-      ),
     );
   };
 
@@ -236,14 +226,6 @@ export function mountNamesPage(services: DrawServices, root: ParentNode = docume
     pendingCountdown = null;
     await run;
     drawing = false;
-  });
-  grid.addEventListener('click', (event) => {
-    const button = (event.target as HTMLElement).closest<HTMLButtonElement>('[data-draw-one]');
-    if (!button || button.disabled) return;
-    drawing = true;
-    void vm.drawOne(Number(button.dataset['drawOne'])).finally(() => {
-      drawing = false;
-    });
   });
   skipButton.addEventListener('click', skip);
   publishButton.addEventListener('click', async () => {
