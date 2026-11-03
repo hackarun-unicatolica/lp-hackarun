@@ -13,12 +13,14 @@ export interface TeamMascot {
   types: readonly string[];
 }
 
+const MAX_MEMBERS_SHOWN = 8;
+
 const validMascot = (m: TeamMascot | null | undefined): TeamMascot | null =>
   m && Number.isInteger(m.pokemonId) && m.pokemonId > 0 && m.pokemonId < 10000
     ? { pokemonId: m.pokemonId, types: m.types.filter((t) => /^[a-z]{2,12}$/.test(t)).slice(0, 2) }
     : null;
 
-// equipe pública: só o que o site mostra (nome, quantidade de integrantes e a foto). Nome de pessoa,
+// equipe pública: só o que o site mostra (nome, quantidade e nomes dos integrantes e a foto). Contato de pessoa,
 // matrícula e e-mail ficam na planilha
 export interface TeamProps {
   id: string;
@@ -28,6 +30,8 @@ export interface TeamProps {
   // foto ou logo pública (só aparece depois da confirmação)
   imageUrl?: string | null;
   mascot?: TeamMascot | null;
+  // nomes de quem está na equipe (só o nome; a página /equipes é dos competidores)
+  members?: readonly string[];
 }
 
 export class Team extends Entity {
@@ -36,6 +40,7 @@ export class Team extends Entity {
   readonly status: TeamStatus;
   readonly imageUrl: string | null;
   readonly mascot: TeamMascot | null;
+  readonly members: readonly string[];
 
   private constructor(props: TeamProps) {
     super(props.id);
@@ -45,6 +50,10 @@ export class Team extends Entity {
     this.status = props.status;
     this.imageUrl = props.imageUrl && SAFE_IMAGE_URL.test(props.imageUrl) ? props.imageUrl : null;
     this.mascot = validMascot(props.mascot);
+    // texto puro, sem vazio nem repetido, com limite (nome torto na planilha não derruba o card)
+    this.members = [
+      ...new Set((props.members ?? []).map((m) => String(m).trim().slice(0, 80)).filter(Boolean)),
+    ].slice(0, MAX_MEMBERS_SHOWN);
   }
 
   static create(props: TeamProps): Team {

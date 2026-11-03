@@ -128,6 +128,7 @@ export const toTeamDTO = (t: Team): TeamDTO => ({
   status: t.status,
   imageUrl: t.imageUrl,
   mascot: t.mascot,
+  members: t.members,
 });
 
 export const toSpeakerDTO = (s: Speaker): SpeakerDTO => ({

@@ -156,9 +156,11 @@ describe('aviso de privacidade v4 (inscrição individual)', () => {
     expect(notice).toMatch(/avaliação/);
   });
 
-  it('a página de equipes mostra só nome, insígnia e número de integrantes', () => {
-    expect(notice).toMatch(/só o nome da equipe, a insígnia e o número de integrantes/);
-    expect(notice).toContain('Nome de pessoa, e-mail, WhatsApp e matrícula nunca aparecem no site');
+  it('a página de equipes mostra nome da equipe, insígnia, número e nome dos integrantes, nunca contato', () => {
+    expect(notice).toMatch(
+      /o nome da equipe, a insígnia, o número de integrantes e o nome de cada integrante/,
+    );
+    expect(notice).toContain('E-mail, WhatsApp e matrícula nunca aparecem no site');
   });
 
   it('sem foto de equipe, sem "não usamos WhatsApp" e sem exclusividade', () => {

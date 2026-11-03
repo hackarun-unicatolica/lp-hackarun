@@ -3,7 +3,7 @@ import { normalizeSearch } from '@shared/utils/text';
 import { Slots } from '@domain/index';
 import type { ListTeams, SlotsDTO, TeamDTO } from '@application/index';
 
-// o que a página pública mostra de uma equipe: nome, quantidade e foto. Nunca nomes, matrículas ou e-mails
+// o que a página pública mostra de uma equipe: nome, quantidade, nomes dos integrantes e foto. Nunca matrícula, e-mail nem WhatsApp
 export interface PublicTeam {
   id: string;
   name: string;
@@ -12,6 +12,8 @@ export interface PublicTeam {
   imageUrl: string | null;
   // Pokémon do sorteio dos nomes: o card vira o círculo com a cor do tipo, como no telão do sorteio
   mascot: { pokemonId: number; types: readonly string[] } | null;
+  // nomes de quem está na equipe (a página é dos competidores: saber com quem vai trabalhar)
+  members: readonly string[];
 }
 
 export type TeamsStatus = 'idle' | 'loading' | 'ready' | 'error';
@@ -37,6 +39,7 @@ export const toPublicTeam = (t: TeamDTO): PublicTeam => ({
   memberCount: t.memberCount,
   imageUrl: t.imageUrl,
   mascot: t.mascot,
+  members: t.members,
 });
 
 // vitrine da LP: até `limit` equipes, as com foto primeiro (a ordem entre elas se mantém)

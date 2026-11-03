@@ -223,7 +223,7 @@ A chave `SORTEIO_TOKEN` pode ser apagada depois do sorteio: o site para de ler e
 3. **Insígnia:** suba a imagem (JPG, PNG ou WebP) na pasta das insígnias, compartilhe como **Qualquer pessoa com o
    link · Leitor**, copie o ID do link (`.../file/d/<ID>/view`) e cole na coluna **ID da insígnia**.
 4. **Publicar no site:** troque o Status da equipe para `confirmado`. Em até 1 minuto ela aparece em `/equipes`,
-   apenas com nome, insígnia e número de integrantes. Nomes, e-mails e telefones nunca saem da planilha.
+   com nome, insígnia, número e nome dos integrantes. E-mails, telefones e matrículas nunca saem da planilha.
 5. O Resumo mostra quantos credenciados ainda estão sem equipe.
 
 Renomear uma equipe depois de publicada muda o identificador dela no site; corrigir maiúsculas ou acentos não muda.

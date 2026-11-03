@@ -7,7 +7,7 @@ import type { PublicTeam } from '@presentation/view-models/teams/TeamsViewModel'
 function card(): HTMLElement {
   const li = document.createElement('li');
   li.innerHTML = `<div data-team-frame><span data-team-initials></span></div>
-    <h2 data-team-name></h2><p data-team-types hidden></p><span data-team-pips></span><span data-team-count></span>`;
+    <h2 data-team-name></h2><p data-team-types hidden></p><ul data-team-people hidden></ul><span data-team-pips></span><span data-team-count></span>`;
   return li;
 }
 
@@ -17,6 +17,7 @@ const team = (over: Partial<PublicTeam>): PublicTeam => ({
   memberCount: 4,
   imageUrl: '/pokemon/6.webp',
   mascot: { pokemonId: 6, types: ['fire', 'flying'] },
+  members: ['Ana Souza', 'Bruno Lima'],
   ...over,
 });
 
@@ -32,6 +33,18 @@ describe('card da equipe com mascote', () => {
     expect(li.querySelector<HTMLImageElement>('.team-card__img')?.getAttribute('src')).toBe(
       '/pokemon/6.webp',
     );
+  });
+
+  it('lista os nomes de quem está na equipe, como texto puro, e some quando a equipe não tem ninguém', () => {
+    const li = card();
+    fillTeamCard(li, team({ members: ['Ana Souza', '<b>Bruno</b>'] }));
+    const people = li.querySelector<HTMLElement>('[data-team-people]');
+    expect(people?.hidden).toBe(false);
+    expect([...(people?.children ?? [])].map((c) => c.textContent)).toEqual(['Ana Souza', '<b>Bruno</b>']);
+    expect(people?.querySelector('b')).toBeNull();
+    fillTeamCard(li, team({ members: [] }));
+    expect(people?.hidden).toBe(true);
+    expect(people?.children).toHaveLength(0);
   });
 
   it('reaproveitado para uma equipe sem mascote, volta ao card de sempre', () => {

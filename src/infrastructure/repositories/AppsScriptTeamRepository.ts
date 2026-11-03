@@ -18,6 +18,8 @@ interface TeamRow {
   imageId?: unknown;
   // Pokémon do sorteio dos nomes (número da Pokédex); quando existe, é ele o logo
   pokemonId?: unknown;
+  // nomes de quem está na equipe
+  members?: unknown;
 }
 
 // equipes confirmadas na planilha (GET ?action=teams); a planilha nunca manda dado pessoal
@@ -58,6 +60,9 @@ export class AppsScriptTeamRepository implements TeamRepository {
           status: 'confirmed',
           imageUrl: pokemonImageUrl(row.pokemonId) ?? driveImageUrl(row.imageId),
           mascot: AppsScriptTeamRepository.mascot(row.pokemonId),
+          members: Array.isArray(row.members)
+            ? row.members.filter((m): m is string => typeof m === 'string')
+            : [],
         }),
       ];
     } catch {

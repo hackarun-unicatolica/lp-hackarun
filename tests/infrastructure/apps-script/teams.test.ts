@@ -21,23 +21,47 @@ const SEEDED_TEAMS = [
   // linha pré-formatada sem nome: nunca sai, mesmo marcada
   { Equipe: '', Status: 'confirmado' },
 ];
-const SEEDED_PEOPLE = [{ Protocolo: 'HR26-AAAAAA', 'Nome completo': 'Ana Souza', Equipe: 'Equipe Pikachu' }];
+const SEEDED_PEOPLE = [
+  { Protocolo: 'HR26-AAAAAA', 'Nome completo': 'Ana Souza', Equipe: 'Equipe Pikachu', Status: 'credenciado' },
+  {
+    Protocolo: 'HR26-BBBBBB',
+    'Nome completo': 'Bruno Lima',
+    Equipe: 'equipe pikachu',
+    Status: 'credenciado',
+  },
+  {
+    Protocolo: 'HR26-CCCCCC',
+    'Nome completo': 'Caio Cancelado',
+    Equipe: 'Equipe Pikachu',
+    Status: 'cancelado',
+  },
+  { Protocolo: 'HR26-DDDDDD', 'Nome completo': 'Duda Sem Equipe', Equipe: '', Status: 'credenciado' },
+];
 
 describe('Apps Script · lista pública de equipes (aba Equipes)', () => {
-  it('expõe só {id, name, memberCount, imageId, pokemonId} das equipes confirmadas', () => {
+  it('expõe só {id, name, memberCount, imageId, pokemonId, members} das equipes confirmadas', () => {
     const script = new AppsScriptSandbox();
     script.seed(SEEDED_PEOPLE, SEEDED_TEAMS);
     const res = script.get('teams');
     expect(res.ok).toBe(true);
     expect(res.teams).toHaveLength(1);
     const [team] = res.teams ?? [];
-    expect(Object.keys(team ?? {}).sort()).toEqual(['id', 'imageId', 'memberCount', 'name', 'pokemonId']);
+    expect(Object.keys(team ?? {}).sort()).toEqual([
+      'id',
+      'imageId',
+      'memberCount',
+      'members',
+      'name',
+      'pokemonId',
+    ]);
     // sem aba Sorteio (equipe montada à mão), sem Pokémon
     expect(team).toMatchObject({ name: 'Equipe Pikachu', memberCount: 4, imageId: BADGE, pokemonId: null });
     expect(team?.['id']).toMatch(/^team-[0-9a-f]{10}$/);
-    // nada pessoal escapa
+    // os competidores veem quem está na equipe (sem quem cancelou nem quem é de outra equipe), só o nome
+    expect(team?.['members']).toEqual(['Ana Souza', 'Bruno Lima']);
+    // nenhum dado de contato escapa
     const raw = JSON.stringify(res);
-    ['ana@exemplo.com', 'Ana Souza', 'Bruno', '99999', 'HR26-'].forEach((secret) =>
+    ['ana@exemplo.com', '99999', 'HR26-', 'Caio', 'Duda'].forEach((secret) =>
       expect(raw).not.toContain(secret),
     );
   });
@@ -105,7 +129,7 @@ describe('Apps Script · lista pública de equipes (aba Equipes)', () => {
       const { registrations } = script.seed(SEEDED_PEOPLE, SEEDED_TEAMS);
       script.get('teams');
       script.onEdit(registrations, column);
-      expect(script.cache.store.has('teams:v5')).toBe(false);
+      expect(script.cache.store.has('teams:v6')).toBe(false);
     },
   );
 
@@ -115,7 +139,7 @@ describe('Apps Script · lista pública de equipes (aba Equipes)', () => {
     script.get('teams');
     script.onEdit(teams, 'E-mails');
     script.onEdit(registrations, 'Curso');
-    expect(script.cache.store.has('teams:v5')).toBe(true);
+    expect(script.cache.store.has('teams:v6')).toBe(true);
   });
 
   it('sem a aba Equipes (planilha nova) a lista vem vazia, sem criar nada nem gerar segredo', () => {
