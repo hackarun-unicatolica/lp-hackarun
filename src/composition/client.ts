@@ -87,9 +87,16 @@ function mentorLoader(config: AppConfig, clock: Clock, simulated: boolean): () =
 // lista de equipes do sorteio (aba Equipes da planilha); sem planilha fica só a lista do build
 function createListTeams(endpoint: string | null): ListTeams | null {
   if (!endpoint) return null;
-  const live = new AppsScriptTeamRepository(new AppsScriptClient(endpoint));
+  const direct = new AppsScriptTeamRepository(new AppsScriptClient(endpoint));
   const bundled = new StaticTeamRepository(teamsData as RawTeam[]);
-  return new ListTeams(new FallbackTeamRepository(live, bundled));
+  const live = new FallbackTeamRepository(direct, bundled);
+  // no site publicado a lista vem do /api/equipes (cópia guardada pela Cloudflare, para muita gente não derrubar o
+  // limite de execuções do Apps Script); sem ele (dev, teste) ou se ele falhar, busca direto no Apps Script
+  if (typeof location === 'undefined') return new ListTeams(live);
+  const proxy = new AppsScriptTeamRepository(
+    new AppsScriptClient(new URL('/api/equipes', location.origin).href),
+  );
+  return new ListTeams(new FallbackTeamRepository(proxy, live));
 }
 
 // simulation: o build liberou a simulação (SIMULATION_ENABLED); os testes passam false pra ficar sem ela
