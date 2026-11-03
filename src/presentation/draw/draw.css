@@ -264,6 +264,61 @@ summary:focus-visible {
   text-decoration: underline;
 }
 
+/* "Ir para o sorteio dos nomes": o próximo passo, maior e com seta desenhada (sai bem no telão) */
+.message:has(.message__next) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+}
+
+.message__text {
+  font-size: 1.05rem;
+}
+
+.message .message__next {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 1.2rem;
+  border: 1px solid currentColor;
+  border-radius: 0.65rem;
+  background: rgb(44 245 180 / 0.1);
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition:
+    background 0.2s ease,
+    gap 0.2s ease;
+}
+
+.message .message__next:hover {
+  gap: 1rem;
+  background: rgb(44 245 180 / 0.2);
+}
+
+.message__arrow {
+  position: relative;
+  width: 1.4rem;
+  height: 2px;
+  border-radius: 2px;
+  background: currentColor;
+}
+
+.message__arrow::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 0;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-top: 2px solid currentColor;
+  border-right: 2px solid currentColor;
+  border-radius: 1px;
+  transform: translateY(-50%) rotate(45deg);
+}
+
 /* ---- equipes ---- */
 .grid {
   display: grid;
@@ -313,33 +368,9 @@ summary:focus-visible {
 
 .member__name {
   display: block;
+  color: #f2f5ff;
+  font-size: 1rem;
   font-weight: 600;
-}
-
-.chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.3rem;
-  margin-top: 0.15rem;
-}
-
-.chip {
-  padding: 0.05rem 0.5rem;
-  border-radius: 999px;
-  background: rgb(130 160 255 / 0.18);
-  color: var(--text-muted, #dfe6ff);
-  font-size: 0.75rem;
-}
-
-.chip--outside {
-  background: rgb(237 40 232 / 0.18);
-  color: #ffc4fb;
-}
-
-.chip[data-repeat='true'] {
-  background: rgb(255 194 74 / 0.25);
-  color: var(--ink-gold, #ffd88a);
-  font-weight: 700;
 }
 
 /* ---- nomes (Pokémon) ---- */
@@ -412,21 +443,60 @@ summary:focus-visible {
   text-transform: capitalize;
 }
 
+/* integrantes de cada equipe (dropdown): no telão ajuda a turma a achar a própria equipe, então letra clara e maior */
 .poke__members {
   width: 100%;
-  color: var(--text-muted, #dfe6ff);
-  font-size: 0.85rem;
+  color: #f2f5ff;
+  font-size: 0.95rem;
   text-align: left;
 }
 
 .poke__members summary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid rgb(130 160 255 / 0.3);
+  border-radius: 0.5rem;
+  background: rgb(130 160 255 / 0.08);
+  color: var(--ink-cyan, #8ff3ff);
+  font-weight: 700;
   cursor: pointer;
-  text-align: center;
+  list-style: none;
+}
+
+.poke__members summary::-webkit-details-marker {
+  display: none;
+}
+
+.poke__members summary::after {
+  content: '';
+  width: 0.45rem;
+  height: 0.45rem;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: translateY(-2px) rotate(45deg);
+  transition: transform 0.2s ease;
+}
+
+.poke__members[open] summary::after {
+  transform: translateY(2px) rotate(-135deg);
 }
 
 .poke__members ul {
-  margin: 0.4rem 0 0;
-  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.35rem;
+  margin: 0.5rem 0 0;
+  padding: 0.6rem 0.75rem;
+  border-radius: 0.5rem;
+  background: rgb(5 8 26 / 0.65);
+  list-style: none;
+  line-height: 1.3;
+}
+
+.poke__members li {
+  font-weight: 600;
 }
 
 /* ---- diálogos ---- */
@@ -776,15 +846,6 @@ body.presenting .top__logout {
   }
 }
 
-.team__members li .chips {
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.team__members li.locked .chips {
-  opacity: 1;
-}
-
 .team--in li:not(.locked) .member__name {
   color: var(--ink-cyan, #8ff3ff);
   font-family: 'JetBrains Mono Variable', ui-monospace, monospace;
@@ -941,7 +1002,6 @@ body.presenting .top__keys,
 body.presenting .seed,
 body.presenting [data-save],
 body.presenting .stats,
-body.presenting .poke__members,
 body.presenting .poke .btn {
   display: none !important;
 }

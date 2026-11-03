@@ -3,6 +3,7 @@ import type { PublicTeam } from '@presentation/view-models/teams/TeamsViewModel'
 import { memberCountLabel, teamImageAlt, teamInitials } from '@presentation/formatters/TeamLabels';
 import { softHyphenate } from '@presentation/formatters/SoftHyphens';
 import { typeColor } from '@presentation/formatters/pokemonTypes';
+import { personName } from '@presentation/formatters/personName';
 
 const MISSING = 'is-image-missing';
 // mesma largura que o driveImageUrl pede ao Google (=w600): reserva o espaço e evita pulo de layout
@@ -72,7 +73,7 @@ function setPeople(card: HTMLElement, members: readonly string[]): void {
   list.replaceChildren(
     ...members.map((name) => {
       const li = document.createElement('li');
-      li.textContent = name;
+      li.textContent = personName(name);
       return li;
     }),
   );

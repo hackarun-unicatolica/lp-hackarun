@@ -1,5 +1,6 @@
 // pedaços da 1ª tela do sorteio: números do topo e o card de cada equipe
-import { levelLabel, type DrawnTeam } from '@domain/index';
+import type { DrawnTeam } from '@domain/index';
+import { personName } from '@presentation/formatters/personName';
 import { h } from './dom';
 
 export const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
@@ -13,10 +14,9 @@ export function stat(label: string, value: string): HTMLElement {
   );
 }
 
-// card montado "fechado": os nomes aparecem como ??? e a revelação gira e trava no nome certo (data-name)
+// card montado "fechado": os nomes aparecem como ??? e a revelação gira e trava no nome certo (data-name). No telão
+// só os nomes (período e instituição ficam na planilha)
 export function teamCard(team: DrawnTeam): HTMLElement {
-  const counts = new Map<string, number>();
-  for (const m of team.members) counts.set(m.level, (counts.get(m.level) ?? 0) + 1);
   return h(
     'article',
     { class: 'team team--waiting' },
@@ -30,21 +30,7 @@ export function teamCard(team: DrawnTeam): HTMLElement {
       'ul',
       { class: 'team__members' },
       ...team.members.map((m) =>
-        h(
-          'li',
-          {},
-          h('span', { class: 'member__name', 'data-name': m.name }, '???'),
-          h(
-            'span',
-            { class: 'chips' },
-            h(
-              'span',
-              { class: 'chip', 'data-repeat': String((counts.get(m.level) ?? 0) > 1) },
-              levelLabel(m.level),
-            ),
-            m.institution.external && h('span', { class: 'chip chip--outside' }, m.institution.label),
-          ),
-        ),
+        h('li', {}, h('span', { class: 'member__name', 'data-name': personName(m.name) }, '???')),
       ),
     ),
   );

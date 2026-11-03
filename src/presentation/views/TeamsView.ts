@@ -37,13 +37,19 @@ export class TeamsView {
     if (this.list) qsa('[data-team-card]', this.list).forEach(watchTeamImage);
     this.renderFaces(this.vm.state.value.teams);
     this.vm.state.subscribe((state, prev) => this.render(state, prev));
-    if (this.vm.isLive) this.refreshWhenVisible();
+    qs('[data-teams-retry]', this.root)?.addEventListener('click', () => void this.vm.refresh());
+    this.renderPhase(this.vm.state.value);
+    // /equipes: a lista é o conteúdo da página, busca na hora. Na LP só quando a seção chega perto da tela
+    if (this.vm.isLive) {
+      if (qs('[data-teams-loading]', this.root)) void this.vm.refresh();
+      else this.refreshWhenVisible();
+    }
   }
 
   private render(state: TeamsState, prev: TeamsState): void {
     const hasTeams = state.teams.length > 0;
     this.toggle('[data-teams-search-wrap]', hasTeams);
-    this.toggle('[data-teams-empty]', !hasTeams);
+    this.renderPhase(state);
     // lista vazia some: leitor de tela não precisa ouvir "lista, 0 itens"
     this.toggle('[data-teams-list]', state.visible.length > 0);
     this.toggle('[data-teams-noresults]', hasTeams && state.visible.length === 0);
@@ -59,6 +65,24 @@ export class TeamsView {
     if (state.visible !== this.renderedTeams) this.renderList(state.visible);
     if (state.teams !== prev.teams) this.renderFaces(state.teams);
     if (state.query !== prev.query) this.announce(state);
+  }
+
+  // carregando / erro / vazio. Só a página /equipes tem o bloco de carregando: lá, sem equipes ainda e com a lista ao
+  // vivo a caminho, aparece "Carregando" (e não "nenhuma equipe" nem o contador em 0). Na LP fica como sempre
+  private renderPhase(state: TeamsState): void {
+    const hasTeams = state.teams.length > 0;
+    if (!qs('[data-teams-loading]', this.root)) {
+      this.toggle('[data-teams-empty]', !hasTeams);
+      return;
+    }
+    const waiting = !hasTeams && this.vm.isLive && (state.status === 'idle' || state.status === 'loading');
+    const failed = !hasTeams && state.status === 'error';
+    this.toggle('[data-teams-loading]', waiting);
+    this.toggle('[data-teams-error]', failed);
+    this.toggle('[data-teams-empty]', !hasTeams && !waiting && !failed);
+    this.toggle('[data-teams-bar]', hasTeams);
+    const retry = qs<HTMLButtonElement>('[data-teams-retry]', this.root);
+    if (retry) retry.disabled = state.status === 'loading';
   }
 
   // lista pequena: refaz tudo, sem diff

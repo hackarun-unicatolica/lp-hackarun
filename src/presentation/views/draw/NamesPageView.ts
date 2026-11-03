@@ -2,6 +2,7 @@ import type { SavedTeam } from '@application/draw/DrawGateway';
 import type { PokemonEntry } from '@application/draw/TeamDrawUseCases';
 import type { DrawServices } from '@composition/draw';
 import { TeamNamesViewModel, type TeamNamesState } from '@presentation/view-models/draw/TeamNamesViewModel';
+import { personName } from '@presentation/formatters/personName';
 import { confirmDialog } from './confirmDialog';
 import { follow, h, mustFind, pokemonImage } from './dom';
 import { countdown, type Countdown } from './fx/countdown';
@@ -91,7 +92,7 @@ export function mountNamesPage(services: DrawServices, root: ParentNode = docume
         'details',
         { class: 'poke__members' },
         h('summary', {}, `${team.members.length} integrantes`),
-        h('ul', {}, ...team.members.map((m) => h('li', {}, m.name))),
+        h('ul', {}, ...team.members.map((m) => h('li', {}, personName(m.name)))),
       ),
       h(
         'button',

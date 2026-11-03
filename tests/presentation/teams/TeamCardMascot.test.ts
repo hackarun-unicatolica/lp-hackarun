@@ -32,12 +32,12 @@ describe('card da equipe com mascote', () => {
     );
   });
 
-  it('lista os nomes de quem está na equipe, como texto puro, e some quando a equipe não tem ninguém', () => {
+  it('lista os nomes de quem está na equipe (padronizados, como texto puro) e some quando a equipe não tem ninguém', () => {
     const li = card();
-    fillTeamCard(li, team({ members: ['Ana Souza', '<b>Bruno</b>'] }));
+    fillTeamCard(li, team({ members: ['ANA SOUZA', '<b>Bruno</b>'] }));
     const people = li.querySelector<HTMLElement>('[data-team-people]');
     expect(people?.hidden).toBe(false);
-    expect([...(people?.children ?? [])].map((c) => c.textContent)).toEqual(['Ana Souza', '<b>Bruno</b>']);
+    expect([...(people?.children ?? [])].map((c) => c.textContent)).toEqual(['Ana Souza', '<b>bruno</b>']);
     expect(people?.querySelector('b')).toBeNull();
     fillTeamCard(li, team({ members: [] }));
     expect(people?.hidden).toBe(true);

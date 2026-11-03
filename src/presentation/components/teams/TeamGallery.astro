@@ -1,5 +1,7 @@
 ---
-// grade de equipes confirmadas da página /equipes: HTML do build + lista ao vivo da planilha (TeamsView)
+// grade de equipes confirmadas da página /equipes: HTML do build + lista ao vivo da planilha (TeamsView). Enquanto a
+// lista ao vivo chega aparece "Carregando as equipes" (nada de contador em 0 nem vaga fantasma); se a planilha não
+// responder, um aviso com "Tentar de novo"
 import type { SlotsDTO, TeamDTO } from '@application/index';
 import Button from '@presentation/components/ui/Button.astro';
 import Icon from '@presentation/components/ui/Icon.astro';
@@ -7,7 +9,6 @@ import { toPublicTeam } from '@presentation/view-models/teams/TeamsViewModel';
 import { registrationHref } from '@presentation/view-models/registration/registrationOrigin';
 import TeamCard from './TeamCard.astro';
 import TeamCounter from './TeamCounter.astro';
-import LineupSlots from './LineupSlots.astro';
 
 interface Props {
   teams: TeamDTO[];
@@ -17,7 +18,7 @@ interface Props {
 }
 
 const { teams, slots, registrationOpen = true } = Astro.props;
-// só o que é público vai pro HTML (nada de nome de integrante)
+// equipes confirmadas que o build já conhece (a lista ao vivo substitui)
 const confirmed = teams.filter((t) => t.status === 'confirmed').map(toPublicTeam);
 ---
 
@@ -28,7 +29,7 @@ const confirmed = teams.filter((t) => t.status === 'confirmed').map(toPublicTeam
   data-teams-slots={JSON.stringify(slots)}
   data-slots-level={slots.level}
 >
-  <div class="gallery__bar">
+  <div class="gallery__bar" data-teams-bar hidden={confirmed.length === 0}>
     <TeamCounter count={confirmed.length} slots={slots} />
     <div class="gallery__search" data-teams-search-wrap hidden>
       <label class="gallery__search-label" for="team-search">
@@ -68,19 +69,26 @@ const confirmed = teams.filter((t) => t.status === 'confirmed').map(toPublicTeam
     Nenhuma equipe com “<span data-teams-query></span>”. Confira a grafia do nome.
   </p>
 
-  <div class="gallery__empty" data-teams-empty hidden={confirmed.length > 0}>
-    <LineupSlots />
-    <div class="gallery__empty-cta">
-      <p class="gallery__empty-text">
-        Nenhuma equipe confirmada ainda.{' '}
-        <strong>A sua pode abrir o grid de largada: é só se inscrever.</strong>
-      </p>
-      {registrationOpen && (
-        <Button href={registrationHref('equipes')} registrationCta="equipes">
-          Fazer minha inscrição
-        </Button>
-      )}
-    </div>
+  <div class="gallery__state" data-teams-loading role="status" hidden={confirmed.length > 0}>
+    <span class="gallery__spinner" aria-hidden="true"></span>
+    <p class="gallery__state-title">Carregando as equipes…</p>
+  </div>
+
+  <div class="gallery__state gallery__state--error" data-teams-error role="alert" hidden>
+    <p class="gallery__state-title">Não deu para carregar as equipes agora.</p>
+    <p class="gallery__state-text">Confira a internet e tente de novo.</p>
+    <button class="gallery__retry" type="button" data-teams-retry>
+      Tentar de novo
+    </button>
+  </div>
+
+  <div class="gallery__state" data-teams-empty hidden>
+    <p class="gallery__state-title">As equipes aparecem aqui logo depois do sorteio.</p>
+    {registrationOpen && (
+      <Button href={registrationHref('equipes')} registrationCta="equipes">
+        Fazer minha inscrição
+      </Button>
+    )}
   </div>
 
   <template data-teams-template>
@@ -167,27 +175,73 @@ const confirmed = teams.filter((t) => t.status === 'confirmed').map(toPublicTeam
     color: var(--text-muted);
   }
 
-  .gallery__empty {
+  /* carregando / erro / vazio: um bloco só, centrado, no lugar da grade */
+  .gallery__state {
     display: grid;
-    gap: var(--space-6);
+    justify-items: center;
+    gap: var(--space-4);
+    padding: clamp(2.5rem, 2rem + 4vw, 4.5rem) var(--space-5);
+    border: 1px solid rgb(0 229 255 / 0.18);
+    border-radius: 3px;
+    background:
+      radial-gradient(60% 80% at 50% 0%, rgb(18 100 255 / 0.16), transparent 70%), rgb(4 8 26 / 0.55);
+    text-align: center;
   }
 
-  .gallery__empty-cta {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-4) var(--space-6);
+  .gallery__state[hidden] {
+    display: none;
   }
 
-  .gallery__empty-text {
-    max-width: 34rem;
+  .gallery__state--error {
+    border-color: rgb(255 77 141 / 0.35);
+  }
+
+  .gallery__state-title {
+    color: var(--text);
+    font-size: var(--fs-md, 1.15rem);
+    font-weight: 600;
+  }
+
+  .gallery__state-text {
     color: var(--text-muted);
   }
 
-  .gallery__empty-text strong {
-    color: var(--text);
-    font-weight: 600;
+  .gallery__spinner {
+    width: 3rem;
+    height: 3rem;
+    border: 3px solid rgb(0 229 255 / 0.18);
+    border-top-color: var(--c-cyan);
+    border-radius: 50%;
+    animation: gallery-spin 0.9s linear infinite;
+    filter: drop-shadow(0 0 10px rgb(0 229 255 / 0.45));
+  }
+
+  @keyframes gallery-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .gallery__retry {
+    min-height: 44px;
+    padding: 0 var(--space-5);
+    border: 1px solid var(--c-cyan);
+    border-radius: 3px;
+    background: rgb(0 229 255 / 0.08);
+    color: var(--ink-cyan);
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .gallery__retry:hover {
+    background: rgb(0 229 255 / 0.16);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .gallery__spinner {
+      animation-duration: 2.4s;
+    }
   }
 
   @media (min-width: 40rem) {
