@@ -26,7 +26,7 @@ const get = () => new Request('https://hackarun.com.br/api/equipes');
 
 describe('/api/equipes', () => {
   it('a primeira chamada vai ao Apps Script e as seguintes saem do cache, sem nova chamada', async () => {
-    const upstream = vi.fn(async () => ok());
+    const upstream = vi.fn(async (_url: string) => ok());
     const cache = memoryCache();
     const deps = { fetch: upstream as unknown as typeof fetch, cache };
     const first = await handleTeams(get(), ENV, deps);
@@ -106,7 +106,7 @@ describe('/api/equipes', () => {
     // sem PUBLIC_TEAMS_ENDPOINT vale o das inscrições
     const viaRegistration = await handleTeams(
       get(),
-      { PUBLIC_REGISTRATION_ENDPOINT: ENV.PUBLIC_TEAMS_ENDPOINT },
+      { PUBLIC_REGISTRATION_ENDPOINT: 'https://script.google.com/macros/s/AKfy/exec' },
       deps,
     );
     expect(viaRegistration.status).toBe(200);
