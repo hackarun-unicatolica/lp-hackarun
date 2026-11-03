@@ -1,0 +1,78 @@
+---
+// as duas telas do sorteio na mesma página: Equipes e Nomes. Trocar de tela não recarrega (o endereço muda para
+// /sorteio ou /sorteio/nomes), então o modo apresentação em tela cheia continua até apertar F ou "Sair da apresentação"
+interface Props {
+  initial: 'teams' | 'names';
+}
+
+const { initial } = Astro.props;
+const local = import.meta.env.SORTEIO_LOCAL === '1';
+---
+
+<section class="screen" data-screen="teams" hidden={initial !== 'teams'}>
+  <section class="stats" data-stats aria-live="polite"></section>
+  <div class="actions">
+    <button class="btn btn--primary btn--xl" type="button" data-draw>
+      Sortear equipes
+    </button>
+    <button class="btn btn--xl" type="button" data-save disabled>
+      Salvar na planilha
+    </button>
+    <details class="seed">
+      <summary>Semente (opcional)</summary>
+      <label>
+        Repete exatamente um sorteio anterior
+        <input type="text" data-seed autocomplete="off" placeholder="ex.: 20261112-193005-ab12" />
+      </label>
+    </details>
+  </div>
+  <div class="progress" data-progress hidden>
+    <p class="progress__text" data-progress-text aria-live="polite"></p>
+    <div class="progress__bar" data-progress-bar>
+      <span></span>
+    </div>
+    <button class="btn btn--ghost" type="button" data-skip hidden>
+      Revelar tudo
+    </button>
+  </div>
+  <p class="message" data-message role="status"></p>
+  <div class="grid" data-grid></div>
+</section>
+
+<section class="screen" data-screen="names" hidden={initial !== 'names'}>
+  <section class="stats" data-stats aria-live="polite"></section>
+  <div class="actions">
+    <button class="btn btn--primary btn--xl" type="button" data-draw-all disabled>
+      Sortear todas
+    </button>
+    <button class="btn btn--ghost btn--xl" type="button" data-skip hidden>
+      Revelar tudo
+    </button>
+    <button class="btn btn--primary btn--xl" type="button" data-publish hidden>
+      Publicar no site
+    </button>
+    <a
+      class="btn btn--primary btn--xl btn--link"
+      href="/equipes"
+      target="_blank"
+      rel="noopener"
+      data-view-teams
+      hidden
+    >
+      Ver a página das equipes
+    </a>
+    {local && (
+      <button class="btn btn--test" type="button" data-reset-names hidden>
+        Sortear os nomes de novo (teste)
+      </button>
+    )}
+  </div>
+  <p class="message" data-message role="status"></p>
+  <div class="grid grid--poke" data-grid></div>
+</section>
+
+<script>
+  import { startDrawApp } from '@presentation/views/draw/drawApp';
+
+  startDrawApp();
+</script>

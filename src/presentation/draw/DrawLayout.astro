@@ -38,27 +38,21 @@ const fontFaces = [
     <header class="top">
       <div class="top__brand">
         <p class="top__eyebrow">// HackaRun 2026 · sorteio ao vivo</p>
-        <h1>{title}</h1>
+        <h1 data-title>{title}</h1>
       </div>
       <nav class="top__steps" aria-label="Etapas do sorteio">
-        <a href="/sorteio" aria-current={step === 'teams' ? 'step' : undefined}>
+        <a href="/sorteio" data-step="teams" aria-current={step === 'teams' ? 'step' : undefined}>
           <span>1</span> Equipes
         </a>
-        <a href="/sorteio/nomes" aria-current={step === 'names' ? 'step' : undefined}>
+        <a href="/sorteio/nomes" data-step="names" aria-current={step === 'names' ? 'step' : undefined}>
           <span>2</span> Nomes
         </a>
       </nav>
       <div class="top__tools">
-        {local ? (
+        {local && (
           <button class="btn btn--test" type="button" data-reset hidden>
             Recomeçar teste
           </button>
-        ) : (
-          <form method="post" action="/sorteio/sair" class="top__logout">
-            <button class="btn btn--ghost" type="submit">
-              Sair
-            </button>
-          </form>
         )}
         <button class="btn btn--ghost" type="button" data-present aria-pressed="false">
           Modo apresentação
@@ -70,6 +64,13 @@ const fontFaces = [
       <p class="top__keys" aria-hidden="true">
         <kbd>F</kbd> tela cheia
       </p>
+      {!local && (
+        <form method="post" action="/sorteio/sair" class="top__logout">
+          <button class="btn btn--ghost btn--small" type="submit">
+            Sair
+          </button>
+        </form>
+      )}
     </header>
     <main>
       <slot />

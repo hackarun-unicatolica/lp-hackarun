@@ -1,50 +1,10 @@
 ---
 // 1ª tela do sorteio: forma as equipes com os credenciados (níveis diferentes, instituições espalhadas, 4 por equipe e
-// no máximo 5), mostra o relatório e grava na planilha. No site, só abre com o login da organização
+// no máximo 5) e grava na planilha. A 2ª tela (nomes) vem na mesma página. No site, só abre com o login da organização
 import DrawLayout from '@presentation/draw/DrawLayout.astro';
+import DrawScreens from '@presentation/draw/DrawScreens.astro';
 ---
 
 <DrawLayout title="Sorteio das equipes" step="teams">
-  <section class="stats" data-stats aria-live="polite"></section>
-  <div class="actions">
-    <button class="btn btn--primary btn--xl" type="button" data-draw>
-      Sortear equipes
-    </button>
-    <button class="btn btn--xl" type="button" data-save disabled>
-      Salvar na planilha
-    </button>
-    <details class="seed">
-      <summary>Semente (opcional)</summary>
-      <label>
-        Repete exatamente um sorteio anterior
-        <input type="text" data-seed autocomplete="off" placeholder="ex.: 20261112-193005-ab12" />
-      </label>
-    </details>
-  </div>
-  <div class="progress" data-progress hidden>
-    <p class="progress__text" data-progress-text aria-live="polite"></p>
-    <div class="progress__bar" data-progress-bar>
-      <span></span>
-    </div>
-    <button class="btn btn--ghost" type="button" data-skip hidden>
-      Revelar tudo
-    </button>
-  </div>
-  <p class="message" data-message role="status"></p>
-  <div data-report></div>
-  <div class="grid" data-grid></div>
-  <script>
-    import { connect } from '@presentation/views/draw/connect';
-    import { mountTeamsPage } from '@presentation/views/draw/TeamsPageView';
-
-    connect()
-      .then(mountTeamsPage)
-      .catch((error: unknown) => {
-        const message = document.querySelector<HTMLElement>('[data-message]');
-        if (message) {
-          message.dataset['kind'] = 'error';
-          message.textContent = error instanceof Error ? error.message : 'Não consegui falar com a planilha.';
-        }
-      });
-  </script>
+  <DrawScreens initial="teams" />
 </DrawLayout>
