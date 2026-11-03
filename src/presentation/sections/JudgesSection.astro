@@ -68,14 +68,14 @@ const roles = new SpeakerRoleLabel();
     }
   }
 
-  /* tablet: 4 por fileira (cabem os 4 avaliadores numa linha só) */
+  /* tablet: 4 por fileira */
   @media (min-width: 768px) {
     .crew__grid > :global(*) {
       flex-basis: calc((100% - 3 * var(--gap-x)) / 4);
     }
   }
 
-  /* desktop: os 5 avaliadores numa fileira só, ocupando a largura da seção */
+  /* desktop: 4 por fileira (7 avaliadores = 4 + 3, a segunda fileira centralizada) */
   @media (min-width: 1024px) {
     .crew__grid {
       --gap-x: var(--space-5);
@@ -83,7 +83,7 @@ const roles = new SpeakerRoleLabel();
     }
 
     .crew__grid > :global(*) {
-      flex-basis: calc((100% - 4 * var(--gap-x)) / 5);
+      flex-basis: calc((100% - 3 * var(--gap-x)) / 4);
     }
   }
 </style>
