@@ -45,11 +45,6 @@
     "types": ["water"]
   },
   {
-    "id": 12,
-    "name": "Butterfree",
-    "types": ["bug", "flying"]
-  },
-  {
     "id": 15,
     "name": "Beedrill",
     "types": ["bug", "poison"]
@@ -62,6 +57,11 @@
   {
     "id": 18,
     "name": "Pidgeot",
+    "types": ["normal", "flying"]
+  },
+  {
+    "id": 22,
+    "name": "Fearow",
     "types": ["normal", "flying"]
   },
   {
@@ -95,8 +95,18 @@
     "types": ["fire"]
   },
   {
+    "id": 42,
+    "name": "Golbat",
+    "types": ["poison", "flying"]
+  },
+  {
     "id": 52,
     "name": "Meowth",
+    "types": ["normal"]
+  },
+  {
+    "id": 53,
+    "name": "Persian",
     "types": ["normal"]
   },
   {
@@ -123,11 +133,6 @@
     "id": 62,
     "name": "Poliwrath",
     "types": ["water", "fighting"]
-  },
-  {
-    "id": 63,
-    "name": "Abra",
-    "types": ["psychic"]
   },
   {
     "id": 64,
@@ -165,14 +170,14 @@
     "types": ["rock", "ground"]
   },
   {
-    "id": 77,
-    "name": "Ponyta",
-    "types": ["fire"]
-  },
-  {
     "id": 78,
     "name": "Rapidash",
     "types": ["fire"]
+  },
+  {
+    "id": 82,
+    "name": "Magneton",
+    "types": ["electric", "steel"]
   },
   {
     "id": 91,
@@ -182,11 +187,6 @@
   {
     "id": 92,
     "name": "Gastly",
-    "types": ["ghost", "poison"]
-  },
-  {
-    "id": 94,
-    "name": "Gengar",
     "types": ["ghost", "poison"]
   },
   {
@@ -215,6 +215,11 @@
     "types": ["fighting"]
   },
   {
+    "id": 110,
+    "name": "Weezing",
+    "types": ["poison"]
+  },
+  {
     "id": 112,
     "name": "Rhydon",
     "types": ["ground", "rock"]
@@ -228,6 +233,11 @@
     "id": 116,
     "name": "Horsea",
     "types": ["water"]
+  },
+  {
+    "id": 121,
+    "name": "Starmie",
+    "types": ["water", "psychic"]
   },
   {
     "id": 123,
@@ -268,11 +278,6 @@
     "id": 131,
     "name": "Lapras",
     "types": ["water", "ice"]
-  },
-  {
-    "id": 132,
-    "name": "Ditto",
-    "types": ["normal"]
   },
   {
     "id": 134,
@@ -375,6 +380,11 @@
     "types": ["water"]
   },
   {
+    "id": 168,
+    "name": "Ariados",
+    "types": ["bug", "poison"]
+  },
+  {
     "id": 169,
     "name": "Crobat",
     "types": ["poison", "flying"]
@@ -405,6 +415,11 @@
     "types": ["psychic"]
   },
   {
+    "id": 207,
+    "name": "Gligar",
+    "types": ["ground", "flying"]
+  },
+  {
     "id": 208,
     "name": "Steelix",
     "types": ["steel", "ground"]
@@ -420,24 +435,9 @@
     "types": ["bug", "fighting"]
   },
   {
-    "id": 215,
-    "name": "Sneasel",
-    "types": ["dark", "ice"]
-  },
-  {
     "id": 217,
     "name": "Ursaring",
     "types": ["normal"]
-  },
-  {
-    "id": 222,
-    "name": "Corsola",
-    "types": ["water", "rock"]
-  },
-  {
-    "id": 225,
-    "name": "Delibird",
-    "types": ["ice", "flying"]
   },
   {
     "id": 227,
