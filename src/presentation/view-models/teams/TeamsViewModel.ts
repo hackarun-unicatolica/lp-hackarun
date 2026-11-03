@@ -10,6 +10,8 @@ export interface PublicTeam {
   memberCount: number;
   // foto/logo aprovada junto com a equipe; null = card com as iniciais
   imageUrl: string | null;
+  // Pokémon do sorteio dos nomes: o card vira o círculo com a cor do tipo, como no telão do sorteio
+  mascot: { pokemonId: number; types: readonly string[] } | null;
 }
 
 export type TeamsStatus = 'idle' | 'loading' | 'ready' | 'error';
@@ -34,6 +36,7 @@ export const toPublicTeam = (t: TeamDTO): PublicTeam => ({
   name: t.name,
   memberCount: t.memberCount,
   imageUrl: t.imageUrl,
+  mascot: t.mascot,
 });
 
 // vitrine da LP: até `limit` equipes, as com foto primeiro (a ordem entre elas se mantém)

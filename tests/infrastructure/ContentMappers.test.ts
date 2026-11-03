@@ -82,10 +82,10 @@ describe('ContentMapper (JSONs reais)', () => {
     expect(() => ContentMapper.toTeam({ id: 't0', name: ' x ' })).toThrow(DomainError);
   });
 
-  it('equipe pública guarda só nome, quantidade de integrantes, status e foto', () => {
+  it('equipe pública guarda só nome, quantidade de integrantes, status, foto e o Pokémon (nada pessoal)', () => {
     const team = ContentMapper.toTeam({ id: 't1', name: 'Os Brabos', memberCount: 4 });
     expect(team.size).toBe(4);
     expect(team.isConfirmed).toBe(true);
-    expect(Object.keys(team).sort()).toEqual(['id', 'imageUrl', 'name', 'size', 'status']);
+    expect(Object.keys(team).sort()).toEqual(['id', 'imageUrl', 'mascot', 'name', 'size', 'status']);
   });
 });

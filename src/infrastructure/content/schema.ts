@@ -107,6 +107,8 @@ export interface RawTeam {
   status?: TeamStatus;
   // url https da foto/logo (a lista ao vivo monta a partir do id do Drive)
   imageUrl?: string | null;
+  // Pokémon do sorteio dos nomes (a lista ao vivo monta a partir do pokemonId da planilha)
+  mascot?: { pokemonId: number; types: readonly string[] } | null;
 }
 
 export interface RawSpeaker {

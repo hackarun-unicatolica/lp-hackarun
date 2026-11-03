@@ -7,6 +7,17 @@ export type TeamStatus = 'confirmed' | 'pending';
 // nomes): nada de javascript: ou http solto no src da foto
 const SAFE_IMAGE_URL = /^(?:https:\/\/|data:image\/(?:png|jpeg|webp);base64,|\/pokemon\/\d{1,4}\.webp$)/;
 
+// mascote da equipe: o Pokémon sorteado no sorteio dos nomes (número da Pokédex e os tipos, que dão a cor do card)
+export interface TeamMascot {
+  pokemonId: number;
+  types: readonly string[];
+}
+
+const validMascot = (m: TeamMascot | null | undefined): TeamMascot | null =>
+  m && Number.isInteger(m.pokemonId) && m.pokemonId > 0 && m.pokemonId < 10000
+    ? { pokemonId: m.pokemonId, types: m.types.filter((t) => /^[a-z]{2,12}$/.test(t)).slice(0, 2) }
+    : null;
+
 // equipe pública: só o que o site mostra (nome, quantidade de integrantes e a foto). Nome de pessoa,
 // matrícula e e-mail ficam na planilha
 export interface TeamProps {
@@ -16,6 +27,7 @@ export interface TeamProps {
   status: TeamStatus;
   // foto ou logo pública (só aparece depois da confirmação)
   imageUrl?: string | null;
+  mascot?: TeamMascot | null;
 }
 
 export class Team extends Entity {
@@ -23,6 +35,7 @@ export class Team extends Entity {
   readonly size: number;
   readonly status: TeamStatus;
   readonly imageUrl: string | null;
+  readonly mascot: TeamMascot | null;
 
   private constructor(props: TeamProps) {
     super(props.id);
@@ -31,6 +44,7 @@ export class Team extends Entity {
     this.size = Number.isFinite(count) ? Math.max(0, Math.round(count)) : 0;
     this.status = props.status;
     this.imageUrl = props.imageUrl && SAFE_IMAGE_URL.test(props.imageUrl) ? props.imageUrl : null;
+    this.mascot = validMascot(props.mascot);
   }
 
   static create(props: TeamProps): Team {

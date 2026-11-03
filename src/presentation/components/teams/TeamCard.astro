@@ -1,25 +1,35 @@
 ---
 // card da página /equipes: foto/logo num quadro quadrado (contain sobre uma cópia borrada, logo nunca corta),
-// iniciais como reserva. Sem props vira o molde do <template> que o TeamsView clona (TeamCardRenderer)
+// iniciais como reserva. Equipe do sorteio dos nomes (mascote Pokémon) vira o círculo com a cor do tipo, igual ao
+// telão do sorteio. Sem props vira o molde do <template> que o TeamsView clona (TeamCardRenderer)
 import { memberCountLabel } from '@presentation/formatters/TeamLabels';
 import { softHyphenate } from '@presentation/formatters/SoftHyphens';
+import { mascotStyle, mascotTypes } from '@presentation/formatters/pokemonTypes';
 import TeamCardFrame from './TeamCardFrame.astro';
 
 interface Props {
   name?: string;
   memberCount?: number;
   imageUrl?: string | null;
+  mascot?: { pokemonId: number; types: readonly string[] } | null;
 }
 
-const { name = '', memberCount = 0, imageUrl = null } = Astro.props;
+const { name = '', memberCount = 0, imageUrl = null, mascot = null } = Astro.props;
 ---
 
-<li class:list={['team-card', { 'is-image-missing': !imageUrl }]} data-team-card>
+<li
+  class:list={['team-card', { 'is-image-missing': !imageUrl, 'is-mascot': Boolean(mascot) }]}
+  style={mascot ? mascotStyle(mascot.types) : undefined}
+  data-team-card
+>
   <TeamCardFrame name={name} imageUrl={imageUrl} />
   <div class="team-card__body">
     <h2 class="team-card__name" data-team-name>
       {softHyphenate(name)}
     </h2>
+    <p class="team-card__types" data-team-types hidden={!mascot}>
+      {mascot ? mascotTypes(mascot.types) : ''}
+    </p>
     <p class="team-card__members">
       <span
         class="team-card__pips"
@@ -92,6 +102,21 @@ const { name = '', memberCount = 0, imageUrl = null } = Astro.props;
     font-size: var(--fs-hud);
     letter-spacing: 0.12em;
     text-transform: uppercase;
+  }
+
+  .team-card__types {
+    margin: 0;
+    color: var(--text-dim);
+    font-size: var(--fs-xs, 0.8rem);
+  }
+
+  .team-card.is-mascot {
+    border-color: color-mix(in srgb, var(--type, var(--c-cyan)) 35%, transparent);
+  }
+
+  .team-card.is-mascot:hover {
+    border-color: var(--type, var(--c-cyan));
+    box-shadow: 0 26px 50px -28px color-mix(in srgb, var(--type, var(--c-cyan)) 60%, transparent);
   }
 
   /* um bloquinho por integrante, sem gerar DOM extra */
