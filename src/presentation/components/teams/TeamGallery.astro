@@ -54,7 +54,7 @@ const confirmed = teams.filter((t) => t.status === 'confirmed').map(toPublicTeam
 
   <ol role="list" class="gallery__grid" data-teams-list hidden={confirmed.length === 0}>
     {confirmed.map((t) => (
-      <TeamCard name={t.name} memberCount={t.memberCount} imageUrl={t.imageUrl} />
+      <TeamCard name={t.name} memberCount={t.memberCount} imageUrl={t.imageUrl} mascot={t.mascot} />
     ))}
   </ol>
 

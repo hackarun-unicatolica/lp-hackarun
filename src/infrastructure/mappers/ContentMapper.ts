@@ -31,6 +31,7 @@ export class ContentMapper {
       ...(raw.memberCount !== undefined && { memberCount: raw.memberCount }),
       status: raw.status ?? 'confirmed',
       imageUrl: raw.imageUrl ?? null,
+      mascot: raw.mascot ?? null,
     });
   }
 

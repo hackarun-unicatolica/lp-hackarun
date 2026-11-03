@@ -115,6 +115,35 @@ const SIDE = 600;
     display: none;
   }
 
+  /* mascote (Pokémon do sorteio): fundo limpo com o brilho do tipo e a arte num círculo, como no telão do sorteio */
+  :global(.is-mascot) > .team-card__frame {
+    background:
+      radial-gradient(
+        circle at 50% 46%,
+        color-mix(in srgb, var(--type, #00e5ff) 24%, transparent),
+        transparent 64%
+      ),
+      var(--c-night);
+  }
+
+  :global(.is-mascot) > .team-card__frame .team-card__initials,
+  :global(.is-mascot) > .team-card__frame :global(.team-card__backdrop) {
+    display: none;
+  }
+
+  :global(.is-mascot) > .team-card__frame :global(.team-card__img) {
+    inset: 0;
+    width: 68%;
+    height: 68%;
+    margin: auto;
+    padding: 7%;
+    box-sizing: border-box;
+    border: 3px solid var(--type, #00e5ff);
+    border-radius: 50%;
+    background: #0b0e1c;
+    box-shadow: 0 0 30px color-mix(in srgb, var(--type, #00e5ff) 45%, transparent);
+  }
+
   .team-card__badge {
     position: absolute;
     top: var(--space-2);

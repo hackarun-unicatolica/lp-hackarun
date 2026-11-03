@@ -1,7 +1,11 @@
 import type { Team, TeamRepository } from '@domain/index';
 import type { AppsScriptClient } from '../registration/AppsScriptClient';
 import { ContentMapper } from '../mappers/ContentMapper';
+import pokemonCatalog from '../content/pokemon.json';
 import { driveImageUrl, pokemonImageUrl } from './driveImageUrl';
+
+// tipos de cada Pokémon do catálogo do sorteio (a cor do card na página /equipes)
+const TYPES = new Map<number, readonly string[]>(pokemonCatalog.map((p) => [p.id, p.types]));
 
 const TIMEOUT_MS = 6_000;
 
@@ -33,6 +37,13 @@ export class AppsScriptTeamRepository implements TeamRepository {
     return (response.teams as TeamRow[]).flatMap((row) => AppsScriptTeamRepository.toTeam(row));
   }
 
+  // só Pokémon do catálogo viram mascote (número torto ou fora da lista: card com a foto/iniciais de sempre)
+  private static mascot(id: unknown): { pokemonId: number; types: readonly string[] } | null {
+    const n = Number(id);
+    const types = Number.isInteger(n) ? TYPES.get(n) : undefined;
+    return types ? { pokemonId: n, types } : null;
+  }
+
   // linha torta na planilha (nome vazio, gigante...) é ignorada em vez de derrubar a lista
   private static toTeam(row: TeamRow): Team[] {
     if (typeof row.id !== 'string' || typeof row.name !== 'string') return [];
@@ -46,6 +57,7 @@ export class AppsScriptTeamRepository implements TeamRepository {
           memberCount: Number.isFinite(count) && count > 0 ? Math.round(count) : 1,
           status: 'confirmed',
           imageUrl: pokemonImageUrl(row.pokemonId) ?? driveImageUrl(row.imageId),
+          mascot: AppsScriptTeamRepository.mascot(row.pokemonId),
         }),
       ];
     } catch {

@@ -33,6 +33,7 @@ describe('textos do card de equipe', () => {
       name: id,
       memberCount: 2,
       imageUrl,
+      mascot: null,
     });
     const picked = pickFaces([t('a', null), t('b', 'https://x'), t('c', null)], 2);
     expect(picked.map((x) => x.id)).toEqual(['b', 'a']);

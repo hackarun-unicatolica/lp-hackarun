@@ -154,6 +154,8 @@ export interface TeamDTO {
   status: TeamStatus;
   // url pública da foto/logo (Drive) ou null: a página mostra as iniciais
   imageUrl: string | null;
+  // Pokémon do sorteio dos nomes (número e tipos) ou null
+  mascot: { pokemonId: number; types: readonly string[] } | null;
 }
 
 export interface SpeakerDTO {

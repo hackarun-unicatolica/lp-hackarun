@@ -2,6 +2,7 @@ import { qs } from '@shared/utils/dom';
 import type { PublicTeam } from '@presentation/view-models/teams/TeamsViewModel';
 import { memberCountLabel, teamImageAlt, teamInitials } from '@presentation/formatters/TeamLabels';
 import { softHyphenate } from '@presentation/formatters/SoftHyphens';
+import { mascotTypes, typeColor } from '@presentation/formatters/pokemonTypes';
 
 const MISSING = 'is-image-missing';
 // mesma largura que o driveImageUrl pede ao Google (=w600): reserva o espaço e evita pulo de layout
@@ -60,4 +61,16 @@ export function fillTeamCard(card: HTMLElement, team: PublicTeam): void {
   setText(card, '[data-team-initials]', teamInitials(team.name));
   qs('[data-team-pips]', card)?.style.setProperty('--count', String(team.memberCount));
   setImage(card, { ...team, imageUrl: team.imageUrl ?? null });
+  setMascot(card, team.mascot ?? null);
+}
+
+// equipe do sorteio dos nomes: círculo com a cor do tipo e os tipos embaixo do nome (o CSS do TeamCard faz o resto)
+function setMascot(card: HTMLElement, mascot: PublicTeam['mascot']): void {
+  card.classList.toggle('is-mascot', mascot !== null);
+  if (mascot) card.style.setProperty('--type', typeColor(mascot.types));
+  else card.style.removeProperty('--type');
+  const types = qs<HTMLElement>('[data-team-types]', card);
+  if (!types) return;
+  types.hidden = mascot === null;
+  types.textContent = mascot ? mascotTypes(mascot.types) : '';
 }

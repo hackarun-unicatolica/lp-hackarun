@@ -3,31 +3,30 @@ import type { DrawPreview } from '@application/draw/TeamDrawUseCases';
 import { TeamDrawViewModel, type TeamDrawState } from '@presentation/view-models/draw/TeamDrawViewModel';
 import { follow, h, mustFind } from './dom';
 import { confirmDialog } from './confirmDialog';
-import { plural, reportBox, stat, teamCard } from './teamCards';
+import { plural, stat, teamCard } from './teamCards';
 import { countdown, type Countdown } from './fx/countdown';
 import { finale } from './fx/finale';
-import { setupStage } from './fx/stage';
 import { prefersReducedMotion } from './fx/timing';
 import { revealTeams, type TeamsReveal } from './TeamsReveal';
 
-// 1ª tela do sorteio: credenciados, sorteio das equipes com revelação em cascata, relatório e salvar na planilha
-export function mountTeamsPage(services: DrawServices): TeamDrawViewModel {
+// 1ª tela do sorteio: credenciados, sorteio das equipes com revelação em cascata e gravação na planilha. Na tela do show
+// só aparece o sorteio (sem relatório nem avisos); o resumo fica registrado na aba Sorteio da planilha
+export function mountTeamsPage(services: DrawServices, root: ParentNode = document): TeamDrawViewModel {
   const vm = new TeamDrawViewModel({
     status: services.status,
     generate: services.generate,
     save: services.save,
   });
-  const stats = mustFind('[data-stats]');
-  const message = mustFind<HTMLElement>('[data-message]');
-  const report = mustFind('[data-report]');
-  const grid = mustFind('[data-grid]');
-  const progress = mustFind<HTMLElement>('[data-progress]');
+  const stats = mustFind('[data-stats]', root);
+  const message = mustFind<HTMLElement>('[data-message]', root);
+  const grid = mustFind('[data-grid]', root);
+  const progress = mustFind<HTMLElement>('[data-progress]', root);
   const progressText = mustFind('[data-progress-text]', progress);
   const progressBar = mustFind<HTMLElement>('[data-progress-bar]', progress);
-  const drawButton = mustFind<HTMLButtonElement>('[data-draw]');
-  const saveButton = mustFind<HTMLButtonElement>('[data-save]');
-  const skipButton = mustFind<HTMLButtonElement>('[data-skip]');
-  const seedInput = mustFind<HTMLInputElement>('[data-seed]');
+  const drawButton = mustFind<HTMLButtonElement>('[data-draw]', root);
+  const saveButton = mustFind<HTMLButtonElement>('[data-save]', root);
+  const skipButton = mustFind<HTMLButtonElement>('[data-skip]', root);
+  const seedInput = mustFind<HTMLInputElement>('[data-seed]', root);
   const reduced = prefersReducedMotion();
   // planilha real: grava sozinho ao sortear (o botão "Salvar na planilha" é só do teste)
   const { autoSave } = services;
@@ -40,8 +39,6 @@ export function mountTeamsPage(services: DrawServices): TeamDrawViewModel {
     show?.countdown?.skip();
     show?.reveal?.skip();
   };
-
-  setupStage();
 
   const setProgress = (revealed: number, total: number) => {
     progress.hidden = total === 0;
@@ -70,6 +67,9 @@ export function mountTeamsPage(services: DrawServices): TeamDrawViewModel {
     const busy =
       state.status === 'loading' || state.status === 'drawing' || state.status === 'saving' || show !== null;
     const preview = state.preview;
+    // alguma equipe já tem nome (nesta tela ou na planilha): as equipes não podem mais ser refeitas
+    const locked =
+      (preview?.locked ?? false) || (state.sheet?.saved.some((t) => t.pokemonId !== null) ?? false);
     stats.replaceChildren(
       stat('credenciados', state.sheet ? String(state.sheet.accredited) : '–'),
       stat('equipes', preview ? String(preview.result.report.teams) : '–'),
@@ -83,10 +83,15 @@ export function mountTeamsPage(services: DrawServices): TeamDrawViewModel {
       ),
     );
 
-    drawButton.textContent =
-      state.status === 'drawing' ? 'Sorteando…' : preview ? 'Sortear de novo' : 'Sortear equipes';
-    drawButton.disabled = busy || (preview?.locked ?? false);
-    saveButton.disabled = busy || !preview || state.saved || preview.locked;
+    drawButton.textContent = locked
+      ? 'Sorteio encerrado'
+      : state.status === 'drawing'
+        ? 'Sorteando…'
+        : preview
+          ? 'Sortear de novo'
+          : 'Sortear equipes';
+    drawButton.disabled = busy || locked;
+    saveButton.disabled = busy || !preview || state.saved || locked;
     // planilha real grava sozinho; o botão só volta se a gravação falhar (mesmas equipes da tela, sem sortear de novo)
     const retry = autoSave && preview !== null && !state.saved && state.error !== null;
     saveButton.hidden = autoSave && !retry;
@@ -101,22 +106,17 @@ export function mountTeamsPage(services: DrawServices): TeamDrawViewModel {
     skipButton.hidden = show === null;
 
     message.replaceChildren();
-    message.dataset['kind'] = state.error ? 'error' : state.saved ? 'ok' : preview?.locked ? 'warn' : '';
+    message.dataset['kind'] = state.error ? 'error' : state.saved ? 'ok' : '';
     if (state.error) message.append(state.error);
     else if (state.saved) {
       message.append(
         'Equipes gravadas na planilha. ',
         h('a', { href: '/sorteio/nomes' }, 'Ir para o sorteio dos nomes →'),
       );
-    } else if (preview?.locked) {
-      message.append('Alguma equipe já tem nome: o sorteio das equipes está travado.');
     } else if (preview?.alreadySaved && show === null) {
       message.append('Já existe um sorteio salvo na planilha. Se gravar este, ele substitui o anterior.');
     }
 
-    report.replaceChildren(
-      ...(preview && show === null ? [reportBox(preview.result.report, preview.result.seed)] : []),
-    );
     if (preview && preview !== shownPreview) void startShow(preview);
   };
 
@@ -146,7 +146,7 @@ export function mountTeamsPage(services: DrawServices): TeamDrawViewModel {
     show = null;
     finale(
       'Equipes formadas!',
-      `${plural(teams.length, 'equipe', 'equipes')} prontas para a corrida`,
+      `${plural(teams.length, 'equipe formada', 'equipes formadas')} para o hackathon`,
       reduced,
     );
     render(vm.state.value);

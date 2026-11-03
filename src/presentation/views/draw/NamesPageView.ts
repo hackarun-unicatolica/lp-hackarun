@@ -6,7 +6,6 @@ import { confirmDialog } from './confirmDialog';
 import { follow, h, mustFind, pokemonImage } from './dom';
 import { countdown, type Countdown } from './fx/countdown';
 import { finale } from './fx/finale';
-import { setupStage } from './fx/stage';
 import { cascadeDelays, NAME_REVEAL, prefersReducedMotion, typeColor, typeLabel } from './fx/timing';
 
 const SPIN_MS = 90;
@@ -15,7 +14,7 @@ const AUTO_RETRY_MS = 4000;
 // 2ª tela do sorteio: "Quem é esse Pokémon?". Enquanto a planilha grava, silhuetas passam rápido; depois a silhueta do
 // Pokémon sorteado fica um instante e a cor aparece com um flash, junto com o nome da equipe. "Sortear todas" revela em
 // cascata; "Revelar tudo" pula para o fim
-export function mountNamesPage(services: DrawServices): TeamNamesViewModel {
+export function mountNamesPage(services: DrawServices, root: ParentNode = document): TeamNamesViewModel {
   const { catalog } = services;
   const byId = new Map<number, PokemonEntry>(catalog.map((p) => [p.id, p]));
   const vm = new TeamNamesViewModel({
@@ -24,13 +23,13 @@ export function mountNamesPage(services: DrawServices): TeamNamesViewModel {
     publish: services.publish,
     catalog,
   });
-  const stats = mustFind('[data-stats]');
-  const message = mustFind<HTMLElement>('[data-message]');
-  const grid = mustFind('[data-grid]');
-  const drawAll = mustFind<HTMLButtonElement>('[data-draw-all]');
-  const skipButton = mustFind<HTMLButtonElement>('[data-skip]');
-  const publishButton = mustFind<HTMLButtonElement>('[data-publish]');
-  const viewTeams = mustFind<HTMLAnchorElement>('[data-view-teams]');
+  const stats = mustFind('[data-stats]', root);
+  const message = mustFind<HTMLElement>('[data-message]', root);
+  const grid = mustFind('[data-grid]', root);
+  const drawAll = mustFind<HTMLButtonElement>('[data-draw-all]', root);
+  const skipButton = mustFind<HTMLButtonElement>('[data-skip]', root);
+  const publishButton = mustFind<HTMLButtonElement>('[data-publish]', root);
+  const viewTeams = mustFind<HTMLAnchorElement>('[data-view-teams]', root);
   const reduced = prefersReducedMotion();
 
   // equipe -> instante em que a revelação dela começa (performance.now); some quando a animação termina
@@ -41,8 +40,6 @@ export function mountNamesPage(services: DrawServices): TeamNamesViewModel {
   let pendingCountdown: Countdown | null = null;
   // um sorteio pedido nesta tela está em andamento (as equipes que ganharem nome agora são reveladas com animação)
   let drawing = false;
-
-  setupStage();
 
   const randomId = () => (catalog[Math.floor(Math.random() * catalog.length)] as PokemonEntry).id;
 
@@ -192,7 +189,7 @@ export function mountNamesPage(services: DrawServices): TeamNamesViewModel {
         revealAt.clear();
         render(vm.state.value);
         if (fresh.length > 1)
-          finale('Equipes batizadas!', `${fresh.length} equipes com nome de Pokémon`, reduced);
+          finale('Equipes nomeadas!', `${fresh.length} equipes com nome de Pokémon`, reduced);
         void autoPublish();
       }, last),
     );

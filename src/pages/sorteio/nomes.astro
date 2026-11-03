@@ -1,54 +1,10 @@
 ---
 // 2ª tela do sorteio: dá a cada equipe o nome de um Pokémon da 1ª ou 2ª geração (sem repetir), com a imagem dele de
-// logo. No site, só abre com o login da organização. Terminada a revelação, as equipes são publicadas em /equipes sozinhas
-// (o botão "Publicar no site" só aparece se isso falhar ou se a página for aberta depois)
+// logo. Terminada a revelação, as equipes são publicadas em /equipes sozinhas. Mesma página da 1ª tela (abre já nesta)
 import DrawLayout from '@presentation/draw/DrawLayout.astro';
-
-const local = import.meta.env.SORTEIO_LOCAL === '1';
+import DrawScreens from '@presentation/draw/DrawScreens.astro';
 ---
 
 <DrawLayout title="Sorteio dos nomes" step="names">
-  <section class="stats" data-stats aria-live="polite"></section>
-  <div class="actions">
-    <button class="btn btn--primary btn--xl" type="button" data-draw-all disabled>
-      Sortear todas
-    </button>
-    <button class="btn btn--ghost btn--xl" type="button" data-skip hidden>
-      Revelar tudo
-    </button>
-    <button class="btn btn--primary btn--xl" type="button" data-publish hidden>
-      Publicar no site
-    </button>
-    <a
-      class="btn btn--primary btn--xl btn--link"
-      href="/equipes"
-      target="_blank"
-      rel="noopener"
-      data-view-teams
-      hidden
-    >
-      Ver a página das equipes
-    </a>
-    {local && (
-      <button class="btn btn--test" type="button" data-reset-names hidden>
-        Sortear os nomes de novo (teste)
-      </button>
-    )}
-  </div>
-  <p class="message" data-message role="status"></p>
-  <div class="grid grid--poke" data-grid></div>
-  <script>
-    import { connect } from '@presentation/views/draw/connect';
-    import { mountNamesPage } from '@presentation/views/draw/NamesPageView';
-
-    connect()
-      .then(mountNamesPage)
-      .catch((error: unknown) => {
-        const message = document.querySelector<HTMLElement>('[data-message]');
-        if (message) {
-          message.dataset['kind'] = 'error';
-          message.textContent = error instanceof Error ? error.message : 'Não consegui falar com a planilha.';
-        }
-      });
-  </script>
+  <DrawScreens initial="names" />
 </DrawLayout>

@@ -78,3 +78,22 @@ describe('foto na lista ao vivo', () => {
     expect(pokemonImageUrl(1.5)).toBeNull();
   });
 });
+
+describe('mascote da equipe (Pokémon do sorteio dos nomes)', () => {
+  it('só Pokémon do catálogo vira mascote, com os tipos dele; fora da lista fica sem', async () => {
+    const body = {
+      ok: true,
+      teams: [
+        { id: 'a', name: 'Equipe Charizard', memberCount: 4, pokemonId: 6 },
+        { id: 'b', name: 'Equipe Manual', memberCount: 4, pokemonId: null },
+        { id: 'c', name: 'Equipe Fora', memberCount: 4, pokemonId: 999 },
+      ],
+    };
+    const fetchFn = vi.fn(async () => new Response(JSON.stringify(body)));
+    const repo = new AppsScriptTeamRepository(
+      new AppsScriptClient('https://script.google.com/x/exec', fetchFn),
+    );
+    const teams = await repo.list();
+    expect(teams.map((t) => t.mascot)).toEqual([{ pokemonId: 6, types: ['fire', 'flying'] }, null, null]);
+  });
+});
