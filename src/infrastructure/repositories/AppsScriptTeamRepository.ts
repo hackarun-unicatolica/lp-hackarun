@@ -7,7 +7,7 @@ import { driveImageUrl, pokemonImageUrl } from './driveImageUrl';
 // tipos de cada Pokémon do catálogo do sorteio (a cor do card na página /equipes)
 const TYPES = new Map<number, readonly string[]>(pokemonCatalog.map((p) => [p.id, p.types]));
 
-const TIMEOUT_MS = 6_000;
+const TIMEOUT_MS = 10_000;
 
 // o que o ?action=teams devolve: nome, quantidade e id da foto (nada pessoal)
 interface TeamRow {

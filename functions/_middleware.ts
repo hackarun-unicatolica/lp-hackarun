@@ -1,12 +1,14 @@
-// Cloudflare Pages Function: só o sorteio da organização passa por aqui (public/_routes.json limita a /sorteio* e
-// /api/sorteio*); o resto do site continua estático. A lógica fica em src/server/sorteio (testada no Vitest)
+// Cloudflare Pages Function: só o sorteio da organização (/sorteio*, /api/sorteio*) e a lista pública de equipes
+// (/api/equipes) passam por aqui (public/_routes.json); o resto do site continua estático. A lógica fica em
+// src/server/sorteio e src/server/equipes (testadas no Vitest)
 import { CacheAttemptStore, MemoryAttemptStore, type AttemptStore } from '../src/server/sorteio/attempts';
 import type { SorteioEnv } from '../src/server/sorteio/config';
 import { handleSorteio, isSorteioPath } from '../src/server/sorteio/handler';
+import { handleTeams, type EdgeCache, type TeamsEnv } from '../src/server/equipes/proxy';
 
 interface PagesContext {
   request: Request;
-  env: SorteioEnv;
+  env: SorteioEnv & TeamsEnv;
   next(): Promise<Response>;
 }
 
@@ -20,6 +22,13 @@ function attemptStore(): AttemptStore {
 
 export const onRequest = async (context: PagesContext): Promise<Response> => {
   const url = new URL(context.request.url);
+  if (url.pathname === '/api/equipes') {
+    const edge = (globalThis as { caches?: { default?: unknown } }).caches?.default as EdgeCache | undefined;
+    return handleTeams(context.request, context.env, {
+      fetch: (input, init) => fetch(input, init),
+      cache: edge ?? null,
+    });
+  }
   if (!isSorteioPath(url.pathname)) return context.next();
   return handleSorteio(context.request, context.env, {
     next: () => context.next(),
