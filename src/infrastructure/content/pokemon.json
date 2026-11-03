@@ -100,11 +100,6 @@
     "types": ["poison", "flying"]
   },
   {
-    "id": 52,
-    "name": "Meowth",
-    "types": ["normal"]
-  },
-  {
     "id": 53,
     "name": "Persian",
     "types": ["normal"]
@@ -150,6 +145,11 @@
     "types": ["fighting"]
   },
   {
+    "id": 67,
+    "name": "Machoke",
+    "types": ["fighting"]
+  },
+  {
     "id": 68,
     "name": "Machamp",
     "types": ["fighting"]
@@ -162,6 +162,11 @@
   {
     "id": 74,
     "name": "Geodude",
+    "types": ["rock", "ground"]
+  },
+  {
+    "id": 75,
+    "name": "Graveler",
     "types": ["rock", "ground"]
   },
   {
@@ -180,14 +185,14 @@
     "types": ["electric", "steel"]
   },
   {
+    "id": 89,
+    "name": "Muk",
+    "types": ["poison"]
+  },
+  {
     "id": 91,
     "name": "Cloyster",
     "types": ["water", "ice"]
-  },
-  {
-    "id": 92,
-    "name": "Gastly",
-    "types": ["ghost", "poison"]
   },
   {
     "id": 95,
@@ -198,6 +203,11 @@
     "id": 99,
     "name": "Kingler",
     "types": ["water"]
+  },
+  {
+    "id": 101,
+    "name": "Electrode",
+    "types": ["electric"]
   },
   {
     "id": 105,
@@ -395,11 +405,6 @@
     "types": ["electric"]
   },
   {
-    "id": 195,
-    "name": "Quagsire",
-    "types": ["water", "ground"]
-  },
-  {
     "id": 196,
     "name": "Espeon",
     "types": ["psychic"]
@@ -408,11 +413,6 @@
     "id": 197,
     "name": "Umbreon",
     "types": ["dark"]
-  },
-  {
-    "id": 202,
-    "name": "Wobbuffet",
-    "types": ["psychic"]
   },
   {
     "id": 207,
