@@ -1,8 +1,8 @@
 ---
-// conteúdo da página /equipes: título, grade de equipes confirmadas e a regra de publicação. A troca com a
-// página de inscrição e o "Voltar ao evento" ficam na SubNav, logo acima
+// conteúdo da página /equipes: título e a grade de equipes confirmadas (com os integrantes). A troca com a página de
+// inscrição e o "Voltar ao evento" ficam na SubNav, logo acima. Aviso importante da organização entra no `lead` do
+// SectionHeader (hoje vazio)
 import type { SlotsDTO, TeamDTO } from '@application/index';
-import Icon from '@presentation/components/ui/Icon.astro';
 import PageHalo from '@presentation/components/layout/PageHalo.astro';
 import TeamGallery from '@presentation/components/teams/TeamGallery.astro';
 import SectionHeader from './shared/SectionHeader.astro';
@@ -28,21 +28,11 @@ const { teams, slots, registrationOpen } = Astro.props;
         size="lg"
         code="EQ"
         eyebrow="Grid de largada"
-        title="Equipes <em>inscritas</em>"
-        lead="Quem já garantiu vaga no HackaRun 2026, com a foto ou a logo de cada time. A lista se atualiza sozinha a cada inscrição confirmada."
+        title="Equipes <em>formadas</em>"
       />
     </div>
 
     <TeamGallery teams={teams} slots={slots} registrationOpen={registrationOpen} />
-
-    <p class="section-note">
-      <Icon name="shield" />
-      <span>
-        <strong>A equipe aparece aqui depois que a organização confirma a inscrição.</strong> Só o nome, a
-        foto e o número de integrantes. Quer trocar ou tirar a foto do ar? Peça por e-mail à organização, com
-        o protocolo.
-      </span>
-    </p>
   </div>
 </section>
 

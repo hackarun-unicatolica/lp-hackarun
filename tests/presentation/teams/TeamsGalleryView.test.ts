@@ -176,3 +176,74 @@ describe('TeamsView · vitrine da LP', () => {
     expect(faces.some((f) => f.classList.contains('is-image-missing'))).toBe(false);
   });
 });
+
+// página /equipes com os blocos de carregando / erro / vazio (TeamGallery.astro)
+const page = `
+  <div data-teams>
+    <div data-teams-bar hidden><span data-teams-count></span><span data-teams-count-label></span></div>
+    <div data-teams-search-wrap hidden><input data-teams-search /></div>
+    <ol data-teams-list hidden></ol>
+    <div data-teams-loading></div>
+    <div data-teams-error hidden><button data-teams-retry>Tentar de novo</button></div>
+    <div data-teams-empty hidden></div>
+    <template data-teams-template>${card}</template>
+  </div>`;
+
+const shown = (root: HTMLElement, sel: string) => root.querySelector<HTMLElement>(sel)?.hidden === false;
+
+describe('TeamsView · carregando, erro e vazio na página /equipes', () => {
+  it('enquanto a lista ao vivo não chega: "Carregando", sem contador em 0 nem "nenhuma equipe"', () => {
+    const { root } = mount(page, []);
+    expect(shown(root, '[data-teams-loading]')).toBe(true);
+    expect(shown(root, '[data-teams-empty]')).toBe(false);
+    expect(shown(root, '[data-teams-bar]')).toBe(false);
+  });
+
+  it('na página de equipes a busca começa na hora, sem esperar a lista chegar perto da tela', async () => {
+    const { root } = mount(page, [team('a', 'Equipe Charizard')]);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(root.querySelectorAll('[data-team-card]')).toHaveLength(1);
+    expect(shown(root, '[data-teams-loading]')).toBe(false);
+  });
+
+  it('chegou vazia: some o carregando e aparece o aviso de que as equipes vêm depois do sorteio', async () => {
+    const { root, vm } = mount(page, []);
+    await vm.refresh();
+    expect(shown(root, '[data-teams-loading]')).toBe(false);
+    expect(shown(root, '[data-teams-empty]')).toBe(true);
+    expect(shown(root, '[data-teams-error]')).toBe(false);
+  });
+
+  it('chegou com equipes: grade e contador aparecem', async () => {
+    const { root, vm } = mount(page, [team('a', 'Equipe Charizard')]);
+    await vm.refresh();
+    expect(shown(root, '[data-teams-list]')).toBe(true);
+    expect(shown(root, '[data-teams-bar]')).toBe(true);
+    expect(shown(root, '[data-teams-loading]')).toBe(false);
+  });
+
+  it('planilha fora do ar: aviso com "Tentar de novo", que busca de novo e mostra as equipes', async () => {
+    document.body.innerHTML = page;
+    const root = document.querySelector<HTMLElement>('[data-teams]') as HTMLElement;
+    let fail = true;
+    const vm = new TeamsViewModel({
+      initial: [],
+      slots: SLOTS,
+      listTeams: new ListTeams({
+        list: async () => {
+          if (fail) throw new Error('offline');
+          return [team('a', 'Equipe Charizard')];
+        },
+      }),
+    });
+    new TeamsView(root, vm).mount();
+    await vm.refresh();
+    expect(shown(root, '[data-teams-error]')).toBe(true);
+    expect(shown(root, '[data-teams-loading]')).toBe(false);
+    fail = false;
+    root.querySelector<HTMLButtonElement>('[data-teams-retry]')?.click();
+    await vm.refresh();
+    expect(shown(root, '[data-teams-error]')).toBe(false);
+    expect(root.querySelectorAll('[data-team-card]')).toHaveLength(1);
+  });
+});

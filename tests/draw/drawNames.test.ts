@@ -207,3 +207,40 @@ describe('"Publicar no site"', () => {
     expect(status.every((row) => row.includes('confirmado'))).toBe(true);
   });
 });
+
+describe('sem reler a planilha quando a tela já sabe as equipes', () => {
+  it('sortear, nomear e publicar com a lista conhecida não fazem nenhuma leitura extra', async () => {
+    const ctx = await setup(24);
+    const preview = await ctx.generate.execute('base');
+    if (!preview.ok) throw new Error(preview.error);
+    await ctx.save.execute(preview.value.result);
+    const known = await ctx.gateway.loadSavedTeams();
+    let reads = 0;
+    const original = ctx.gateway.loadSavedTeams.bind(ctx.gateway);
+    ctx.gateway.loadSavedTeams = async () => {
+      reads++;
+      return original();
+    };
+    const drawn = await ctx.names.drawAll(known);
+    if (!drawn.ok) throw new Error(drawn.error);
+    expect(drawn.value).toHaveLength(6);
+    const named = known.map((t) => drawn.value.find((d) => d.team.number === t.number)?.team ?? t);
+    expect(await ctx.publish.execute(named)).toEqual({ ok: true, value: 6 });
+    expect(reads).toBe(0);
+    expect((await original()).every((t) => t.published && t.pokemonId !== null)).toBe(true);
+  });
+
+  it('lista conhecida velha não engana a planilha: Pokémon repetido ainda é recusado', async () => {
+    const ctx = await setup(24);
+    const preview = await ctx.generate.execute('base');
+    if (!preview.ok) throw new Error(preview.error);
+    await ctx.save.execute(preview.value.result);
+    const stale = await ctx.gateway.loadSavedTeams();
+    expect((await ctx.names.drawOne(1)).ok).toBe(true);
+    // a tela ainda acha que ninguém tem nome: o sorteio pode escolher o mesmo Pokémon, mas a planilha confere
+    for (let n = 2; n <= 6; n++) await ctx.names.drawOne(n, stale).catch(() => undefined);
+    const final = await ctx.gateway.loadSavedTeams();
+    const ids = final.map((t) => t.pokemonId).filter((id) => id !== null);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+});

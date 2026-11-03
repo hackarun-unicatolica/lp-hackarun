@@ -94,9 +94,10 @@ export class GenerateTeamDraw {
 export class SaveTeamDraw {
   constructor(private readonly gateway: DrawGateway) {}
 
-  // grava o sorteio mostrado na tela. Se já havia um salvo, só troca quando nenhuma equipe tem nome ainda
-  async execute(result: DrawResult): Promise<Result<void, string>> {
-    const saved = await this.gateway.loadSavedTeams();
+  // grava o sorteio mostrado na tela. Se já havia um salvo, só troca quando nenhuma equipe tem nome ainda. `known` =
+  // as equipes salvas que a tela já leu (poupa uma ida à planilha, que leva segundos; a planilha confere de novo)
+  async execute(result: DrawResult, known?: readonly SavedTeam[]): Promise<Result<void, string>> {
+    const saved = known ?? (await this.gateway.loadSavedTeams());
     if (saved.some((team) => team.pokemonId !== null)) {
       return fail('Alguma equipe já tem nome: não dá mais para refazer as equipes.');
     }
@@ -123,9 +124,10 @@ export class DrawTeamNames {
     return this.catalog.filter((p) => !used.has(p.id));
   }
 
-  // uma equipe: escolhe um Pokémon livre e grava. Equipe que já tem nome não é sorteada de novo
-  async drawOne(teamNumber: number): Promise<Result<NameDrawn, string>> {
-    const teams = await this.gateway.loadSavedTeams();
+  // uma equipe: escolhe um Pokémon livre e grava. Equipe que já tem nome não é sorteada de novo. `known` = as equipes
+  // que a tela já leu (sem reler a planilha); quem decide no fim é a planilha, que recusa Pokémon ou nome repetido
+  async drawOne(teamNumber: number, known?: readonly SavedTeam[]): Promise<Result<NameDrawn, string>> {
+    const teams = known ?? (await this.gateway.loadSavedTeams());
     const team = teams.find((t) => t.number === teamNumber);
     if (!team) return fail(`A Equipe ${teamNumber} não está salva na planilha.`);
     if (team.pokemonId !== null) return fail(`A ${team.name} já foi sorteada.`);
@@ -140,8 +142,8 @@ export class DrawTeamNames {
 
   // todas as que ainda não têm nome: sorteia tudo na memória (sem repetir) e grava num pedido só, que a planilha confere
   // inteiro antes de gravar
-  async drawAll(): Promise<Result<NameDrawn[], string>> {
-    const teams = await this.gateway.loadSavedTeams();
+  async drawAll(known?: readonly SavedTeam[]): Promise<Result<NameDrawn[], string>> {
+    const teams = known ?? (await this.gateway.loadSavedTeams());
     const pending = teams.filter((t) => t.pokemonId === null).sort((a, b) => a.number - b.number);
     if (pending.length === 0) return fail('Todas as equipes já foram sorteadas.');
     const pool = this.available(teams);
@@ -164,8 +166,8 @@ export class DrawTeamNames {
 export class PublishTeams {
   constructor(private readonly gateway: DrawGateway) {}
 
-  async execute(): Promise<Result<number, string>> {
-    const teams = await this.gateway.loadSavedTeams();
+  async execute(known?: readonly SavedTeam[]): Promise<Result<number, string>> {
+    const teams = known ?? (await this.gateway.loadSavedTeams());
     if (teams.length === 0) return fail('Ainda não há equipes salvas.');
     if (teams.some((t) => t.pokemonId === null)) {
       return fail('Ainda há equipe sem nome: sorteie todos os nomes antes de publicar.');

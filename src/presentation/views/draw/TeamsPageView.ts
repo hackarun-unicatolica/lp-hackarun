@@ -2,6 +2,7 @@ import type { DrawServices } from '@composition/draw';
 import type { DrawPreview } from '@application/draw/TeamDrawUseCases';
 import { TeamDrawViewModel, type TeamDrawState } from '@presentation/view-models/draw/TeamDrawViewModel';
 import { follow, h, mustFind } from './dom';
+import { personName } from '@presentation/formatters/personName';
 import { confirmDialog } from './confirmDialog';
 import { plural, stat, teamCard } from './teamCards';
 import { countdown, type Countdown } from './fx/countdown';
@@ -110,8 +111,13 @@ export function mountTeamsPage(services: DrawServices, root: ParentNode = docume
     if (state.error) message.append(state.error);
     else if (state.saved) {
       message.append(
-        'Equipes gravadas na planilha. ',
-        h('a', { href: '/sorteio/nomes' }, 'Ir para o sorteio dos nomes →'),
+        h('span', { class: 'message__text' }, 'Equipes salvas na base de dados.'),
+        h(
+          'a',
+          { class: 'message__next', href: '/sorteio/nomes' },
+          'Ir para o sorteio dos nomes',
+          h('span', { class: 'message__arrow', 'aria-hidden': 'true' }),
+        ),
       );
     } else if (preview?.alreadySaved && show === null) {
       message.append('Já existe um sorteio salvo na planilha. Se gravar este, ele substitui o anterior.');
@@ -134,7 +140,7 @@ export function mountTeamsPage(services: DrawServices, root: ParentNode = docume
 
     const cards = teams.map(teamCard);
     grid.replaceChildren(...cards);
-    const names = teams.flatMap((t) => t.members.map((m) => m.name));
+    const names = teams.flatMap((t) => t.members.map((m) => personName(m.name)));
     show.reveal = revealTeams(cards, {
       names,
       reduced,

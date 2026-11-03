@@ -155,14 +155,14 @@
     "types": ["fighting"]
   },
   {
+    "id": 71,
+    "name": "Victreebel",
+    "types": ["grass", "poison"]
+  },
+  {
     "id": 73,
     "name": "Tentacruel",
     "types": ["water", "poison"]
-  },
-  {
-    "id": 74,
-    "name": "Geodude",
-    "types": ["rock", "ground"]
   },
   {
     "id": 75,
@@ -198,6 +198,11 @@
     "id": 95,
     "name": "Onix",
     "types": ["rock", "ground"]
+  },
+  {
+    "id": 97,
+    "name": "Hypno",
+    "types": ["psychic"]
   },
   {
     "id": 99,
@@ -238,11 +243,6 @@
     "id": 115,
     "name": "Kangaskhan",
     "types": ["normal"]
-  },
-  {
-    "id": 116,
-    "name": "Horsea",
-    "types": ["water"]
   },
   {
     "id": 121,
