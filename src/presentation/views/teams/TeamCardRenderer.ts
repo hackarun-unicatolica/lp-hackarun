@@ -62,6 +62,21 @@ export function fillTeamCard(card: HTMLElement, team: PublicTeam): void {
   qs('[data-team-pips]', card)?.style.setProperty('--count', String(team.memberCount));
   setImage(card, { ...team, imageUrl: team.imageUrl ?? null });
   setMascot(card, team.mascot ?? null);
+  setPeople(card, team.members ?? []);
+}
+
+// nomes de quem está na equipe: um <li> por pessoa, sempre como texto
+function setPeople(card: HTMLElement, members: readonly string[]): void {
+  const list = qs<HTMLElement>('[data-team-people]', card);
+  if (!list) return;
+  list.replaceChildren(
+    ...members.map((name) => {
+      const li = document.createElement('li');
+      li.textContent = name;
+      return li;
+    }),
+  );
+  list.hidden = members.length === 0;
 }
 
 // equipe do sorteio dos nomes: círculo com a cor do tipo e os tipos embaixo do nome (o CSS do TeamCard faz o resto)

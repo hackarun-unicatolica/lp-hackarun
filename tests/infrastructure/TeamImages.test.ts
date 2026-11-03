@@ -97,3 +97,27 @@ describe('mascote da equipe (Pokémon do sorteio dos nomes)', () => {
     expect(teams.map((t) => t.mascot)).toEqual([{ pokemonId: 6, types: ['fire', 'flying'] }, null, null]);
   });
 });
+
+describe('nomes dos integrantes na lista pública', () => {
+  it('vêm do script como texto; entrada torta (não-texto, vazio, repetido, gigante) é ignorada', async () => {
+    const body = {
+      ok: true,
+      teams: [
+        {
+          id: 'a',
+          name: 'Equipe Charizard',
+          memberCount: 4,
+          members: ['Ana Souza', 'Ana Souza', '', 7, null, `${'x'.repeat(200)}`, 'Bruno Lima'],
+        },
+        { id: 'b', name: 'Equipe Sem Lista', memberCount: 4 },
+      ],
+    };
+    const fetchFn = vi.fn(async () => new Response(JSON.stringify(body)));
+    const repo = new AppsScriptTeamRepository(
+      new AppsScriptClient('https://script.google.com/x/exec', fetchFn),
+    );
+    const [first, second] = await repo.list();
+    expect(first?.members).toEqual(['Ana Souza', 'x'.repeat(80), 'Bruno Lima']);
+    expect(second?.members).toEqual([]);
+  });
+});

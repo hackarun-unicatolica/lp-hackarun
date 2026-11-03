@@ -2,7 +2,7 @@
 // publica as equipes confirmadas depois do sorteio. Cole no editor do Apps Script da planilha
 // (Extensões > Apps Script) junto com os outros .gs desta pasta (passo a passo no README.md).
 
-const TEAMS_CACHE_KEY = 'teams:v5';
+const TEAMS_CACHE_KEY = 'teams:v6';
 const TEAMS_CACHE_SECONDS = 60;
 // Propriedade do script com o segredo dos ids públicos das equipes (idSecret_)
 const ID_SECRET_PROPERTY = 'ID_SEGREDO';
@@ -89,14 +89,16 @@ function onEdit(e) {
     if (name !== REGISTRATIONS_SHEET) return;
     // Status muda a vaga e a contagem de integrantes; Equipe muda só a contagem
     if (touches(RCOL.status)) cache.remove(SLOTS_CACHE_KEY);
-    if (touches(RCOL.status) || touches(RCOL.team)) cache.remove(TEAMS_CACHE_KEY);
+    // nome e Equipe também: a lista pública mostra quem está em cada equipe
+    if (touches(RCOL.status) || touches(RCOL.team) || touches(RCOL.name)) cache.remove(TEAMS_CACHE_KEY);
   } catch (err) {
     // gatilho simples não pode quebrar a edição da planilha
   }
 }
 
-// só o que é público: id derivado do nome, nome da equipe, quantidade de integrantes, o id da insígnia e o Pokémon
-// do sorteio dos nomes (a imagem dele vem do próprio site)
+// o que a página /equipes mostra: id derivado do nome, nome da equipe, quantidade e nomes dos integrantes (para os
+// competidores saberem com quem vão trabalhar), o id da insígnia e o Pokémon do sorteio dos nomes. Nunca e-mail,
+// WhatsApp, matrícula nem outro dado de contato
 function confirmedTeams_() {
   const cache = CacheService.getScriptCache();
   const hit = cache.get(TEAMS_CACHE_KEY);
@@ -107,6 +109,7 @@ function confirmedTeams_() {
   // uma leitura das Propriedades por chamada (e não uma por equipe): a cota diária é contada por leitura
   const secret = rows.length ? idSecret_() : '';
   const pokemon = rows.length ? drawPokemonByTeam_(SpreadsheetApp.getActiveSpreadsheet()) : {};
+  const members = rows.length ? teamMembers_(SpreadsheetApp.getActiveSpreadsheet()) : {};
   const teams = rows
     .filter((r) => isConfirmed_(r[TCOL.status]) && nameKey_(r[TCOL.name]))
     .map((r) => ({
@@ -115,9 +118,25 @@ function confirmedTeams_() {
       memberCount: Math.max(1, Math.round(Number(r[TCOL.count]) || 1)),
       imageId: publicImageId_(r[TCOL.badgeId]),
       pokemonId: pokemon[nameKey_(r[TCOL.name])] || null,
+      members: members[nameKey_(r[TCOL.name])] || [],
     }));
   cache.put(TEAMS_CACHE_KEY, JSON.stringify(teams), TEAMS_CACHE_SECONDS);
   return teams;
+}
+
+// nomes de quem está em cada equipe (aba Inscritos, coluna Equipe), sem quem cancelou, em ordem alfabética
+function teamMembers_(book) {
+  const sheet = book.getSheetByName(REGISTRATIONS_SHEET);
+  const map = {};
+  if (!hasHeaders_(sheet, REGISTRATION_HEADERS)) return map;
+  readRows_(sheet, REGISTRATION_HEADERS.length).forEach((r) => {
+    const key = nameKey_(r[RCOL.team]);
+    const name = cellText_(r[RCOL.name]).trim().slice(0, 80);
+    if (!key || !name || String(r[RCOL.status]).trim().toLowerCase() === 'cancelado') return;
+    (map[key] = map[key] || []).push(name);
+  });
+  Object.keys(map).forEach((key) => map[key].sort((a, b) => a.localeCompare(b, 'pt-BR')));
+  return map;
 }
 
 // mesmo envio = mesma chave do formulário + mesmo e-mail; site antigo sem chave: e-mail + horário do cliente

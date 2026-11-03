@@ -109,6 +109,7 @@ export interface RawTeam {
   imageUrl?: string | null;
   // Pokémon do sorteio dos nomes (a lista ao vivo monta a partir do pokemonId da planilha)
   mascot?: { pokemonId: number; types: readonly string[] } | null;
+  members?: readonly string[];
 }
 
 export interface RawSpeaker {

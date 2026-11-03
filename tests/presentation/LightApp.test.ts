@@ -14,8 +14,8 @@ vi.mock('@presentation/views/registration/mountRegistrationPage', () => ({
 const SLOTS = { capacity: null, taken: 0, remaining: null, level: 'unknown' };
 const CONFIG = { milestones: [], registration: { slots: SLOTS }, teamsEndpoint: null };
 const TEAMS: PublicTeam[] = [
-  { id: 'a', name: 'Bug Busters', memberCount: 3, imageUrl: null, mascot: null },
-  { id: 'b', name: 'Cerrado Devs', memberCount: 4, imageUrl: null, mascot: null },
+  { id: 'a', name: 'Bug Busters', memberCount: 3, imageUrl: null, mascot: null, members: [] },
+  { id: 'b', name: 'Cerrado Devs', memberCount: 4, imageUrl: null, mascot: null, members: [] },
 ];
 
 const page = (config: unknown = CONFIG) => `

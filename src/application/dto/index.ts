@@ -146,7 +146,7 @@ export interface MissionsDTO {
   scoring: ScoringDTO | null;
 }
 
-// equipe pública: nunca nome de pessoa, matrícula ou e-mail
+// equipe pública: nomes dos integrantes sim; matrícula, e-mail e WhatsApp nunca
 export interface TeamDTO {
   id: string;
   name: string;
@@ -156,6 +156,8 @@ export interface TeamDTO {
   imageUrl: string | null;
   // Pokémon do sorteio dos nomes (número e tipos) ou null
   mascot: { pokemonId: number; types: readonly string[] } | null;
+  // nomes de quem está na equipe
+  members: readonly string[];
 }
 
 export interface SpeakerDTO {

@@ -269,9 +269,9 @@ A meta é a **WCAG 2.2 AA**.
 - **Validação no servidor:** o Apps Script confere tudo de novo, com as mesmas regras do site (um teste compara os
   dois lados), e grava textos que começam com `=`, `+`, `-` ou `@` como texto, para evitar fórmula injetada.
 - **Proteção contra spam:** campo isca, tempo mínimo de preenchimento e limite de envios.
-- **Pouca informação pública:** a página de equipes, escondida até o sorteio, mostra só o nome da equipe, a quantidade
-  de integrantes e a insígnia, e só depois que a organização confirma. Nome de pessoa, e-mail e WhatsApp nunca
-  aparecem no site.
+- **Pouca informação pública:** a página de equipes, escondida até o sorteio, mostra o nome da equipe, a insígnia, a
+  quantidade e o nome dos integrantes (para os competidores saberem com quem vão trabalhar), e só depois que a
+  organização confirma. E-mail, WhatsApp e matrícula nunca aparecem no site.
 
 ## Qualidade
 

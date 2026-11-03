@@ -100,7 +100,7 @@ describe('Apps Script · migração da inscrição por equipe para a individual'
 
   it('lista pública e vagas lidas antes da migração saem do cache quando a planilha migra', () => {
     const { script } = legacyBook();
-    script.cache.put('teams:v5', '[{"name":"velho"}]');
+    script.cache.put('teams:v6', '[{"name":"velho"}]');
     script.cache.put('slots:v1', '9');
     configure(script);
     expect(script.get('teams').teams).toEqual([]);

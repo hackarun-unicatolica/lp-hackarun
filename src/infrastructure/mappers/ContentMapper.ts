@@ -32,6 +32,7 @@ export class ContentMapper {
       status: raw.status ?? 'confirmed',
       imageUrl: raw.imageUrl ?? null,
       mascot: raw.mascot ?? null,
+      members: raw.members ?? [],
     });
   }
 
