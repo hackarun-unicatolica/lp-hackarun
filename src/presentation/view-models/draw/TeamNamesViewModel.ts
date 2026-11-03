@@ -71,6 +71,13 @@ export class TeamNamesViewModel {
     }
   }
 
+  // o que a tela já leu da planilha: os sorteios usam isso em vez de reler (cada ida à planilha leva alguns segundos).
+  // Sem nada lido ainda, deixa o caso de uso ler
+  private known(): readonly SavedTeam[] | undefined {
+    const { teams } = this.state.value;
+    return teams.length > 0 ? teams : undefined;
+  }
+
   get pending(): SavedTeam[] {
     return this.state.value.teams.filter((t) => t.pokemonId === null);
   }
@@ -96,7 +103,7 @@ export class TeamNamesViewModel {
     const startedAt = Date.now();
     this.patch({ spinning: [...this.state.value.spinning, number], error: null });
     try {
-      const result = await this.deps.names.drawOne(number);
+      const result = await this.deps.names.drawOne(number, this.known());
       await this.hold(startedAt, DEFAULT_MIN_SPIN_ONE_MS);
       if (result.ok) this.apply([result.value]);
       else {
@@ -116,7 +123,7 @@ export class TeamNamesViewModel {
     const startedAt = Date.now();
     this.patch({ spinning: pending, error: null });
     try {
-      const result = await this.deps.names.drawAll();
+      const result = await this.deps.names.drawAll(this.known());
       await this.hold(startedAt, DEFAULT_MIN_SPIN_ALL_MS);
       if (result.ok) this.apply(result.value);
       else {
@@ -135,7 +142,7 @@ export class TeamNamesViewModel {
     if (this.state.value.publishing || this.state.value.spinning.length > 0) return;
     this.patch({ publishing: true, error: null });
     try {
-      const result = await this.deps.publish.execute();
+      const result = await this.deps.publish.execute(this.known());
       if (result.ok) this.patch({ teams: this.state.value.teams.map((t) => ({ ...t, published: true })) });
       else {
         this.patch({ error: result.error });

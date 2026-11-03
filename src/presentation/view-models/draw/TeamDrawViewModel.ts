@@ -80,7 +80,7 @@ export class TeamDrawViewModel {
     }
     this.patch({ status: 'saving', error: null });
     try {
-      const saved = await this.deps.save.execute(preview.result);
+      const saved = await this.deps.save.execute(preview.result, this.state.value.sheet?.saved);
       if (!saved.ok) return this.patch({ status: 'ready', error: saved.error });
       this.patch({ status: 'ready', saved: true, sheet: await this.deps.status.execute() });
     } catch (error) {

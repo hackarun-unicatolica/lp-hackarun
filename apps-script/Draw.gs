@@ -41,7 +41,8 @@ function drawAction_(body) {
     else if (body.action === 'draw-save') out = drawSave_(ctx, body);
     else if (body.action === 'draw-names') out = drawNames_(ctx, body);
     else out = drawPublish_(ctx);
-    SpreadsheetApp.flush();
+    // só quem grava precisa esperar as escritas assentarem (a leitura não: o flush custava segundos à toa)
+    if (body.action !== 'draw-list') SpreadsheetApp.flush();
     return json_(out);
   } catch (err) {
     if (err && err.drawConflict) return json_({ ok: false, error: 'conflict', message: err.message });
@@ -82,6 +83,22 @@ function drawConflict_(message) {
 const drawText_ = (value) => String(value === null || value === undefined ? '' : value).trim();
 const drawStatus_ = (value) => drawText_(value).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
+// aba Equipes: só as colunas Equipe e Status. As outras (integrantes, e-mails, WhatsApps, contagem) são fórmulas que
+// recalculam a cada leitura e deixavam o sorteio dos nomes lento. O resto da linha fica vazio (nada daqui usa)
+function drawReadTeamRows_(teams) {
+  const last = teams.getLastRow();
+  if (last < 2) return [];
+  const count = last - 1;
+  const names = teams.getRange(2, TCOL.name + 1, count, 1).getValues();
+  const status = teams.getRange(2, TCOL.status + 1, count, 1).getValues();
+  return names.map((n, i) => {
+    const row = TEAM_HEADERS.map(() => '');
+    row[TCOL.name] = n[0];
+    row[TCOL.status] = status[i][0];
+    return row;
+  });
+}
+
 // as três abas, já lidas: Inscritos (pessoas), Equipes (nome e status) e Sorteio (o registro do sorteio)
 function drawContext_(book) {
   const registrations = book.getSheetByName(REGISTRATIONS_SHEET);
@@ -101,7 +118,7 @@ function drawContext_(book) {
     teams: teams,
     draw: draw,
     people: readRows_(registrations, REGISTRATION_HEADERS.length),
-    teamRows: readRows_(teams, TEAM_HEADERS.length),
+    teamRows: drawReadTeamRows_(teams),
     drawRows: readRows_(draw, DRAW_HEADERS.length),
   };
 }

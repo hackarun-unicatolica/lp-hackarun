@@ -68,7 +68,7 @@ describe('TeamDrawViewModel', () => {
     const { vm, save, status } = drawVm();
     await vm.draw();
     await vm.save();
-    expect(save).toHaveBeenCalledWith(RESULT);
+    expect(save.mock.calls[0]?.[0]).toBe(RESULT);
     expect(vm.state.value.saved).toBe(true);
     expect(status).toHaveBeenCalledTimes(1);
   });
@@ -88,7 +88,7 @@ describe('TeamDrawViewModel', () => {
   it('planilha real: sortear já grava; com as equipes travadas não grava nada', async () => {
     const { vm, save } = drawVm();
     await vm.drawAndSave();
-    expect(save).toHaveBeenCalledWith(RESULT);
+    expect(save.mock.calls[0]?.[0]).toBe(RESULT);
     expect(vm.state.value.saved).toBe(true);
 
     const locked = drawVm({ generate: async () => ok(preview({ locked: true })) });
@@ -108,7 +108,7 @@ describe('TeamDrawViewModel', () => {
     expect(vm.state.value).toMatchObject({ saved: false, error: 'A planilha não respondeu a tempo.' });
     expect(vm.state.value.preview?.result).toBe(RESULT);
     await vm.save();
-    expect(save).toHaveBeenLastCalledWith(RESULT);
+    expect(save.mock.lastCall?.[0]).toBe(RESULT);
     expect(vm.state.value).toMatchObject({ saved: true, error: null });
   });
 
@@ -177,7 +177,7 @@ describe('TeamNamesViewModel', () => {
     const { vm, names } = namesVm([team(1), team(2)]);
     await vm.load();
     await vm.drawOne(2);
-    expect(names.drawOne).toHaveBeenCalledWith(2);
+    expect(names.drawOne).toHaveBeenCalledWith(2, expect.anything());
     expect(vm.state.value.spinning).toEqual([]);
     expect(vm.pending.map((t) => t.number)).toEqual([1]);
   });
