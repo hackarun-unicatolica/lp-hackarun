@@ -171,6 +171,12 @@ main {
   font-weight: 700;
 }
 
+/* o atributo hidden sempre vence o display dos botões e links (senão "Ver a página das equipes" aparecia antes da hora) */
+.btn[hidden],
+.screen [hidden] {
+  display: none !important;
+}
+
 .btn--link {
   display: inline-block;
   text-decoration: none;

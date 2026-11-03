@@ -48,6 +48,5 @@ export const TYPE_LABELS: Record<string, string> = {
 
 export const typeLabel = (type: string): string => TYPE_LABELS[type] ?? type;
 
-// card da página /equipes: a cor do tipo vira a variável --type e os tipos aparecem embaixo do nome
+// card da página /equipes: a cor do tipo vira a variável --type
 export const mascotStyle = (types: readonly string[]): string => `--type: ${typeColor(types)}`;
-export const mascotTypes = (types: readonly string[]): string => types.map(typeLabel).join(' · ');

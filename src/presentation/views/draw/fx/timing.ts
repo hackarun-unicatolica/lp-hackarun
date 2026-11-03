@@ -23,9 +23,9 @@ export const TEAM_REVEAL = {
 } as const;
 
 export const NAME_REVEAL = {
-  // entre um Pokémon e o próximo no "Sortear todas" (46 equipes ≈ 11 s de cascata)
+  // entre um Pokémon e o próximo no "Sortear" (a cascata inteira cabe em ~2 s, e o suspense todo em uns 6 s)
   staggerMs: 240,
-  maxTotalMs: 11_000,
+  maxTotalMs: 2_000,
   // duração da passagem silhueta -> cor (bate com o CSS .poke--reveal)
   revealMs: 1100,
 } as const;
