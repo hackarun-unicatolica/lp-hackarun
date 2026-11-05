@@ -69,9 +69,10 @@ const { data: _data } = Astro.props;
   }
 
   @media (min-width: 1024px) {
-    /* placas médias: 4 por fileira (8 patrocinadores = 2 fileiras cheias), abaixo dos destaques */
+    /* placas médias: 5 por fileira (10 patrocinadores = 2 fileiras cheias), abaixo dos destaques */
     .sponsors__grid {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: var(--space-4);
     }
 
     .sponsors__grid--featured {
