@@ -1,5 +1,5 @@
 import { createDrawServices, type DrawServices } from '@composition/draw';
-import { mustFind } from './dom';
+import { h, mustFind } from './dom';
 
 // o que o servidor do `npm run sorteio` diz sobre a cópia de teste
 interface LocalConfig {
@@ -17,6 +17,21 @@ export function showSource(services: DrawServices, testLabel: string | null = nu
   badge.hidden = label === null;
   badge.textContent = label === null ? '' : `CÓPIA DE TESTE · ${label}`;
   badge.dataset['mode'] = 'test';
+}
+
+// avisa nas duas telas que ainda há credenciados marcados com "conferir" na planilha
+function showToReview(count: number): void {
+  if (count === 0) return;
+  const who = count === 1 ? '1 credenciado marcado' : `${count} credenciados marcados`;
+  document
+    .querySelector('main')
+    ?.prepend(
+      h(
+        'p',
+        { class: 'review-note', role: 'status' },
+        `${who} com "conferir" na planilha. Revise antes de sortear.`,
+      ),
+    );
 }
 
 // botões que só existem no teste (cópia local): "Recomeçar teste" (equipes e nomes) e "Sortear nomes de novo". Na
@@ -61,5 +76,6 @@ export async function connect(): Promise<DrawServices> {
   mustFind<HTMLElement>('[data-source]').hidden = true;
   const status = await services.status.execute();
   showSource(services, status.testLabel ?? null);
+  showToReview(status.toReview ?? 0);
   return services;
 }

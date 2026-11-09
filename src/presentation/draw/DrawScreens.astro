@@ -51,14 +51,10 @@ const local = import.meta.env.SORTEIO_LOCAL === '1';
     <button class="btn btn--primary btn--xl" type="button" data-publish hidden>
       Publicar no site
     </button>
-    <a
-      class="btn btn--primary btn--xl btn--link"
-      href="/equipes"
-      target="_blank"
-      rel="noopener"
-      data-view-teams
-      hidden
-    >
+    <button class="btn btn--primary btn--xl" type="button" data-present-teams hidden>
+      Ver equipe por equipe
+    </button>
+    <a class="btn btn--xl btn--link" href="/equipes" target="_blank" rel="noopener" data-view-teams hidden>
       Ver a página das equipes
     </a>
     {local && (

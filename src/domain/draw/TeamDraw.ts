@@ -10,6 +10,9 @@ export interface DrawParticipant {
   name: string;
   level: KnowledgeLevel;
   institution: InstitutionGroup;
+  female?: boolean;
+  // a planilha marcou esta pessoa para a organização conferir antes do sorteio
+  review?: boolean;
 }
 
 export interface DrawConfig {
@@ -71,6 +74,48 @@ export function teamSizes(total: number, config: Pick<DrawConfig, 'teamSize' | '
   const base = Math.floor(total / teams);
   const extra = total % teams;
   return Array.from({ length: teams }, (_, i) => (i < extra ? base + 1 : base));
+}
+
+const FULL_TEAM = 4;
+
+export function femaleQuotas(females: number, sizes: readonly number[], random: Random): number[] {
+  const quotas = sizes.map(() => 0);
+  if (females === 0) return quotas;
+  const order = shuffled(
+    sizes.map((_, i) => i),
+    random,
+  );
+  const sizeOf = (i: number) => sizes[i] as number;
+  if (females < FULL_TEAM) {
+    quotas[order[0] as number] = females;
+    return quotas;
+  }
+  const find = (size: number) => order.find((i) => sizeOf(i) === size);
+  let full = find(FULL_TEAM);
+  if (full === undefined || females === FULL_TEAM + 1) full = females > FULL_TEAM ? find(5) : full;
+  let rest = females;
+  if (full !== undefined) {
+    quotas[full] = sizeOf(full);
+    rest -= sizeOf(full);
+  }
+  const others = order.filter((i) => i !== full);
+  const paired = others.slice(0, Math.floor(rest / 2));
+  for (const i of paired) quotas[i] = Math.min(2, sizeOf(i));
+  rest -= paired.reduce((sum, i) => sum + (quotas[i] as number), 0);
+  const extras = paired.length > 0 ? paired : others;
+  for (let turn = 0; rest > 0 && turn < females * extras.length; turn++) {
+    const i = extras[turn % extras.length] as number;
+    if ((quotas[i] as number) < sizeOf(i)) {
+      quotas[i] = (quotas[i] as number) + 1;
+      rest--;
+    }
+  }
+  return quotas;
+}
+
+function hasRoom(members: readonly DrawParticipant[], person: DrawParticipant, size: number, quota: number) {
+  const females = members.filter((m) => m.female).length;
+  return person.female ? females < quota : members.length - females < size - quota;
 }
 
 function teamPenalty(members: readonly DrawParticipant[], targets: Targets): number {
@@ -151,6 +196,7 @@ function totalPenalty(groups: readonly DrawParticipant[][], targets: Targets): n
 function attempt(
   participants: readonly DrawParticipant[],
   sizes: readonly number[],
+  quotas: readonly number[],
   targets: Targets,
   random: Random,
 ): DrawParticipant[][] {
@@ -168,7 +214,7 @@ function attempt(
     let bestCost = Infinity;
     let bestTie = Infinity;
     groups.forEach((members, i) => {
-      if (members.length >= (sizes[i] as number)) return;
+      if (!hasRoom(members, person, sizes[i] as number, quotas[i] as number)) return;
       const cost = teamPenalty([...members, person], targets) - teamPenalty(members, targets);
       // empate: a equipe mais vazia, depois o acaso (com semente)
       const tie = members.length + random() * 0.5;
@@ -190,9 +236,10 @@ function attempt(
     const gb = groups[b] as DrawParticipant[];
     const i = Math.floor(random() * ga.length);
     const j = Math.floor(random() * gb.length);
-    const before = teamPenalty(ga, targets) + teamPenalty(gb, targets);
     const pa = ga[i] as DrawParticipant;
     const pb = gb[j] as DrawParticipant;
+    if (Boolean(pa.female) !== Boolean(pb.female)) continue;
+    const before = teamPenalty(ga, targets) + teamPenalty(gb, targets);
     ga[i] = pb;
     gb[j] = pa;
     const after = teamPenalty(ga, targets) + teamPenalty(gb, targets);
@@ -225,10 +272,11 @@ export function drawTeams(
   const random = createRandom(config.seed);
   // quais equipes ficam com 5: sorteadas (as maiores vêm primeiro em `sizes`, aqui embaralhadas)
   const shuffledSizes = shuffled(sizes, random);
+  const quotas = femaleQuotas(participants.filter((p) => p.female).length, shuffledSizes, random);
   let best: DrawParticipant[][] | null = null;
   let bestPenalty = Infinity;
   for (let i = 0; i < ATTEMPTS; i++) {
-    const groups = attempt(participants, shuffledSizes, targets, createRandom(`${config.seed}#${i}`));
+    const groups = attempt(participants, shuffledSizes, quotas, targets, createRandom(`${config.seed}#${i}`));
     const penalty = totalPenalty(groups, targets);
     if (penalty < bestPenalty) {
       best = groups;
