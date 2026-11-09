@@ -1274,6 +1274,35 @@ body.presenting .btn--test {
   font-weight: 600;
 }
 
+/* fora do modo apresentação a janela é mais baixa: o card se ajusta à altura disponível e não passa por cima dos botões */
+body:not(.presenting) .carousel__stage {
+  container-type: size;
+  min-height: 0;
+}
+
+body:not(.presenting) .carousel__card {
+  gap: 0.5rem;
+  padding: 1rem 1.25rem;
+}
+
+body:not(.presenting) .carousel__logo {
+  width: min(32cqh, 16rem);
+}
+
+body:not(.presenting) .carousel__name {
+  font-size: clamp(1.3rem, 6cqh, 2.4rem);
+}
+
+body:not(.presenting) .carousel__members {
+  gap: 0.3rem 0.5rem;
+  min-height: 0;
+}
+
+body:not(.presenting) .carousel__members li {
+  padding: 0.2rem 0.65rem;
+  font-size: clamp(0.85rem, 3cqh, 1.15rem);
+}
+
 .carousel__nav {
   display: flex;
   gap: 1rem;
