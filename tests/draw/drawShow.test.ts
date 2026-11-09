@@ -4,6 +4,7 @@ import { revealTeams } from '@presentation/views/draw/TeamsReveal';
 import {
   cascadeDelays,
   NAME_REVEAL,
+  rowSchedule,
   staggerFor,
   TEAM_REVEAL,
   typeColor,
@@ -35,6 +36,50 @@ const shown = (all: HTMLElement[]) =>
 
 afterEach(() => {
   vi.useRealTimers();
+});
+
+describe('revelação dos nomes por fileira', () => {
+  const FIVE = { staggerMs: 240, maxTotalMs: 18_000, revealMs: 1100, scrollMs: 450, minStaggerMs: 60 };
+
+  it('a tela só rola quando o último card da fileira de cima terminou de aparecer', () => {
+    const { delays, scrolls } = rowSchedule([4, 4, 4], FIVE);
+    const lastOfRow = [delays[3] as number, delays[7] as number];
+    expect(scrolls[1]).toBe(lastOfRow[0]! + FIVE.revealMs);
+    expect(scrolls[2]).toBe(lastOfRow[1]! + FIVE.revealMs);
+  });
+
+  it('a fileira nova só começa depois da rolagem, e a primeira não espera', () => {
+    const { delays, scrolls } = rowSchedule([3, 3], FIVE);
+    expect(scrolls[0]).toBe(0);
+    expect(delays[0]).toBe(0);
+    expect(delays[3]).toBe((scrolls[1] as number) + FIVE.scrollMs);
+  });
+
+  it('nenhum card começa antes do anterior e as fileiras não se misturam', () => {
+    const { delays } = rowSchedule([6, 6, 6, 6, 6, 6, 6, 4], FIVE);
+    expect(delays).toHaveLength(46);
+    expect([...delays].sort((a, b) => a - b)).toEqual(delays);
+    expect(new Set(delays).size).toBe(46);
+  });
+
+  it.each([3, 4, 5, 6, 8])(
+    '46 equipes em %i colunas cabem no tempo, sem passar do intervalo preferido',
+    (columns) => {
+      const rows = Array.from({ length: Math.floor(46 / columns) }, () => columns);
+      if (46 % columns) rows.push(46 % columns);
+      const { delays, end } = rowSchedule(rows, FIVE);
+      const step = (delays[1] as number) - (delays[0] as number);
+      expect(step).toBeLessThanOrEqual(FIVE.staggerMs);
+      expect(step).toBeGreaterThanOrEqual(FIVE.minStaggerMs);
+      if (step > FIVE.minStaggerMs) expect(end).toBeLessThanOrEqual(FIVE.maxTotalMs);
+    },
+  );
+
+  it('poucas equipes usam o intervalo cheio; uma só entra na hora; nenhuma não agenda nada', () => {
+    expect(rowSchedule([3], FIVE).delays).toEqual([0, 240, 480]);
+    expect(rowSchedule([1], FIVE)).toEqual({ delays: [0], scrolls: [0], end: FIVE.revealMs });
+    expect(rowSchedule([], FIVE)).toEqual({ delays: [], scrolls: [], end: 0 });
+  });
 });
 
 describe('tempos do show', () => {
