@@ -482,7 +482,14 @@ o que evita sobrecarregar a planilha quando muita gente responde ao mesmo tempo.
 
 A planilha ganha três abas: **Avaliações** (uma linha por colega avaliado), **Notas baixas** (agrupa as notas ruins de
 cada pessoa, com justificativa, autor e quantos avaliaram mal no dia) e **Acompanhamento** (quem avaliou ou não em cada
-dia). Os horários ficam em `FEEDBACK_DEFAULT_WINDOWS` e podem ser trocados pela propriedade `FEEDBACK_JANELAS`.
+dia). Os horários ficam em `FEEDBACK_DEFAULT_WINDOWS` e podem ser trocados pela propriedade `FEEDBACK_JANELAS`:
+12/11 das 21h às 23h59 (depois do sorteio), 13/11 das 19h às 23h59 e 14/11 das 10h às 16h30.
+
+**Painel da organização (`/sorteio/avaliacoes`).** As mesmas informações das abas, em tabelas no jeito de planilha:
+uma aba por dia (quem avaliou e a que horas, média recebida, notas baixas e faltas, com as linhas ruins em rosa), a
+visão geral com todos os dias lado a lado, filtro por equipe, atualização sozinha a cada minuto e botão "Baixar CSV".
+Fica atrás do login do sorteio (`SORTEIO_ATIVO`, `SORTEIO_USUARIO`, `SORTEIO_SENHA`) e lê a planilha pela ação
+`feedback-report` do `Feedback.gs`, que só devolve nome, equipe e as avaliações (nada de e-mail ou WhatsApp).
 
 Para publicar um fork na sua própria conta: na Cloudflare, abra **Workers & Pages → Create application → Pages →
 Connect to Git**, escolha o repositório e use o comando de build `npm run build` com a pasta de saída `dist`.
