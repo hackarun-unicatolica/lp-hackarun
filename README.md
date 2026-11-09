@@ -469,6 +469,21 @@ Variável nova ou alterada só vale depois de um novo deploy (**Deployments → 
 sem a planilha real: `npm run build`, um `.dev.vars` com as variáveis acima apontando para a cópia de teste e
 `npx wrangler pages dev dist`.
 
+### Avaliação entre colegas (`/feedback`)
+
+Durante a competição, cada integrante avalia os colegas da própria equipe uma vez por dia, de 1 a 5 estrelas ou
+marcando que a pessoa não compareceu. Nota de 3 estrelas ou menos e falta exigem justificativa. Só a organização vê as
+respostas, e elas não entram na pontuação.
+
+A pessoa se identifica com o e-mail e o WhatsApp da inscrição. A Pages Function (`src/server/feedback`) confere esses
+dados em uma lista guardada por 45 segundos e chama o Apps Script (`apps-script/Feedback.gs`) só para gravar o envio,
+o que evita sobrecarregar a planilha quando muita gente responde ao mesmo tempo. Para ligar, crie a variável
+`FEEDBACK_ATIVO` com o valor `sim` e faça um novo deploy; a chave e a planilha são as mesmas do sorteio.
+
+A planilha ganha três abas: **Avaliações** (uma linha por colega avaliado), **Notas baixas** (agrupa as notas ruins de
+cada pessoa, com justificativa, autor e quantos avaliaram mal no dia) e **Acompanhamento** (quem avaliou ou não em cada
+dia). Os horários ficam em `FEEDBACK_DEFAULT_WINDOWS` e podem ser trocados pela propriedade `FEEDBACK_JANELAS`.
+
 Para publicar um fork na sua própria conta: na Cloudflare, abra **Workers & Pages → Create application → Pages →
 Connect to Git**, escolha o repositório e use o comando de build `npm run build` com a pasta de saída `dist`.
 

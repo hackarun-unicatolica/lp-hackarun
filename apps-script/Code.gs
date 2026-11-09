@@ -13,6 +13,10 @@ function doPost(e) {
   const body = parseBody_(e);
   // sorteio das equipes (Draw.gs): vem da função do site com a chave do sorteio, não do formulário
   if (body && typeof body.action === 'string' && body.action.indexOf('draw-') === 0) return drawAction_(body);
+  // avaliação entre colegas (Feedback.gs): mesma chave do sorteio, também vem só da função do site
+  if (body && typeof body.action === 'string' && body.action.indexOf('feedback-') === 0) {
+    return feedbackAction_(body);
+  }
   // primeiro filtro, barato: honeypot preenchido ou formulário enviado rápido demais
   if (!body || isBot_(body)) return json_({ ok: false, error: 'invalid' });
   // cadastro de mentor: outro fluxo e outra aba (Mentors.gs); não passa pelo prazo nem pelas vagas da inscrição
