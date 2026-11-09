@@ -8,7 +8,7 @@ import { follow, h, mustFind, pokemonImage } from './dom';
 import { countdown, type Countdown } from './fx/countdown';
 import { finale } from './fx/finale';
 import { createTeamViewer, type CarouselItem } from './fx/carousel';
-import { NAME_REVEAL, cascadeDelays, prefersReducedMotion, typeColor } from './fx/timing';
+import { prefersReducedMotion, rowSchedule, typeColor } from './fx/timing';
 
 const SPIN_MS = 90;
 const AUTO_RETRY_MS = 4000;
@@ -157,20 +157,35 @@ export function mountNamesPage(services: DrawServices, root: ParentNode = docume
       void autoPublish();
       return;
     }
-    // cascata na própria grade: cada card vira silhueta, ganha cor e mostra o nome, um depois do outro
-    const delays = cascadeDelays(fresh.length, NAME_REVEAL.staggerMs, NAME_REVEAL.maxTotalMs);
+    // cascata na própria grade, fileira por fileira: cada card vira silhueta, ganha cor e mostra o nome, um depois do
+    // outro, e a tela só desce quando a fileira de cima terminou
+    const rows = rowsOf(fresh);
+    const schedule = rowSchedule(rows.map((row) => row.length));
     const startedAt = performance.now();
-    fresh.forEach((number, i) => {
-      const delay = delays[i] as number;
-      revealAt.set(number, startedAt + delay);
+    fresh.forEach((number, i) => revealAt.set(number, startedAt + (schedule.delays[i] as number)));
+    rows.forEach((row, index) => {
       revealTimers.push(
         window.setTimeout(() => {
-          const logo = grid.querySelector(`[data-logo="${number}"]`);
+          const logo = grid.querySelector(`[data-logo="${row[0]}"]`);
           if (logo) follow(logo, reduced);
-        }, delay),
+        }, schedule.scrolls[index]),
       );
     });
-    revealTimers.push(window.setTimeout(finishReveal, (delays.at(-1) as number) + NAME_REVEAL.revealMs));
+    revealTimers.push(window.setTimeout(finishReveal, schedule.end));
+  };
+
+  // as equipes que entram agora, agrupadas pela fileira em que aparecem na grade (mesma altura = mesma fileira)
+  const rowsOf = (numbers: readonly number[]): number[][] => {
+    const rows: number[][] = [];
+    let top: number | null = null;
+    for (const number of numbers) {
+      const card = grid.querySelector<HTMLElement>(`[data-logo="${number}"]`)?.closest<HTMLElement>('.poke');
+      const offset = card?.offsetTop ?? 0;
+      if (top === null || offset !== top) rows.push([]);
+      top = offset;
+      (rows.at(-1) as number[]).push(number);
+    }
+    return rows;
   };
 
   const finishReveal = () => {
