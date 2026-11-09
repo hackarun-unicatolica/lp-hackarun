@@ -1,0 +1,91 @@
+---
+// avaliação diária entre colegas de equipe: só existe no ar com FEEDBACK_ATIVO=sim (functions/_middleware.ts). Fora do
+// menu e do sitemap. Serve para a organização acompanhar as equipes e não entra na nota
+import displayFont from '../assets/fonts/orbitron-pt-latin-wght.woff2?url';
+import bodyFont from '@fontsource-variable/montserrat/files/montserrat-latin-wght-normal.woff2?url';
+import '@presentation/styles/tokens.css';
+import '@presentation/feedback/feedback.css';
+
+const fontFaces = [
+  `@font-face{font-family:'Orbitron Variable';font-style:normal;font-display:swap;font-weight:400 900;src:url(${displayFont}) format('woff2')}`,
+  `@font-face{font-family:'Montserrat Variable';font-style:normal;font-display:swap;font-weight:100 900;src:url(${bodyFont}) format('woff2')}`,
+].join('');
+---
+
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Avaliação da equipe · HackaRun 2026</title>
+    <style set:html={fontFaces}></style>
+  </head>
+  <body class="fb">
+    <main>
+      <p class="fb__eyebrow">HackaRun 2026</p>
+
+      <section data-screen="identify">
+        <h1>Avaliação da equipe</h1>
+        <p class="fb__lead">
+          Em cada dia de competição, você avalia os colegas da sua equipe. Entre com o e-mail e o WhatsApp da
+          sua inscrição.
+        </p>
+        <form class="panel" data-identify-form novalidate>
+          <label class="field">
+            <span class="field__label">E-mail</span>
+            <input name="email" type="email" autocomplete="email" inputmode="email" required />
+          </label>
+          <label class="field">
+            <span class="field__label">WhatsApp com DDD</span>
+            <input
+              name="whatsapp"
+              type="tel"
+              autocomplete="tel"
+              inputmode="tel"
+              placeholder="(63) 99999-9999"
+              required
+            />
+          </label>
+          <p class="fb__error" data-identify-error role="alert"></p>
+          <button class="btn" type="submit" data-enter>
+            Continuar
+          </button>
+        </form>
+        <p class="fb__note">
+          Só a organização vê as respostas. Seus colegas não ficam sabendo o que você marcou.
+        </p>
+      </section>
+
+      <section data-screen="rate" hidden>
+        <h1 data-greeting></h1>
+        <p class="fb__context" data-context></p>
+        <p class="fb__lead">
+          Avalie como cada colega contribuiu hoje. Com 3 estrelas ou menos, conte o motivo. Só a organização
+          vê as respostas.
+        </p>
+        <p class="fb__progress" data-progress aria-live="polite"></p>
+        <div class="cards" data-colleagues></div>
+        <p class="fb__error" data-rate-error role="alert"></p>
+        <button class="btn" type="button" data-submit>
+          Enviar avaliação
+        </button>
+        <p class="fb__note">Dá para enviar uma vez por dia, e depois não é possível alterar.</p>
+      </section>
+
+      <section data-screen="finished" hidden>
+        <div class="panel panel--done">
+          <h1 data-outcome-title></h1>
+          <p class="fb__lead" data-outcome-text></p>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      import { SiteFeedbackGateway } from '@infrastructure/feedback/SiteFeedbackGateway';
+      import { mountFeedback } from '@presentation/views/feedback/mountFeedback';
+
+      mountFeedback(new SiteFeedbackGateway());
+    </script>
+  </body>
+</html>
