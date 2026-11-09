@@ -6,7 +6,7 @@
 const FEEDBACK_SHEET = 'Avaliações';
 const FEEDBACK_LOW_SHEET = 'Notas baixas';
 const FEEDBACK_TRACK_SHEET = 'Acompanhamento';
-const FEEDBACK_ACTIONS = ['feedback-roster', 'feedback-submit'];
+const FEEDBACK_ACTIONS = ['feedback-roster', 'feedback-submit', 'feedback-report'];
 // mudou o layout? suba a versão: a próxima chamada refaz as abas (as avaliações ficam)
 const FEEDBACK_SETUP_VERSION = '1';
 const FEEDBACK_SETUP_PROPERTY = 'FEEDBACK_VERSAO';
@@ -21,8 +21,10 @@ const FEEDBACK_REASON_MAX = 600;
 // a maior equipe tem 5 pessoas; a folga cobre uma troca feita à mão pela organização
 const FEEDBACK_MAX_RATINGS = 8;
 const FEEDBACK_LOCK_MS = 25000;
-// 12/11 fica de fora: é a noite do sorteio, ninguém trabalhou junto ainda. 14/11 fecha antes de anunciar as finalistas
+// 12/11 abre depois do sorteio (19h15), quando as equipes já trabalharam um pouco juntas. 14/11 fecha antes de anunciar
+// as finalistas
 const FEEDBACK_DEFAULT_WINDOWS = [
+  { day: '2026-11-12', opens: '2026-11-12T21:00:00-03:00', closes: '2026-11-12T23:59:59-03:00' },
   { day: '2026-11-13', opens: '2026-11-13T19:00:00-03:00', closes: '2026-11-13T23:59:59-03:00' },
   { day: '2026-11-14', opens: '2026-11-14T10:00:00-03:00', closes: '2026-11-14T16:30:00-03:00' },
 ];
@@ -63,6 +65,7 @@ function feedbackAction_(body) {
     const windows = feedbackWindows_();
     const token = String(body.token);
     if (body.action === 'feedback-roster') return json_(feedbackRoster_(book, windows, token));
+    if (body.action === 'feedback-report') return json_(feedbackReport_(book, windows));
     return json_(feedbackSubmit_(book, windows, body));
   } catch (err) {
     if (err && err.feedbackBusy) return json_({ ok: false, error: 'busy' });
@@ -271,6 +274,53 @@ function feedbackLine_(rating, seen) {
     reason: low ? reason : '',
   };
 }
+
+// ---- painel da organização (/sorteio/avaliacoes, atrás do login do sorteio) ----
+
+// tudo que o painel precisa para montar as tabelas: os dias, quem está em cada equipe e cada avaliação gravada. Só sai
+// pela função da Cloudflare com a sessão da organização; contato (e-mail, WhatsApp) não entra
+function feedbackReport_(book, windows) {
+  const sheet = feedbackReady_(book, windows) || feedbackLocked_(() => feedbackSetup_(book, windows));
+  const registrations = book.getSheetByName(REGISTRATIONS_SHEET);
+  if (!hasHeaders_(registrations, REGISTRATION_HEADERS)) return { ok: false, error: 'server' };
+  const people = readRows_(registrations, REGISTRATION_HEADERS.length)
+    .filter(
+      (r) =>
+        drawText_(r[RCOL.protocol]) && drawText_(r[RCOL.team]) && drawStatus_(r[RCOL.status]) !== 'cancelado',
+    )
+    .map((r) => ({
+      protocol: drawText_(r[RCOL.protocol]),
+      name: drawText_(r[RCOL.name]),
+      team: drawText_(r[RCOL.team]),
+    }));
+  const days = {};
+  windows.forEach((w) => {
+    days[feedbackDayValue_(w.label)] = w.day;
+  });
+  const ratings = readRows_(sheet, FEEDBACK_HEADERS.length)
+    .filter((r) => days[String(r[FBCOL.day])] && drawText_(r[FBCOL.targetProtocol]))
+    .map((r) => {
+      const score = r[FBCOL.score];
+      const absent = String(score) === FEEDBACK_ABSENT;
+      const sent = r[FBCOL.sentAt];
+      return {
+        day: days[String(r[FBCOL.day])],
+        team: feedbackPlain_(r[FBCOL.team]),
+        target: feedbackPlain_(r[FBCOL.target]),
+        targetProtocol: drawText_(r[FBCOL.targetProtocol]),
+        author: feedbackPlain_(r[FBCOL.author]),
+        authorProtocol: drawText_(r[FBCOL.authorProtocol]),
+        stars: absent ? null : Number(score) || null,
+        absent: absent,
+        reason: feedbackPlain_(r[FBCOL.reason]),
+        sentAt: sent instanceof Date ? sent.toISOString() : '',
+      };
+    });
+  return { ok: true, windows: windows, people: people, ratings: ratings };
+}
+
+// tira o apóstrofo que o sheetSafe_ pôs na frente de texto começado por = + - @
+const feedbackPlain_ = (value) => feedbackClean_(value).replace(/^'(?=[=+\-@])/, '');
 
 // ---- abas da organização ----
 

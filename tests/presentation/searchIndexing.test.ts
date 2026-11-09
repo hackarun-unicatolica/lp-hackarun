@@ -57,7 +57,14 @@ describe('páginas escondidas: fora do sitemap e com noindex', () => {
   const read = (path: string) => readFileSync(fileURLToPath(new URL(path, SRC)), 'utf8');
 
   it('o sitemap deixa de fora /equipes (até o sorteio), /autorizacao e o sorteio, com ou sem barra no fim', () => {
-    expect(UNLISTED_PATHS).toEqual(['/equipes', '/autorizacao', '/sorteio', '/sorteio/nomes', '/feedback']);
+    expect(UNLISTED_PATHS).toEqual([
+      '/equipes',
+      '/autorizacao',
+      '/sorteio',
+      '/sorteio/nomes',
+      '/sorteio/avaliacoes',
+      '/feedback',
+    ]);
     expect(isListedInSitemap('https://hackarun.com.br/equipes')).toBe(false);
     expect(isListedInSitemap('https://hackarun.com.br/equipes/')).toBe(false);
     expect(isListedInSitemap('https://hackarun.com.br/autorizacao')).toBe(false);

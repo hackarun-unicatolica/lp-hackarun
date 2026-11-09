@@ -9,7 +9,14 @@ const site = process.env.PUBLIC_SITE_URL || 'https://hackarun.com.br';
 
 // páginas fora do sitemap (também têm noindex no Seo.astro): /equipes fica escondida até o sorteio,
 // /autorizacao é só o modelo para imprimir e /sorteio é da organização (com login)
-export const UNLISTED_PATHS = ['/equipes', '/autorizacao', '/sorteio', '/sorteio/nomes', '/feedback'];
+export const UNLISTED_PATHS = [
+  '/equipes',
+  '/autorizacao',
+  '/sorteio',
+  '/sorteio/nomes',
+  '/sorteio/avaliacoes',
+  '/feedback',
+];
 
 // a página entra no sitemap? (o filtro recebe a URL completa)
 /** @param {string} page */

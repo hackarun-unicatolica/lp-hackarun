@@ -37,13 +37,16 @@ describe('Apps Script · o que a organização vê na avaliação', () => {
     const script = tabs();
     const sheet = script.tab('Acompanhamento');
     const titles = sheet.rows[0]?.map(String) ?? [];
+    expect(titles).toContain('12/11: avaliou?');
     expect(titles).toContain('13/11: avaliou?');
     expect(titles).toContain('14/11: notas baixas');
     expect(titles.at(-1)).toBe('Total de notas baixas');
-    const friday = sheet.formulaAt(2, 4) ?? '';
+    const column = (title: string) => titles.indexOf(title) + 1;
+    expect(sheet.formulaAt(2, column('12/11: avaliou?'))).toContain('DATE(2026,11,12)+TIME(23,59,59)');
+    const friday = sheet.formulaAt(2, column('13/11: avaliou?')) ?? '';
     expect(friday).toContain('NÃO AVALIOU');
     expect(friday).toContain('DATE(2026,11,13)+TIME(23,59,59)');
-    expect(sheet.formulaAt(2, 7)).toContain('DATE(2026,11,14)+TIME(16,30,0)');
+    expect(sheet.formulaAt(2, column('14/11: avaliou?'))).toContain('DATE(2026,11,14)+TIME(16,30,0)');
   });
 
   it('destaca as linhas ruins e esconde a coluna técnica', () => {

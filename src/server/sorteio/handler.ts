@@ -1,4 +1,5 @@
-// porteiro do sorteio no site: /sorteio e /sorteio/nomes só abrem com o login da organização; /api/sorteio repassa
+// porteiro do sorteio no site: /sorteio, /sorteio/nomes e /sorteio/avaliacoes (painel das avaliações entre colegas) só
+// abrem com o login da organização; /api/sorteio repassa
 // as ações do sorteio ao Apps Script com a chave secreta (que nunca chega ao navegador). Desligado = 404
 import { MAX_FAILURES, type AttemptStore } from './attempts';
 import { readConfig, type SorteioConfig, type SorteioEnv } from './config';
@@ -13,9 +14,10 @@ import {
   validSession,
 } from './session';
 
-export const DRAW_PAGES = ['/sorteio', '/sorteio/nomes'] as const;
+export const DRAW_PAGES = ['/sorteio', '/sorteio/nomes', '/sorteio/avaliacoes'] as const;
 export const API_PATH = '/api/sorteio';
-const ALLOWED_ACTIONS = ['draw-list', 'draw-save', 'draw-names', 'draw-publish'];
+// feedback-report = dados do painel de avaliações (só leitura)
+const ALLOWED_ACTIONS = ['draw-list', 'draw-save', 'draw-names', 'draw-publish', 'feedback-report'];
 const MAX_BODY_BYTES = 256 * 1024;
 const UPSTREAM_TIMEOUT_MS = 30_000;
 // atraso fixo em login errado: tentativa em massa fica lenta

@@ -38,7 +38,9 @@ describe('Apps Script · avaliação entre colegas', () => {
   });
 
   it.each([
-    ['12/11, noite do sorteio', '2026-11-12T21:00:00-03:00', false],
+    ['12/11 durante o sorteio', '2026-11-12T20:59:59-03:00', false],
+    ['12/11 depois do sorteio', '2026-11-12T21:00:00-03:00', true],
+    ['12/11 no último segundo', '2026-11-12T23:59:59-03:00', true],
     ['13/11 antes de abrir', '2026-11-13T18:59:59-03:00', false],
     ['13/11 na abertura', '2026-11-13T19:00:00-03:00', true],
     ['13/11 no último segundo', '2026-11-13T23:59:59-03:00', true],

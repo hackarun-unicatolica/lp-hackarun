@@ -1,0 +1,70 @@
+---
+// painel de avaliações da organização: o que os participantes marcaram em /feedback, por dia, no jeito de planilha.
+// Fica atrás do mesmo login do sorteio (functions/_middleware.ts); fora do menu e do sitemap, noindex
+import displayFont from '../../assets/fonts/orbitron-pt-latin-wght.woff2?url';
+import bodyFont from '@fontsource-variable/montserrat/files/montserrat-latin-wght-normal.woff2?url';
+import '@presentation/styles/tokens.css';
+import '@presentation/feedback/panel.css';
+
+const fontFaces = [
+  `@font-face{font-family:'Orbitron Variable';font-style:normal;font-display:swap;font-weight:400 900;src:url(${displayFont}) format('woff2')}`,
+  `@font-face{font-family:'Montserrat Variable';font-style:normal;font-display:swap;font-weight:100 900;src:url(${bodyFont}) format('woff2')}`,
+].join('');
+---
+
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Avaliações das equipes · HackaRun 2026</title>
+    <style set:html={fontFaces}></style>
+  </head>
+  <body class="fbp">
+    <header class="fbp__top">
+      <div>
+        <p class="fbp__eyebrow">// HackaRun 2026 · organização</p>
+        <h1>Avaliações das equipes</h1>
+        <p class="fbp__lead">
+          O que cada participante marcou sobre os colegas. Só a organização vê, e não entra na nota.
+        </p>
+      </div>
+      <div class="fbp__links">
+        <a class="btn btn--ghost btn--small" href="/sorteio">
+          Sorteio
+        </a>
+        <form method="post" action="/sorteio/sair">
+          <button class="btn btn--ghost btn--small" type="submit">
+            Sair
+          </button>
+        </form>
+      </div>
+    </header>
+
+    <div class="fbp__bar">
+      <nav class="tabs" role="tablist" aria-label="Dias" data-tabs></nav>
+      <label class="fbp__filter">
+        <span>Equipe</span>
+        <select data-team>
+          <option value="">Todas as equipes</option>
+        </select>
+      </label>
+      <button class="btn btn--small" type="button" data-refresh>
+        Atualizar
+      </button>
+      <p class="fbp__status" data-status role="status">
+        Carregando…
+      </p>
+    </div>
+
+    <main data-content></main>
+
+    <script>
+      import { SiteFeedbackReportGateway } from '@infrastructure/feedback/SiteFeedbackReportGateway';
+      import { mountFeedbackPanel } from '@presentation/views/feedback/mountFeedbackPanel';
+
+      mountFeedbackPanel(new SiteFeedbackReportGateway());
+    </script>
+  </body>
+</html>
