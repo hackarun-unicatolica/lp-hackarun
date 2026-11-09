@@ -171,7 +171,11 @@ export function mountFeedback(gateway: FeedbackGateway, root: ParentNode = docum
       progress.textContent = `${ready} de ${total} ${total === 1 ? 'colega avaliado' : 'colegas avaliados'}`;
       cards.forEach((refs, id) => updateCard(id, refs, state));
       submit.disabled = state.busy;
-      submit.textContent = state.busy ? 'Enviando…' : 'Enviar avaliação';
+      submit.textContent = state.queued
+        ? 'Na fila, não feche a página…'
+        : state.busy
+          ? 'Enviando…'
+          : 'Enviar avaliação';
       rateError.textContent = state.error ?? '';
       // acabou de apontar o que falta: leva até o primeiro colega com problema
       const firstProblem = state.colleagues.find((c) => state.problems[c.id] && !previousProblems[c.id]);
