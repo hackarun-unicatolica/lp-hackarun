@@ -34,7 +34,7 @@ export type ConfigState =
 const text = (value: string | undefined) => (value ?? '').trim();
 
 // https sempre; http só para o próprio computador (teste local com o wrangler apontando para a cópia de teste)
-const validEndpoint = (url: string) =>
+export const validEndpoint = (url: string): boolean =>
   url.startsWith('https://') || /^http:\/\/(127\.0\.0\.1|localhost)(:\d+)?\//.test(url);
 
 export function readConfig(env: SorteioEnv): ConfigState {

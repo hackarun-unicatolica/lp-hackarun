@@ -1,5 +1,16 @@
 {
   "version": 1,
-  "include": ["/sorteio", "/sorteio/*", "/sorteio.html", "/api/sorteio", "/api/sorteio/*", "/api/equipes"],
+  "include": [
+    "/sorteio",
+    "/sorteio/*",
+    "/sorteio.html",
+    "/api/sorteio",
+    "/api/sorteio/*",
+    "/api/equipes",
+    "/feedback",
+    "/feedback/*",
+    "/feedback.html",
+    "/api/feedback/*"
+  ],
   "exclude": []
 }
