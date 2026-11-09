@@ -30,7 +30,7 @@
   ],
   "registration": {
     "endpoint": "",
-    "closesAt": "2026-11-08T23:59:00-03:00",
+    "closesAt": "2026-11-08T22:20:00-03:00",
     "capacity": null,
     "teamSize": { "min": 4, "max": 5 }
   },
