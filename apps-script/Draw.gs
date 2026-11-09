@@ -25,10 +25,13 @@ const DRAW_ARTWORK_URL =
 const DRAW_TEST_SHEET = /c[oó]pia|teste/i;
 const DRAW_GROUP_TITLE = 'Menina';
 const DRAW_GROUP_OPTIONS = ['sim', 'não', 'conferir'];
-const DRAW_GROUP_OTHER = /^(joshua|josua|luca|lucca|gianluca|nicola|nikola|mustafa|jonata|jonatha|isaia|jeremia|ezequia|barnaba|kaua|caua)$/;
-const DRAW_GROUP_EXTRA = /^(beatriz|raquel|isabel|ester|esther|rute|ruth|carmen|ingrid|kelly|kelli|thais|tais|lais|agnes|ines|mirian|miriam|myriam|yasmin|yasmim|jasmin|jasmine|vivian|emily|emilly|emilli|emilie|evelyn|evellyn|jocelyn|nicole|nicolle|sarah)$/;
-const DRAW_GROUP_ENDINGS = /(ane|ene|elle|ele|ine|yne|ice|ise|ete|ette|ilde|any|anny|elly|illy)$/;
-const DRAW_GROUP_UNSURE = /^(alex|ariel|darci|darcy|jordan|andrea|sasha|juracy|jaci|dominique|kim|cris|robin|taylor|morgan|valdeci|noa|ira|iran|isa|lua|eri|yuri|iuri|gabi|rafa|jean|mika|elis|deni|rene|renee)$/;
+const DRAW_GROUP_OTHER =
+  /^(joshua|josua|luca|lucca|gianluca|nicola|nikola|mustafa|jonata|jonatha|isaia|jeremia|ezequia|barnaba|kaua|caua)$/;
+const DRAW_GROUP_EXTRA =
+  /^(stefani|stephani|beatriz|raquel|isabel|ester|esther|rute|ruth|carmen|ingrid|kelly|kelli|thais|tais|lais|agnes|ines|mirian|miriam|myriam|yasmin|yasmim|jasmin|jasmine|vivian|emily|emilly|emilli|emilie|evelyn|evellyn|jocelyn|nicole|nicolle|sarah)$/;
+const DRAW_GROUP_ENDINGS = /(ane|ene|elle|ele|ine|yne|ice|ise|ete|ette|ilde|any|anny|iny|elly|illy|olly)$/;
+const DRAW_GROUP_UNSURE =
+  /^(alex|ariel|darci|darcy|jordan|andrea|sasha|juracy|jaci|dominique|kim|cris|robin|taylor|morgan|valdeci|noa|ira|iran|isa|lua|eri|yuri|iuri|gabi|rafa|jean|mika|elis|deni|rene|renee)$/;
 
 function drawAction_(body) {
   if (!drawAuthorized_(body.token)) return json_({ ok: false, error: 'unauthorized' });
@@ -140,7 +143,10 @@ function drawCreateGroupColumn_(sheet, column) {
   const body = sheet.getRange(2, column, sheet.getMaxRows() - 1, 1);
   body.setHorizontalAlignment('center');
   body.setDataValidation(
-    SpreadsheetApp.newDataValidation().requireValueInList(DRAW_GROUP_OPTIONS, true).setAllowInvalid(false).build(),
+    SpreadsheetApp.newDataValidation()
+      .requireValueInList(DRAW_GROUP_OPTIONS, true)
+      .setAllowInvalid(false)
+      .build(),
   );
   const rule = SpreadsheetApp.newConditionalFormatRule()
     .whenFormulaSatisfied('=$' + colLetter_(column - 1) + '2="conferir"')
