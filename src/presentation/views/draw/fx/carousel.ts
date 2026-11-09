@@ -1,7 +1,6 @@
-// carrossel do sorteio dos nomes: as equipes passam uma de cada vez e o card do CENTRO é o foco (grande e nítido);
-// quem já passou (esquerda) e quem está chegando (direita) ficam menores e desfocados. O card que chega mostra só a
-// pokébola (não entrega o resultado); no centro ele vira a silhueta do Pokémon, ganha cor num flash e mostra o nome
-// da equipe e os integrantes. "Revelar tudo" encerra na hora
+// popup para apresentar as equipes depois do sorteio dos nomes: uma equipe por vez no centro, com os integrantes, e as
+// vizinhas desfocadas dos lados. A organização passa com "Avançar" e "Voltar" (ou as setas do teclado) enquanto chama
+// cada equipe à frente
 import { h } from '../dom';
 
 export interface CarouselItem {
@@ -13,18 +12,13 @@ export interface CarouselItem {
   members: readonly string[];
 }
 
-export interface Carousel {
-  // passa as equipes uma a uma (`stepMs` cada) e resolve quando acaba ou quando alguém pede `stop`
-  play(items: readonly CarouselItem[], stepMs: number): Promise<void>;
-  stop(): void;
+export interface TeamViewer {
+  open(items: readonly CarouselItem[], start?: number): void;
+  close(): void;
 }
 
-// em que ponto do tempo de cada equipe a silhueta e a revelação acontecem (fração do passo)
-const GUESS_AT = 0.2;
-const REVEAL_AT = 0.5;
-const MYSTERY = 'Quem é esse Pokémon?';
-
 type Slot = 'gone-left' | 'prev' | 'current' | 'next' | 'gone-right';
+const SLOTS: readonly Slot[] = ['gone-left', 'prev', 'current', 'next', 'gone-right'];
 
 const slotFor = (offset: number): Slot => {
   if (offset < -1) return 'gone-left';
@@ -35,142 +29,88 @@ const slotFor = (offset: number): Slot => {
 };
 
 function makeCard(item: CarouselItem): HTMLElement {
-  const logo = h(
-    'div',
-    { class: 'carousel__logo' },
-    h('span', { class: 'ball', 'aria-hidden': 'true' }, h('span', { class: 'ball__button' })),
-  );
-  const name = h('h2', { class: 'carousel__name' }, MYSTERY);
-  const members = h('ul', { class: 'carousel__members' }, ...item.members.map((m) => h('li', {}, m)));
   const card = h(
     'article',
-    { class: 'carousel__card is-gone-right', 'data-team': String(item.number) },
+    { class: 'carousel__card', 'data-team': String(item.number) },
     h('p', { class: 'carousel__team' }, `Equipe ${item.number}`),
-    logo,
-    name,
-    members,
+    h(
+      'div',
+      { class: 'carousel__logo' },
+      h('img', { src: item.image, alt: '', width: '320', height: '320' }),
+    ),
+    h('h2', { class: 'carousel__name' }, item.name),
+    h('ul', { class: 'carousel__members' }, ...item.members.map((m) => h('li', {}, m))),
   );
   card.style.setProperty('--type', item.color);
   return card;
 }
 
-export function createCarousel(onSkip: () => void): Carousel {
+export function createTeamViewer(): TeamViewer {
   let overlay: HTMLElement | null = null;
-  let timers: number[] = [];
-  let finish: (() => void) | null = null;
-
-  const clearTimers = () => {
-    timers.forEach((t) => window.clearTimeout(t));
-    timers = [];
-  };
+  let onKey: ((event: KeyboardEvent) => void) | null = null;
 
   const close = () => {
-    clearTimers();
     overlay?.remove();
     overlay = null;
-    const done = finish;
-    finish = null;
-    done?.();
+    if (onKey) document.removeEventListener('keydown', onKey);
+    onKey = null;
   };
 
   return {
-    play(items, stepMs) {
+    close,
+    open(items, start = 0) {
       close();
-      if (items.length === 0) return Promise.resolve();
-      const skip = h('button', { class: 'btn btn--ghost carousel__skip', type: 'button' }, 'Revelar tudo');
-      skip.addEventListener('click', onSkip);
-      const counter = h('p', { class: 'carousel__counter', 'aria-hidden': 'true' });
-      const live = h('p', { class: 'sr-only', 'aria-live': 'polite' });
+      if (items.length === 0) return;
+      const counter = h('p', { class: 'carousel__counter', 'aria-live': 'polite' });
       const stage = h('div', { class: 'carousel__stage' });
+      const back = h('button', { class: 'btn btn--ghost btn--xl', type: 'button' }, 'Voltar');
+      const forward = h('button', { class: 'btn btn--primary btn--xl', type: 'button' }, 'Avançar');
+      const exit = h('button', { class: 'btn btn--ghost carousel__close', type: 'button' }, 'Fechar');
+      const cards = items.map(makeCard);
+      stage.append(...cards);
       overlay = h(
         'div',
-        {
-          class: 'carousel',
-          role: 'dialog',
-          'aria-modal': 'true',
-          'aria-label': 'Sorteio do nome das equipes',
-        },
+        { class: 'carousel', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Apresentação das equipes' },
         counter,
         stage,
-        live,
-        skip,
+        h('div', { class: 'carousel__nav' }, back, forward),
+        exit,
       );
       document.body.append(overlay);
 
-      const cards = new Map<number, HTMLElement>();
-      const cardAt = (index: number): HTMLElement | null => {
-        const item = items[index];
-        if (!item) return null;
-        let card = cards.get(index);
-        if (!card) {
-          card = makeCard(item);
-          cards.set(index, card);
-          stage.append(card);
-          // força o layout: o card nasce fora da tela, à direita, e só então desliza para o lugar
-          void card.offsetWidth;
-        }
-        return card;
+      let current = Math.min(Math.max(start, 0), items.length - 1);
+      const last = items.length - 1;
+      const show = () => {
+        cards.forEach((card, index) => {
+          const slot = slotFor(index - current);
+          for (const s of SLOTS) card.classList.toggle(`is-${s}`, s === slot);
+          card.classList.toggle('is-revealed', slot === 'current');
+        });
+        const item = items[current] as CarouselItem;
+        counter.textContent = `Equipe ${item.number} · ${current + 1} de ${items.length}`;
+        back.disabled = current === 0;
+        forward.textContent = current === last ? 'Concluir' : 'Avançar';
       };
-
-      const setSlot = (card: HTMLElement, slot: Slot) => {
-        for (const s of ['gone-left', 'prev', 'current', 'next', 'gone-right'] as const) {
-          card.classList.toggle(`is-${s}`, s === slot);
-        }
-      };
-
-      const place = (current: number) => {
-        for (const index of [current - 1, current, current + 1]) cardAt(index);
-        for (const [index, card] of cards) {
-          setSlot(card, slotFor(index - current));
-          // dois à esquerda já saíram da tela: tira do DOM depois da transição
-          if (index < current - 2) {
-            cards.delete(index);
-            timers.push(window.setTimeout(() => card.remove(), 800));
-          }
-        }
-      };
-
-      const reveal = (index: number) => {
-        const item = items[index];
-        const card = cards.get(index);
-        if (!item || !card) return;
-        const logo = card.querySelector('.carousel__logo');
-        const name = card.querySelector('.carousel__name');
-        const img = h('img', { src: item.image, alt: '', width: '320', height: '320' });
-        logo?.replaceChildren(img);
-        card.classList.add('is-guessing');
-        if (name) name.textContent = MYSTERY;
-        timers.push(
-          window.setTimeout(
-            () => {
-              card.classList.remove('is-guessing');
-              card.classList.add('is-revealed');
-              if (name) name.textContent = item.name;
-              live.textContent = `${item.name}. ${item.members.join(', ')}.`;
-            },
-            Math.round(stepMs * (REVEAL_AT - GUESS_AT)),
-          ),
-        );
-      };
-
-      const step = (index: number) => {
-        if (index >= items.length) {
+      const go = (delta: number) => {
+        if (current + delta > last) {
           close();
           return;
         }
-        counter.textContent = `Equipe ${items[index]?.number} · ${index + 1} de ${items.length}`;
-        place(index);
-        timers.push(window.setTimeout(() => reveal(index), Math.round(stepMs * GUESS_AT)));
-        timers.push(window.setTimeout(() => step(index + 1), stepMs));
+        current = Math.max(0, current + delta);
+        show();
       };
 
-      return new Promise<void>((resolve) => {
-        finish = resolve;
-        step(0);
-      });
-    },
-    stop() {
-      close();
+      back.addEventListener('click', () => go(-1));
+      forward.addEventListener('click', () => go(1));
+      exit.addEventListener('click', close);
+      onKey = (event) => {
+        if (event.key === 'ArrowRight') go(1);
+        else if (event.key === 'ArrowLeft') go(-1);
+        else if (event.key === 'Escape') close();
+      };
+      document.addEventListener('keydown', onKey);
+      show();
+      forward.focus();
     },
   };
 }

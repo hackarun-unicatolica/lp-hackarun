@@ -1094,7 +1094,7 @@ body.presenting .btn--test {
   inset: 0;
   z-index: 42;
   display: grid;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: auto 1fr auto;
   justify-items: center;
   padding: 1.25rem 1rem 1rem;
   overflow: hidden;
@@ -1270,15 +1270,32 @@ body.presenting .btn--test {
   border-radius: 999px;
   background: rgb(130 160 255 / 0.14);
   color: #f2f5ff;
-  font-size: clamp(0.9rem, 1.8vw, 1.1rem);
+  font-size: clamp(1rem, 2vw, 1.35rem);
   font-weight: 600;
 }
 
-.carousel__skip {
-  position: absolute;
-  right: 1.5rem;
-  bottom: 1.5rem;
+.carousel__nav {
+  display: flex;
+  gap: 1rem;
   z-index: 5;
+  padding-top: 0.75rem;
+}
+
+.carousel__close {
+  position: absolute;
+  top: 1rem;
+  right: 1.5rem;
+  z-index: 5;
+}
+
+.review-note {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  border: 1px solid rgb(255 194 74 / 0.5);
+  border-radius: 0.5rem;
+  background: rgb(255 194 74 / 0.12);
+  color: var(--c-gold, #ffc24a);
+  font-weight: 600;
 }
 
 @keyframes carousel-flash {
