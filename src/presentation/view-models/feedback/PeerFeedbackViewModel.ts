@@ -19,6 +19,8 @@ export type FeedbackOutcome = 'sent' | 'already' | 'closed' | 'alone';
 export interface PeerFeedbackState {
   screen: FeedbackScreen;
   busy: boolean;
+  // a planilha está ocupada e o envio segue tentando sozinho
+  queued: boolean;
   error: string | null;
   person: FeedbackPerson | null;
   day: FeedbackDay | null;
@@ -32,6 +34,7 @@ export interface PeerFeedbackState {
 const INITIAL: PeerFeedbackState = {
   screen: 'identify',
   busy: false,
+  queued: false,
   error: null,
   person: null,
   day: null,
@@ -44,8 +47,10 @@ const INITIAL: PeerFeedbackState = {
 
 const UNAVAILABLE = 'Não conseguimos falar com o sistema agora. Tente de novo em instantes.';
 const BUSY = 'Muita gente enviando ao mesmo tempo. Suas respostas continuam aqui: toque em enviar de novo.';
-// planilha ocupada: tenta de novo sozinho antes de pedir um novo toque. Repetir é seguro, ela recusa o segundo envio
-const RETRY_DELAYS_MS = [3000, 6000];
+// planilha ocupada: tenta de novo sozinho por uns 3 minutos antes de pedir um novo toque (no pico, a fila da planilha
+// anda devagar). Repetir é seguro, ela recusa o segundo envio. O sorteio do tempo evita que todos voltem juntos
+const RETRY_DELAYS_MS = [4000, 8000, 12000, 16000, 20000, 25000, 30000, 30000];
+const RETRY_JITTER_MS = 3000;
 
 const emptyRating = (): PeerRating => ({ stars: null, absent: false, reason: '' });
 
@@ -156,9 +161,11 @@ export class PeerFeedbackViewModel {
     let result = await this.gateway.submit(this.ticket, payload);
     for (const delay of RETRY_DELAYS_MS) {
       if (result.kind !== 'busy') break;
-      await this.sleep(delay);
+      this.patch({ queued: true });
+      await this.sleep(delay + Math.random() * RETRY_JITTER_MS);
       result = await this.gateway.submit(this.ticket, payload);
     }
+    this.patch({ queued: false });
 
     switch (result.kind) {
       case 'sent':
