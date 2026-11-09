@@ -146,6 +146,8 @@ export class FakeSheet {
   getName = () => this.name;
   setName = (name: string) => ((this.name = name), this);
   getMaxRows = () => 1000;
+  getMaxColumns = () => 26;
+  insertColumnAfter = () => this;
   readonly hiddenColumns = new Set<number>();
   hideColumns = (col: number) => (this.hiddenColumns.add(col), this);
   getFilter = () => this.filter;

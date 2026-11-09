@@ -23,6 +23,12 @@ const DRAW_ARTWORK_URL =
   'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/';
 // planilha de ensaio: o nome tem "cópia" ou "teste" e as telas do sorteio avisam. A oficial não mostra nada
 const DRAW_TEST_SHEET = /c[oó]pia|teste/i;
+const DRAW_GROUP_TITLE = 'Menina';
+const DRAW_GROUP_OPTIONS = ['sim', 'não', 'conferir'];
+const DRAW_GROUP_OTHER = /^(joshua|josua|luca|lucca|gianluca|nicola|nikola|mustafa|jonata|jonatha|isaia|jeremia|ezequia|barnaba|kaua|caua)$/;
+const DRAW_GROUP_EXTRA = /^(beatriz|raquel|isabel|ester|esther|rute|ruth|carmen|ingrid|kelly|kelli|thais|tais|lais|agnes|ines|mirian|miriam|myriam|yasmin|yasmim|jasmin|jasmine|vivian|emily|emilly|emilli|emilie|evelyn|evellyn|jocelyn|nicole|nicolle|sarah)$/;
+const DRAW_GROUP_ENDINGS = /(ane|ene|elle|ele|ine|yne|ice|ise|ete|ette|ilde|any|anny|elly|illy)$/;
+const DRAW_GROUP_UNSURE = /^(alex|ariel|darci|darcy|jordan|andrea|sasha|juracy|jaci|dominique|kim|cris|robin|taylor|morgan|valdeci|noa|ira|iran|isa|lua|eri|yuri|iuri|gabi|rafa|jean|mika|elis|deni|rene|renee)$/;
 
 function drawAction_(body) {
   if (!drawAuthorized_(body.token)) return json_({ ok: false, error: 'unauthorized' });
@@ -74,6 +80,80 @@ function drawAuthorized_(token) {
   return digest_(String(token || '')) === digest_(expected);
 }
 
+function drawGroupColumn_(sheet) {
+  const width = sheet.getLastColumn();
+  if (width < 1) return 0;
+  return sheet.getRange(1, 1, 1, width).getValues()[0].map(drawText_).indexOf(DRAW_GROUP_TITLE) + 1;
+}
+
+function drawGroupValues_(sheet) {
+  const column = drawGroupColumn_(sheet);
+  const last = sheet.getLastRow();
+  const map = {};
+  if (!column || last < 2) return map;
+  const values = sheet.getRange(2, column, last - 1, 1).getValues();
+  sheet
+    .getRange(2, RCOL.protocol + 1, last - 1, 1)
+    .getValues()
+    .forEach((r, i) => {
+      map[drawText_(r[0])] = drawText_(values[i][0]).toLowerCase();
+    });
+  return map;
+}
+
+function drawGuessGroup_(fullName) {
+  const raw = drawText_(fullName).toLowerCase().split(/\s+/)[0] || '';
+  const first = drawStatus_(raw);
+  if (!first || DRAW_GROUP_UNSURE.test(first)) return 'conferir';
+  if (raw.slice(-1) === 'ã' || DRAW_GROUP_OTHER.test(first)) return 'não';
+  if (first.slice(-1) === 'a' || DRAW_GROUP_EXTRA.test(first) || DRAW_GROUP_ENDINGS.test(first)) return 'sim';
+  return 'não';
+}
+
+// rode no editor: cria a coluna na aba Inscritos e sugere o valor de quem ainda está em branco (o que foi corrigido à
+// mão não muda). Depois é só revisar as linhas marcadas com "conferir"
+function sugerirGrupos() {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(REGISTRATIONS_SHEET);
+  const existing = drawGroupColumn_(sheet);
+  const column = existing || Math.max(sheet.getLastColumn(), REGISTRATION_HEADERS.length) + 1;
+  if (!existing) drawCreateGroupColumn_(sheet, column);
+  const count = sheet.getLastRow() - 1;
+  if (count < 1) return 0;
+  const names = sheet.getRange(2, RCOL.name + 1, count, 1).getValues();
+  const range = sheet.getRange(2, column, count, 1);
+  const filled = range.getValues().map((r, i) => [drawText_(r[0]) || drawGuessGroup_(names[i][0])]);
+  range.setValues(filled);
+  const pending = filled.filter((r) => r[0] === 'conferir').length;
+  console.log('Preenchido: ' + count + ' linhas, ' + pending + ' para conferir');
+  return pending;
+}
+
+function drawCreateGroupColumn_(sheet, column) {
+  if (sheet.getMaxColumns() < column) sheet.insertColumnAfter(sheet.getMaxColumns());
+  sheet
+    .getRange(1, column)
+    .setValue(DRAW_GROUP_TITLE)
+    .setFontWeight('bold')
+    .setFontColor(BRAND.ice)
+    .setBackground(BRAND.night);
+  sheet.setColumnWidth(column, 100);
+  const body = sheet.getRange(2, column, sheet.getMaxRows() - 1, 1);
+  body.setHorizontalAlignment('center');
+  body.setDataValidation(
+    SpreadsheetApp.newDataValidation().requireValueInList(DRAW_GROUP_OPTIONS, true).setAllowInvalid(false).build(),
+  );
+  const rule = SpreadsheetApp.newConditionalFormatRule()
+    .whenFormulaSatisfied('=$' + colLetter_(column - 1) + '2="conferir"')
+    .setBackground('#FFF1CC')
+    .setFontColor('#6B4400')
+    .setRanges([body])
+    .build();
+  sheet.setConditionalFormatRules(sheet.getConditionalFormatRules().concat([rule]));
+  const filter = sheet.getFilter();
+  if (filter) filter.remove();
+  sheet.getRange(1, 1, sheet.getMaxRows(), column).createFilter();
+}
+
 function drawConflict_(message) {
   const err = new Error(message);
   err.drawConflict = true;
@@ -118,6 +198,7 @@ function drawContext_(book) {
     teams: teams,
     draw: draw,
     people: readRows_(registrations, REGISTRATION_HEADERS.length),
+    group: drawGroupValues_(registrations),
     teamRows: drawReadTeamRows_(teams),
     drawRows: readRows_(draw, DRAW_HEADERS.length),
   };
@@ -138,14 +219,19 @@ function drawList_(ctx) {
   const people = ctx.people.filter((r) => drawText_(r[RCOL.protocol]));
   const accredited = people
     .filter((r) => drawStatus_(r[RCOL.status]) === 'credenciado')
-    .map((r) => ({
-      protocol: drawText_(r[RCOL.protocol]),
-      name: drawText_(r[RCOL.name]),
-      profile: drawText_(r[RCOL.profile]),
-      institution: drawText_(r[RCOL.institution]),
-      period: drawText_(r[RCOL.period]),
-      team: drawText_(r[RCOL.team]),
-    }));
+    .map((r) => {
+      const row = {
+        protocol: drawText_(r[RCOL.protocol]),
+        name: drawText_(r[RCOL.name]),
+        profile: drawText_(r[RCOL.profile]),
+        institution: drawText_(r[RCOL.institution]),
+        period: drawText_(r[RCOL.period]),
+        team: drawText_(r[RCOL.team]),
+      };
+      if (ctx.group[row.protocol] === 'sim') row.female = true;
+      if (ctx.group[row.protocol] === 'conferir') row.review = true;
+      return row;
+    });
   const confirmed = ctx.teamRows
     .filter((r) => drawStatus_(r[TCOL.status]) === 'confirmado')
     .map((r) => drawText_(r[TCOL.name]));

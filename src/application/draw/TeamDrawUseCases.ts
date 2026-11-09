@@ -37,6 +37,8 @@ export interface DrawStatus {
   saved: SavedTeam[];
   // planilha de ensaio (nome dela); ausente na oficial
   testLabel?: string | null;
+  // credenciados marcados na planilha para a organização conferir antes do sorteio
+  toReview?: number;
 }
 
 // o que a planilha tem agora: quantos credenciados e se já existe sorteio salvo (as telas abrem mostrando isto)
@@ -53,6 +55,7 @@ export class GetDrawStatus {
       accredited: participants.length,
       saved: [...saved].sort((a, b) => a.number - b.number),
       testLabel,
+      toReview: participants.filter((p) => p.review).length,
     };
   }
 }

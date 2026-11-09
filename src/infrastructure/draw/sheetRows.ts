@@ -14,6 +14,8 @@ export interface AccreditedRow {
   institution: string;
   period: string;
   team: string;
+  female?: boolean;
+  review?: boolean;
 }
 
 // o rótulo da coluna Perfil ("Estuda na UniCatólica") de volta para o perfil do domínio
@@ -39,5 +41,7 @@ export function toParticipant(row: AccreditedRow): DrawParticipant {
     name: row.name,
     level: levelOf(profile, periodFromCell(row.period)),
     institution: institutionOf(profile, row.institution),
+    ...(row.female === true ? { female: true } : {}),
+    ...(row.review === true ? { review: true } : {}),
   };
 }
