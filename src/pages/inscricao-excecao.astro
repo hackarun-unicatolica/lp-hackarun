@@ -1,0 +1,29 @@
+---
+// inscrição por link direto, para casos que a organização liberou depois do prazo: mesma página e mesmo formulário
+// da /inscricao, mas aberto. Sem link no site, fora do sitemap e com noindex. Quem fecha de verdade é o script da
+// planilha: com as inscrições fechadas ele recusa o envio, então o formulário só grava enquanto a organização deixar
+import PageLayout from '@presentation/layouts/PageLayout.astro';
+import SiteHeader from '@presentation/components/layout/SiteHeader.astro';
+import SiteFooter from '@presentation/components/layout/SiteFooter.astro';
+import SubNav from '@presentation/components/layout/SubNav.astro';
+import RegistrationPageSection from '@presentation/sections/RegistrationPageSection.astro';
+import { serverContainer } from '@composition/server';
+import { buildAppConfig } from '@presentation/app/AppConfig';
+import { exceptionRegistration } from '@presentation/components/registration/exceptionWindow';
+import { registrationPageSeo } from '@presentation/components/seo/registrationPageSeo';
+
+const data = await serverContainer().getLandingPage.execute();
+const event = { ...data.event, registration: exceptionRegistration(data.event.registration) };
+
+const page = registrationPageSeo(event.registration.teamSize);
+const seo = { ...page, path: '/inscricao-excecao', noindex: true };
+---
+
+<PageLayout seo={seo} appConfig={buildAppConfig(event)}>
+  <SiteHeader registration={data.event.registration} page="registration" />
+  <main id="conteudo">
+    <SubNav page="registration" />
+    <RegistrationPageSection data={{ ...data, event }} />
+  </main>
+  <SiteFooter data={data} page="registration" />
+</PageLayout>

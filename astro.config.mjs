@@ -16,6 +16,7 @@ export const UNLISTED_PATHS = [
   '/sorteio/nomes',
   '/sorteio/avaliacoes',
   '/feedback',
+  '/inscricao-excecao',
 ];
 
 // a página entra no sitemap? (o filtro recebe a URL completa)
