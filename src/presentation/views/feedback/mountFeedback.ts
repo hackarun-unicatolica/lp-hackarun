@@ -10,6 +10,7 @@ import {
   type RatingProblem,
 } from '@domain/value-objects/PeerReview';
 import { untilText, whenText } from '@presentation/formatters/feedbackTime';
+import { maskPhoneInput } from '@presentation/formatters/phoneMask';
 import { personName } from '@presentation/formatters/personName';
 import {
   PeerFeedbackViewModel,
@@ -189,6 +190,13 @@ export function mountFeedback(gateway: FeedbackGateway, root: ParentNode = docum
       outcomeText.textContent = OUTCOME_TEXT[state.outcome](state.next);
     }
   };
+
+  const whatsapp = mustFind<HTMLInputElement>('input[name="whatsapp"]', form);
+  whatsapp.addEventListener('input', () => {
+    const masked = maskPhoneInput(whatsapp.value, whatsapp.selectionStart ?? whatsapp.value.length);
+    whatsapp.value = masked.value;
+    whatsapp.setSelectionRange(masked.caret, masked.caret);
+  });
 
   vm.state.subscribe(render);
   form.addEventListener('submit', (event) => {

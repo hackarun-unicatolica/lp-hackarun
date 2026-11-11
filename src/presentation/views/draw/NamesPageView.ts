@@ -13,7 +13,7 @@ import { prefersReducedMotion, rowSchedule, typeColor } from './fx/timing';
 const SPIN_MS = 90;
 const AUTO_RETRY_MS = 4000;
 
-// 2ª tela do sorteio: "Quem é esse Pokémon?". Enquanto a planilha grava, silhuetas passam rápido; depois cada card da
+// 2ª tela do sorteio: os Pokémon das equipes. Enquanto a planilha grava, silhuetas passam rápido; depois cada card da
 // grade mostra a silhueta, ganha cor e o nome da equipe, um depois do outro. "Revelar tudo" pula para o fim
 export function mountNamesPage(services: DrawServices, root: ParentNode = document): TeamNamesViewModel {
   const { catalog } = services;
@@ -85,11 +85,7 @@ export function mountNamesPage(services: DrawServices, root: ParentNode = docume
             ? h('img', { src: pokemonImage(pokemon.id), alt: pokemon.name, width: '160', height: '160' })
             : ball(),
       ),
-      h(
-        'h3',
-        { class: 'poke__name' },
-        spinning ? 'Quem é esse Pokémon?' : pokemon ? team.name : `Equipe ${team.number}`,
-      ),
+      h('h3', { class: 'poke__name' }, pokemon && !spinning ? team.name : `Equipe ${team.number}`),
       h(
         'details',
         { class: 'poke__members' },
