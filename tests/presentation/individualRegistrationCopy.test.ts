@@ -31,14 +31,12 @@ describe('FAQ com as regras do regulamento', () => {
     }
   });
 
-  it('inscrição individual, de 19/10 a 08/11, sem número de vagas e sem garantia de equipe', () => {
+  it('inscrições encerradas: foram de 19/10 a 08/11 e o sorteio é só com quem estiver presente', () => {
     const signup = answer('signup');
-    expect(signup).toContain('individual');
     expect(signup).toContain('19/10 a 08/11');
-    // sem limite por enquanto: o site não anuncia número de vagas
+    expect(signup).toContain('encerradas');
     expect(signup).not.toMatch(/\d+\s+vagas/);
-    expect(signup).toContain('não garante vaga');
-    expect(signup).toContain('WhatsApp');
+    expect(signup).toContain('presente e credenciado');
   });
 
   it('formação das equipes: sorteio presencial em 12/11, 19h15 às 19h35, 4 de preferência, até 5', () => {

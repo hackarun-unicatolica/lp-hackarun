@@ -5,7 +5,7 @@ export const REGISTRATION_PAGE_PATH = '/inscricao';
 export function registrationPageSeo(teamSize: { min: number; max: number }) {
   return {
     title: 'Inscrição individual · HackaRun 2026',
-    description: `Inscreva-se no hackathon do HackaRun 2026, em Palmas, de 19/10 a 08/11. Aberto a estudantes, profissionais e entusiastas. Equipes de até ${teamSize.max} por sorteio.`,
+    description: `Inscrição individual no hackathon do HackaRun 2026, em Palmas, de 19/10 a 08/11 (encerrada). Equipes de até ${teamSize.max} por sorteio presencial.`,
     path: REGISTRATION_PAGE_PATH,
   };
 }

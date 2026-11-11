@@ -37,7 +37,7 @@ describe('programação oficial (event.json)', () => {
     expect(block?.place).toBe('Auditório do Bloco II');
     expect(block?.audience).toBe('open');
     expect(block?.activities.map((a) => [a.title, a.slot.start, a.slot.end])).toEqual([
-      ['De onde surgem as ideias?', '19:00', '19:50'],
+      ['Ideação para Hackathons', '19:00', '19:50'],
       ['Do Commit ao Código: Git e GitHub na prática', '20:00', '20:50'],
       ['Hackeando ideias com IA', '21:00', '21:50'],
     ]);

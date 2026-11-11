@@ -53,19 +53,19 @@
           "venueId": "unicatolica",
           "place": "Auditório do Bloco II",
           "audience": "open",
-          "description": "Três oficinas de capacitação: De onde surgem as ideias?, Do Commit ao Código (Git e GitHub) e Hackeando ideias com IA.",
+          "description": "Três oficinas de capacitação: Ideação para Hackathons, Do Commit ao Código (Git e GitHub) e Hackeando ideias com IA.",
           "activities": [
             {
               "id": "idea-check",
-              "title": "De onde surgem as ideias?",
+              "title": "Ideação para Hackathons",
               "kind": "workshop",
               "start": "19:00",
               "end": "19:50",
-              "details": "Identificação de problemas reais, definição do público-alvo, proposta de valor e análise de viabilidade técnica e comercial, utilizando Canvas simplificado para estruturar e validar ideias.",
+              "details": "Um roteiro simples e rápido sobre o que fazer para conseguir cumprir os objetivos de um hackathon.",
               "speaker": {
-                "name": "Prof. Dr. André Raposo",
-                "photo": "/palestrantes/andre-raposo.jpg",
-                "bio": "Doutor em Gerontologia, com mestrados em Desenvolvimento Regional e Gestão Educacional. Especialista em Educação, Protagonismo e Propósito de Vida, Psicologia Positiva, Psicogerontologia, Liderança Sustentável e Coaching Executivo, Docência Universitária e Marketing Digital. MBA em Liderança e Gestão Inovadora de Instituições Educacionais e MBA em Marketing Digital, Global e de Relacionamento. Graduado em Administração. Professor universitário, mentor de carreira e consultor empresarial."
+                "name": "Prof. Talles Martins Moura",
+                "photo": "/palestrantes/talles-moura.jpg",
+                "bio": "Campeão em dois hackathons e duas game jams.\n\nMestre em Ciência da Computação;\nEspecialista em Engenharia de Software;\nEspecialista em Direito Eletrônico;\nEspecialista em Práticas Educacionais Inovadoras;\nGestor de Tecnologia da Informação."
               }
             },
             {

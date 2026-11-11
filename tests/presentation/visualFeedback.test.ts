@@ -25,7 +25,9 @@ describe('seletor da inscrição', () => {
 describe('página de inscrição', () => {
   it('o regulamento tem um cartão de download logo abaixo do título', () => {
     const page = read('presentation/sections/RegistrationPageSection.astro');
-    expect(page).toContain('<RegulationLink />');
+    expect(page).toContain('<RegulationLink');
+    // com as inscrições encerradas o cartão não pede mais para se inscrever
+    expect(page).toContain("title: 'Leia o regulamento do hackathon'");
     const link = read('presentation/components/registration/RegulationLink.astro');
     expect(link).toContain('download={REGULATION_PDF.fileName}');
     expect(link).toContain('Leia o regulamento antes de se inscrever');
