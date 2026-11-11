@@ -24,14 +24,14 @@ export const TEAM_REVEAL = {
 
 export const NAME_REVEAL = {
   // entre um Pokémon e o próximo da mesma fileira no "Sortear"
-  staggerMs: 240,
-  // a revelação inteira (46 equipes ≈ 15 s); a tela só desce para a fileira seguinte quando a anterior terminou
-  maxTotalMs: 18_000,
+  staggerMs: 90,
+  // a revelação inteira (46 equipes ≈ 10 s); a tela só desce para a fileira seguinte quando a anterior terminou
+  maxTotalMs: 10_000,
   // duração da passagem silhueta -> cor (bate com o CSS .poke--reveal)
-  revealMs: 1100,
+  revealMs: 700,
   // tempo da rolagem até a próxima fileira, antes de ela começar a ser revelada
-  scrollMs: 450,
-  minStaggerMs: 60,
+  scrollMs: 350,
+  minStaggerMs: 40,
 } as const;
 
 export interface RowTiming {
