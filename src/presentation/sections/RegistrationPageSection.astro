@@ -13,6 +13,7 @@ import { ScheduleLookup } from '@presentation/formatters/ScheduleLookup';
 import SectionHeader from './shared/SectionHeader.astro';
 import RegistrationBrief from './registration/RegistrationBrief.astro';
 import RegistrationBriefToggle from './registration/RegistrationBriefToggle.astro';
+import ClosedBrief from './registration/ClosedBrief.astro';
 import './sections.css';
 
 interface Props {
@@ -26,6 +27,17 @@ const { status, isOpen } = formStatus(registration);
 const lookup = new ScheduleLookup(schedule);
 const draw = lookup.activity('teams-and-mentors');
 const drawAt = draw ? `${lookup.shortDate(draw.day)}, às ${lookup.startOf(draw)}` : null;
+// inscrições fechadas: nada de "garanta sua vaga" nem "antes de se inscrever"; fica o que serve a quem já se inscreveu
+const closed = registration.status === 'closed';
+const heading = closed
+  ? {
+      title: 'Inscrições <em>encerradas</em>',
+      lead: `As inscrições foram de 19/10 a 08/11. Quem se inscreveu forma equipe no sorteio presencial${drawAt ? `, em ${drawAt}` : ''}.`,
+    }
+  : {
+      title: 'Garanta sua <em>vaga</em>',
+      lead: 'Aberta a estudantes de qualquer instituição, profissionais e entusiastas de tecnologia. Você se inscreve sozinho e as equipes são formadas no sorteio.',
+    };
 ---
 
 <section class="section signup tone-cyan" id="cadastro" aria-labelledby="cadastro-title">
@@ -39,10 +51,10 @@ const drawAt = draw ? `${lookup.shortDate(draw.day)}, às ${lookup.startOf(draw)
           size="lg"
           code="IN"
           eyebrow="Inscrição individual"
-          title="Garanta sua <em>vaga</em>"
-          lead="Aberta a estudantes de qualquer instituição, profissionais e entusiastas de tecnologia. Você se inscreve sozinho e as equipes são formadas no sorteio."
+          title={heading.title}
+          lead={heading.lead}
         />
-        <RegulationLink />
+        <RegulationLink {...(closed && { title: 'Leia o regulamento do hackathon' })} />
       </div>
       <RegistrationStatus
         status={status}
@@ -54,8 +66,14 @@ const drawAt = draw ? `${lookup.shortDate(draw.day)}, às ${lookup.startOf(draw)
     <div class="signup__layout">
       {/* data-reg-aside: some com a inscrição enviada (a lista e as etapas já não servem) */}
       <aside class="signup__aside" aria-label="Antes de começar" data-reg-aside>
-        <RegistrationBrief teamSize={registration.teamSize} drawAt={drawAt} />
-        <RegistrationBriefToggle teamSize={registration.teamSize} drawAt={drawAt} />
+        {closed ? (
+          <ClosedBrief drawAt={drawAt} />
+        ) : (
+          <>
+            <RegistrationBrief teamSize={registration.teamSize} drawAt={drawAt} />
+            <RegistrationBriefToggle teamSize={registration.teamSize} drawAt={drawAt} />
+          </>
+        )}
         {isOpen && <FormProgress />}
       </aside>
       <div class="signup__panel sx-glass sx-corners" id="formulario">

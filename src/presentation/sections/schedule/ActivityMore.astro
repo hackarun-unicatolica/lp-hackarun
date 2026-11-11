@@ -34,7 +34,9 @@ const label = activity.kind === 'workshop' ? 'Miniementa' : 'Detalhes';
       {speaker && (
         <>
           <p class="more__caption">{speaker.name ? `Sobre ${speaker.name}` : 'Sobre o palestrante'}</p>
-          <p class:list={[!speaker.bio && 'more__pending']}>{speaker.bio ?? 'Mini currículo em breve.'}</p>
+          <p class:list={['more__bio', !speaker.bio && 'more__pending']}>
+            {speaker.bio ?? 'Mini currículo em breve.'}
+          </p>
         </>
       )}
     </div>
@@ -142,6 +144,11 @@ const label = activity.kind === 'workshop' ? 'Miniementa' : 'Detalhes';
     font-size: var(--fs-hud);
     letter-spacing: var(--tracking-hud);
     text-transform: uppercase;
+  }
+
+  /* mini currículo com quebras de linha (uma formação por linha) */
+  .more__bio {
+    white-space: pre-line;
   }
 
   .more__pending {

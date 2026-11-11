@@ -15,7 +15,7 @@
     "id": "who",
     "category": "Evento",
     "question": "Quem pode participar?",
-    "answer": "As oficinas do dia 11/11 recebem estudantes da UniCatólica e de outras instituições, profissionais e entusiastas de tecnologia. O hackathon é aberto aos mesmos públicos, com inscrição individual. Quem tem menos de 18 anos participa com a autorização do responsável."
+    "answer": "As oficinas do dia 11/11 recebem estudantes da UniCatólica e de outras instituições, profissionais e entusiastas de tecnologia. O hackathon foi aberto aos mesmos públicos, com inscrição individual, encerrada em 08/11. Quem tem menos de 18 anos participa com a autorização do responsável."
   },
   {
     "id": "experience",
@@ -27,7 +27,7 @@
     "id": "workshops",
     "category": "Programação aberta",
     "question": "Quais oficinas vão acontecer?",
-    "answer": "São 3 oficinas de capacitação, todas em 11/11, no Auditório do Bloco II: De onde surgem as ideias? (19h, com o Prof. Dr. André Raposo), Do Commit ao Código: Git e GitHub na prática (20h) e Hackeando ideias com IA (21h, com o Prof. Msc. Silvano Malfatti). As miniementas estão na programação."
+    "answer": "São 3 oficinas de capacitação, todas em 11/11, no Auditório do Bloco II: Ideação para Hackathons (19h, com o Prof. Talles Martins Moura), Do Commit ao Código: Git e GitHub na prática (20h) e Hackeando ideias com IA (21h, com o Prof. Msc. Silvano Malfatti). As miniementas estão na programação."
   },
   {
     "id": "race",
@@ -68,8 +68,8 @@
   {
     "id": "signup",
     "category": "Inscrição",
-    "question": "Como faço a inscrição no hackathon?",
-    "answer": "Pela página de inscrição do site oficial, de 19/10 a 08/11. A inscrição é individual: cada pessoa preenche a própria, com nome completo, e-mail, WhatsApp e se estuda atualmente (com curso, período e instituição, quando for o caso). A inscrição não garante vaga numa equipe: só participa do sorteio quem estiver presente e credenciado em 12/11."
+    "question": "Ainda dá para se inscrever no hackathon?",
+    "answer": "Não. As inscrições foram de 19/10 a 08/11, pelo site oficial, e já estão encerradas. Quem se inscreveu participa do sorteio das equipes se estiver presente e credenciado em 12/11. As oficinas de 11/11 continuam abertas ao público."
   },
   {
     "id": "teams",
@@ -81,7 +81,7 @@
     "id": "minors",
     "category": "Inscrição",
     "question": "Tenho menos de 18 anos. Posso participar?",
-    "answer": "Pode. Faça a inscrição normalmente e entregue no credenciamento, em 12/11, a autorização assinada pelo responsável legal, exigida pelo item 2.5 do regulamento."
+    "answer": "Pode, se fez a inscrição até 08/11. Entregue no credenciamento, em 12/11, a autorização assinada pelo responsável legal, exigida pelo item 2.5 do regulamento."
   },
   {
     "id": "contact",

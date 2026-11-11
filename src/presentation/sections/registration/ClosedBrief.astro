@@ -1,0 +1,105 @@
+---
+// painel lateral da /inscricao com as inscrições encerradas: troca o "antes de se inscrever" pelo que ainda serve a
+// quem já se inscreveu (presença no sorteio, autorização de menor, por onde chegam os avisos). Aparece em todas as telas
+import Icon from '@presentation/components/ui/Icon.astro';
+import { AUTHORIZATION_PATH } from '@presentation/components/layout/navLinks';
+
+interface Props {
+  drawAt: string | null;
+}
+
+const { drawAt } = Astro.props;
+---
+
+<div class="closed-brief sx-glass">
+  <h2 class="closed-brief__title" id="closed-brief-title">
+    Já se inscreveu?
+  </h2>
+  <ul class="closed-brief__list" role="list" aria-labelledby="closed-brief-title">
+    <li>
+      <span class="closed-brief__icon" aria-hidden="true">
+        <Icon name="users" size={18} />
+      </span>
+      <span>
+        <strong>Esteja no sorteio{drawAt ? `, em ${drawAt}` : ''}</strong>
+        As equipes são formadas na hora, só com quem estiver presente e credenciado.
+      </span>
+    </li>
+    <li>
+      <span class="closed-brief__icon" aria-hidden="true">
+        <Icon name="shield" size={18} />
+      </span>
+      <span>
+        <strong>Menor de 18 anos</strong>
+        Leve no credenciamento a <a href={AUTHORIZATION_PATH}>autorização assinada pelo responsável</a>.
+      </span>
+    </li>
+    <li>
+      <span class="closed-brief__icon" aria-hidden="true">
+        <Icon name="id-card" size={18} />
+      </span>
+      <span>
+        <strong>Fique de olho nos avisos</strong>
+        Eles chegam pelo e-mail e pelo WhatsApp informados na inscrição.
+      </span>
+    </li>
+  </ul>
+</div>
+
+<style>
+  .closed-brief {
+    display: grid;
+    gap: var(--space-4);
+    padding: var(--space-5);
+  }
+
+  .closed-brief__title {
+    color: var(--ink-cyan);
+    font-family: var(--font-mono);
+    font-size: var(--fs-hud);
+    font-weight: 600;
+    letter-spacing: var(--tracking-hud);
+    line-height: 1.4;
+    text-transform: uppercase;
+  }
+
+  .closed-brief__list {
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  .closed-brief__list li {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--space-3);
+    color: var(--text-muted);
+    font-size: var(--fs-xs);
+    line-height: 1.5;
+  }
+
+  .closed-brief__list strong {
+    display: block;
+    color: var(--text);
+    font-size: var(--fs-sm);
+    line-height: 1.35;
+  }
+
+  .closed-brief__list a {
+    color: var(--ink-cyan);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  /* o mesmo losango de HUD da lista "antes de se inscrever" */
+  .closed-brief__icon {
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border: 1px solid color-mix(in srgb, var(--c-cyan) 50%, transparent);
+    border-radius: 2px;
+    background: color-mix(in srgb, var(--c-cyan) 8%, transparent);
+    color: var(--c-cyan);
+    box-shadow: inset 0 0 12px color-mix(in srgb, var(--c-cyan) 18%, transparent);
+  }
+</style>
