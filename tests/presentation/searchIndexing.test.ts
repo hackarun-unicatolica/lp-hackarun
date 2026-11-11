@@ -64,6 +64,7 @@ describe('páginas escondidas: fora do sitemap e com noindex', () => {
       '/sorteio/nomes',
       '/sorteio/avaliacoes',
       '/feedback',
+      '/inscricao-excecao',
     ]);
     expect(isListedInSitemap('https://hackarun.com.br/equipes')).toBe(false);
     expect(isListedInSitemap('https://hackarun.com.br/equipes/')).toBe(false);
@@ -80,5 +81,6 @@ describe('páginas escondidas: fora do sitemap e com noindex', () => {
     expect(read('presentation/components/seo/teamsPageSeo.ts')).toContain('noindex: true');
     expect(read('pages/equipes.astro')).toContain('...TEAMS_PAGE');
     expect(read('pages/autorizacao.astro')).toContain('noindex: true');
+    expect(read('pages/inscricao-excecao.astro')).toContain('noindex: true');
   });
 });
