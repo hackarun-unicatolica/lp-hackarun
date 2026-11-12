@@ -65,6 +65,7 @@ describe('páginas escondidas: fora do sitemap e com noindex', () => {
       '/sorteio/avaliacoes',
       '/feedback',
       '/inscricao-excecao',
+      '/roleta',
     ]);
     expect(isListedInSitemap('https://hackarun.com.br/equipes')).toBe(false);
     expect(isListedInSitemap('https://hackarun.com.br/equipes/')).toBe(false);
