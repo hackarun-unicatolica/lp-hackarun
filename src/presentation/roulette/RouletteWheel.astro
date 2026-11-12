@@ -1,0 +1,80 @@
+---
+// roda da roleta em SVG: uma fatia por categoria, a primeira centrada no topo (sob o ponteiro). Quem gira é o
+// elemento [data-wheel]; a fatia sorteada vem do ViewModel e a View só leva a roda até ela
+import type { ToolCategory } from '@domain/roulette/ToolCatalog';
+import { point, sliceArc, sliceCenter, slicePath } from '@presentation/views/roulette/wheel';
+
+interface Props {
+  categories: readonly ToolCategory[];
+}
+
+const { categories } = Astro.props;
+const count = categories.length;
+const RADIUS = 97;
+const BAND = 97;
+const RING = 106;
+const LABEL_Y = -72;
+const LINE_HEIGHT = 9.6;
+// marcações do aro, como num mostrador: doze por fatia, e a que cai na divisa entre duas fatias é a maior
+const TICKS_PER_SLICE = 12;
+const tickStep = 360 / (count * TICKS_PER_SLICE);
+const ticks = Array.from({ length: count * TICKS_PER_SLICE }, (_, index) => {
+  const edge = index % TICKS_PER_SLICE === 0;
+  const angle = index * tickStep + tickStep * (TICKS_PER_SLICE / 2);
+  const [x1, y1] = point(angle, edge ? 100.5 : 102);
+  const [x2, y2] = point(angle, edge ? 105.5 : 104.5);
+  return { x1, y1, x2, y2, edge };
+});
+---
+
+<svg
+  class="rl-wheel"
+  data-wheel
+  viewBox="-110 -110 220 220"
+  role="img"
+  aria-label="Roleta com as cinco categorias"
+>
+  <defs>
+    {categories.map((_, index) => (
+      <radialGradient
+        id={`rl-fill-${index + 1}`}
+        class={`rl-tone-${index + 1}`}
+        gradientUnits="userSpaceOnUse"
+        cx="0"
+        cy="0"
+        r={RADIUS}
+      >
+        <stop class="rl-stop-in" offset="0.3" />
+        <stop class="rl-stop-mid" offset="0.7" />
+        <stop class="rl-stop-out" offset="1" />
+      </radialGradient>
+    ))}
+  </defs>
+  <circle class="rl-wheel__ring" r={RING}></circle>
+  {ticks.map((tick) => (
+    <line
+      class:list={['rl-wheel__tick', tick.edge && 'rl-wheel__tick--edge']}
+      x1={tick.x1}
+      y1={tick.y1}
+      x2={tick.x2}
+      y2={tick.y2}
+    />
+  ))}
+  {categories.map((category, index) => (
+    <g class={`rl-slice rl-tone-${index + 1}`} data-slice={category.id}>
+      <path class="rl-slice__fill" d={slicePath(index, count, RADIUS)} fill={`url(#rl-fill-${index + 1})`} />
+      <path class="rl-slice__glow" d={slicePath(index, count, RADIUS)} />
+      <path class="rl-slice__band" d={sliceArc(index, count, BAND)} />
+      <g transform={`rotate(${sliceCenter(index, count)})`}>
+        {category.wheelLabel.map((line, row) => (
+          <text class="rl-slice__label" y={LABEL_Y + row * LINE_HEIGHT} text-anchor="middle">
+            {line}
+          </text>
+        ))}
+      </g>
+    </g>
+  ))}
+  <circle class="rl-wheel__hub" r="22"></circle>
+  <circle class="rl-wheel__core" r="16"></circle>
+  <path class="rl-wheel__bolt" d="M3.2 -11L-7.4 2H-1.4L-3.2 11L7.4 -2H1.4Z"></path>
+</svg>

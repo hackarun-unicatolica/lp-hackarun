@@ -1,0 +1,93 @@
+[
+  {
+    "id": "planning",
+    "name": "Planejamento e design",
+    "wheelLabel": ["Planejamento", "e design"],
+    "tools": [
+      { "name": "Figma", "description": "Protótipo navegável das telas principais." },
+      { "name": "Miro", "description": "Quadro com o mapa da ideia e das decisões da equipe." },
+      { "name": "Trello/Jira", "description": "Quadro de tarefas com responsáveis e andamento." },
+      { "name": "Notion", "description": "Documentação do projeto organizada em páginas." },
+      { "name": "User Stories", "description": "Requisitos escritos como histórias de usuário." },
+      { "name": "Wireframes", "description": "Esboço das telas antes do visual final." },
+      { "name": "Design System", "description": "Cores, fontes e componentes padronizados." },
+      { "name": "User Flow", "description": "Diagrama do caminho do usuário no produto." },
+      { "name": "Benchmarking", "description": "Comparação com soluções parecidas do mercado." },
+      { "name": "Validação com usuários", "description": "Teste da ideia com pessoas de fora da equipe." }
+    ]
+  },
+  {
+    "id": "frontend",
+    "name": "Frontend e desenvolvimento",
+    "wheelLabel": ["Frontend e", "desenvolvimento"],
+    "tools": [
+      { "name": "HTML5", "description": "Marcação semântica nas páginas do produto." },
+      { "name": "CSS3/Tailwind", "description": "Estilos em CSS moderno ou com Tailwind." },
+      { "name": "JavaScript/TypeScript", "description": "Lógica da interface em JavaScript ou TypeScript." },
+      { "name": "React/Next.js", "description": "Interface construída com React ou Next.js." },
+      {
+        "name": "Flutter/React Native",
+        "description": "Aplicativo para celular com Flutter ou React Native."
+      },
+      { "name": "Componentização", "description": "Telas montadas com componentes reutilizáveis." },
+      { "name": "Responsividade", "description": "Funciona bem no celular e no computador." },
+      { "name": "Estado", "description": "Gerenciamento de estado organizado na interface." },
+      { "name": "Formulários", "description": "Formulário com validação e mensagens de erro." },
+      { "name": "Consumo de APIs", "description": "A interface busca dados de uma API." },
+      { "name": "Acessibilidade", "description": "Contraste, navegação por teclado e leitor de tela." },
+      { "name": "PWA", "description": "Aplicativo instalável a partir do navegador." }
+    ]
+  },
+  {
+    "id": "backend",
+    "name": "Backend e dados",
+    "wheelLabel": ["Backend", "e dados"],
+    "tools": [
+      { "name": "Firebase", "description": "Serviços do Firebase no backend do produto." },
+      { "name": "Supabase", "description": "Banco de dados e serviços do Supabase." },
+      { "name": "Node.js/FastAPI", "description": "Servidor próprio em Node.js ou FastAPI." },
+      { "name": "API REST", "description": "API com rotas e verbos HTTP bem definidos." },
+      { "name": "JSON", "description": "Troca de dados em JSON com formato documentado." },
+      { "name": "PostgreSQL/Firestore", "description": "Dados guardados em PostgreSQL ou Firestore." },
+      { "name": "CRUD", "description": "Criar, listar, editar e apagar um recurso." },
+      { "name": "Autenticação e autorização", "description": "Login e controle do que cada usuário acessa." },
+      { "name": "Storage", "description": "Envio e armazenamento de arquivos ou imagens." },
+      { "name": "Dados em tempo real", "description": "A tela atualiza sozinha quando o dado muda." },
+      { "name": "Notificações", "description": "Aviso ao usuário por push ou e-mail." }
+    ]
+  },
+  {
+    "id": "infra",
+    "name": "Infraestrutura e segurança",
+    "wheelLabel": ["Infraestrutura", "e segurança"],
+    "tools": [
+      { "name": "Vercel/Railway", "description": "Projeto publicado com endereço público." },
+      { "name": "Variáveis de ambiente", "description": "Chaves e segredos fora do código." },
+      { "name": "CI/CD", "description": "Testes e deploy automáticos a cada envio." },
+      { "name": "Logs", "description": "Registro de erros e eventos para investigar falhas." },
+      { "name": "LGPD", "description": "Aviso de privacidade e coleta mínima de dados." },
+      { "name": "Docker", "description": "Projeto rodando em contêiner com Dockerfile." },
+      {
+        "name": "Pull Requests com revisão",
+        "description": "Mudanças revisadas por um colega antes do merge."
+      }
+    ]
+  },
+  {
+    "id": "launch",
+    "name": "Testes, métricas e lançamento",
+    "wheelLabel": ["Testes, métricas", "e lançamento"],
+    "tools": [
+      { "name": "Postman/Insomnia", "description": "Coleção de requisições para testar a API." },
+      { "name": "Testes unitários", "description": "Testes automatizados das regras principais." },
+      { "name": "Testes de integração", "description": "Testes de um fluxo completo, de ponta a ponta." },
+      { "name": "Testes de usabilidade", "description": "Pessoas reais usando o produto, com anotações." },
+      { "name": "Analytics", "description": "Medição de acessos e uso das telas." },
+      { "name": "Crashlytics/Sentry", "description": "Monitoramento de erros em produção." },
+      { "name": "Feedback", "description": "Canal para o usuário avaliar ou relatar problemas." },
+      { "name": "Landing page", "description": "Página de apresentação do produto." },
+      { "name": "Onboarding", "description": "Primeiros passos guiados para o usuário novo." },
+      { "name": "KPIs", "description": "Indicadores definidos para medir o sucesso." }
+    ]
+  }
+]

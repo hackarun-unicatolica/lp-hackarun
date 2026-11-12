@@ -1,0 +1,135 @@
+---
+// roleta das tecnologias (missão do dia 12/11): fica aberta numa TV e a equipe gira até três vezes, cada giro numa
+// categoria diferente, e escolhe uma das ferramentas sorteadas. Página estática, sem login e sem gravar nada: quem
+// registra a escolha é o NPC. Fora do menu e do sitemap, com noindex
+import displayFont from '../assets/fonts/orbitron-pt-latin-wght.woff2?url';
+import bodyFont from '@fontsource-variable/montserrat/files/montserrat-latin-wght-normal.woff2?url';
+import '@presentation/styles/tokens.css';
+import '@presentation/roulette/roulette.css';
+import RouletteWheel from '@presentation/roulette/RouletteWheel.astro';
+import { toolCatalog } from '@composition/roulette';
+import { MAX_SPINS } from '@domain/roulette/ToolCatalog';
+
+const catalog = toolCatalog();
+const spins = Array.from({ length: MAX_SPINS }, (_, index) => index + 1);
+const fontFaces = [
+  `@font-face{font-family:'Orbitron Variable';font-style:normal;font-display:swap;font-weight:400 900;src:url(${displayFont}) format('woff2')}`,
+  `@font-face{font-family:'Montserrat Variable';font-style:normal;font-display:swap;font-weight:100 900;src:url(${bodyFont}) format('woff2')}`,
+].join('');
+---
+
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Roleta das tecnologias · HackaRun 2026</title>
+    <style set:html={fontFaces}></style>
+  </head>
+  <body class="rl" data-phase="idle">
+    <div class="rl-aurora" aria-hidden="true">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+
+    <header class="rl-top">
+      <div>
+        <p class="rl-eyebrow">// HackaRun 2026 · Dia 1 · A largada</p>
+        <h1>
+          Roleta das <em>tecnologias</em>
+        </h1>
+      </div>
+      <button class="rl-ghost" type="button" data-fullscreen>
+        Tela cheia <kbd>F</kbd>
+      </button>
+    </header>
+
+    <main class="rl-main">
+      <section class="rl-stage" aria-label="Roleta">
+        <div class="rl-wheel-box">
+          <canvas class="rl-lightning" data-lightning aria-hidden="true"></canvas>
+          <span class="rl-pointer" aria-hidden="true"></span>
+          <RouletteWheel categories={catalog.categories} />
+        </div>
+        <div class="rl-controls">
+          <button class="rl-spin" type="button" data-spin>
+            <span data-spin-label>Girar</span>
+          </button>
+          <p class="rl-counter" data-counter>
+            Até {MAX_SPINS} giros
+          </p>
+        </div>
+      </section>
+
+      <section class="rl-board" aria-labelledby="rl-board-title">
+        <h2 id="rl-board-title">Ferramentas sorteadas</h2>
+        <p class="rl-hint" data-hint aria-live="polite">
+          Girem a roleta para sortear a primeira ferramenta.
+        </p>
+        <ol class="rl-slots">
+          {spins.map((spin) => (
+            <li>
+              <button
+                class="rl-slot"
+                type="button"
+                data-slot
+                data-state="empty"
+                aria-pressed="false"
+                disabled
+              >
+                <span class="rl-slot__number" aria-hidden="true">
+                  {spin}
+                </span>
+                <span class="rl-slot__category" data-slot-category>
+                  Giro {spin}
+                </span>
+                <strong class="rl-slot__tool" data-slot-tool>
+                  ?
+                </strong>
+                <span class="rl-slot__description" data-slot-description />
+              </button>
+            </li>
+          ))}
+        </ol>
+        <button class="rl-confirm" type="button" data-confirm hidden>
+          Confirmar escolha
+        </button>
+        <p class="rl-rule">
+          Cada equipe gira até {MAX_SPINS} vezes, sempre em categorias diferentes, e fica com uma ferramenta
+          para usar no projeto. A rodada é única.
+        </p>
+      </section>
+    </main>
+
+    <div
+      class="rl-result"
+      data-result
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="rl-result-tool"
+      hidden
+    >
+      <div class="rl-result__card">
+        <p class="rl-eyebrow">// Ferramenta da equipe</p>
+        <p class="rl-result__category" data-result-category></p>
+        <h2 id="rl-result-tool" data-result-tool></h2>
+        <p class="rl-result__description" data-result-description></p>
+        <p class="rl-result__note">
+          Procurem o NPC da roleta para registrar a equipe e a ferramenta escolhida.
+        </p>
+        <button class="rl-ghost" type="button" data-next>
+          Próxima equipe
+        </button>
+      </div>
+    </div>
+
+    <script>
+      import { toolCatalog } from '@composition/roulette';
+      import { mountRoulette } from '@presentation/views/roulette/mountRoulette';
+
+      mountRoulette(toolCatalog());
+    </script>
+  </body>
+</html>
