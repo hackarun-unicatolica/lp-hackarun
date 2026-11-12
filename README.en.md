@@ -450,6 +450,17 @@ content and no redirect, because that link was widely shared; the canonical addr
   URL) in the Cloudflare production environment. The site's public address comes from `PUBLIC_SITE_URL`; without it,
   the default in the code, `https://hackarun.com.br`, applies.
 
+### Technology roulette (`/roleta`)
+
+A screen for the TV used in the 12 November mission. The wheel has five categories (planning and design, frontend,
+backend and data, infrastructure and security, testing and launch) and a catalogue of 50 tools and practices in
+`src/infrastructure/content/tools.json`. Each team spins up to three times, always landing on a different category,
+and picks one of the drawn tools to use in its project; once confirmed, the choice cannot be changed.
+
+The page is static: no login, nothing is saved, and it stays out of the menu and the sitemap. The organisers record
+the team and its tool. Keyboard shortcuts for whoever runs the laptop: Space spins, 1 to 3 select a card and F
+toggles full screen.
+
 To publish a fork on your own account: in Cloudflare, open **Workers & Pages → Create application → Pages → Connect to
 Git**, choose the repository and use `npm run build` as the build command with `dist` as the output folder.
 

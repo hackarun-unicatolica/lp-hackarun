@@ -491,6 +491,17 @@ visão geral com todos os dias lado a lado, filtro por equipe, atualização soz
 Fica atrás do login do sorteio (`SORTEIO_ATIVO`, `SORTEIO_USUARIO`, `SORTEIO_SENHA`) e lê a planilha pela ação
 `feedback-report` do `Feedback.gs`, que só devolve nome, equipe e as avaliações (nada de e-mail ou WhatsApp).
 
+### Roleta das tecnologias (`/roleta`)
+
+Tela para a TV da missão do dia 12/11. A roda tem cinco categorias (planejamento e design, frontend, backend e dados,
+infraestrutura e segurança, testes e lançamento) e um catálogo de 50 ferramentas e práticas em
+`src/infrastructure/content/tools.json`. Cada equipe gira até três vezes, sempre em categorias diferentes, e escolhe
+uma das ferramentas sorteadas para usar no projeto; depois de confirmar, não dá para trocar.
+
+A página é estática: não tem login, não grava nada e fica fora do menu e do sitemap. Quem registra a equipe e a
+ferramenta é a organização. Atalhos de quem opera o notebook: Espaço gira, 1 a 3 marcam o cartão e F abre a tela
+cheia.
+
 Para publicar um fork na sua própria conta: na Cloudflare, abra **Workers & Pages → Create application → Pages →
 Connect to Git**, escolha o repositório e use o comando de build `npm run build` com a pasta de saída `dist`.
 
