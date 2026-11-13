@@ -20,6 +20,7 @@ export const SCRIPT_FILES = [
   'Draw.gs',
   'Feedback.gs',
   'Gems.gs',
+  'Insignias.gs',
 ] as const;
 
 export interface ScriptResponse {

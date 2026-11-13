@@ -1,4 +1,4 @@
-import type { GemsGateway, GemsResult } from '@application/gems/GemsPorts';
+import type { DeliveryState, GemsGateway, GemsResult } from '@application/gems/GemsPorts';
 import {
   cleanQuestion,
   cleanQueueState,
@@ -16,6 +16,21 @@ interface ApiBody {
   message?: string;
   questions?: unknown;
   state?: unknown;
+  teams?: unknown;
+  done?: unknown;
+}
+
+// lista da entrega vinda da planilha: o que não for texto some
+function cleanDelivery(body: ApiBody): DeliveryState | null {
+  if (!Array.isArray(body.teams) || !Array.isArray(body.done)) return null;
+  const teams = body.teams.filter((t): t is string => typeof t === 'string' && t.trim() !== '');
+  const done = body.done.flatMap((d: unknown) => {
+    const item = d as { team?: unknown; at?: unknown };
+    return typeof item?.team === 'string' && typeof item.at === 'string'
+      ? [{ team: item.team, at: item.at }]
+      : [];
+  });
+  return { teams, done };
 }
 
 async function post(body: Record<string, unknown>): Promise<GemsResult<ApiBody>> {
@@ -31,6 +46,7 @@ async function post(body: Record<string, unknown>): Promise<GemsResult<ApiBody>>
     if (response.status === 401) return { kind: 'login' };
     const parsed = (await response.json()) as ApiBody;
     if (parsed.ok === true) return { kind: 'ok', value: parsed };
+    if (parsed.message) return { kind: 'unavailable', message: parsed.message };
     return { kind: 'unavailable', message: parsed.message ?? 'A planilha não respondeu como esperado.' };
   } catch {
     return { kind: 'unavailable', message: 'Sem conexão com a planilha.' };
@@ -56,5 +72,24 @@ export class SiteGemsGateway implements GemsGateway {
     if (result.kind !== 'ok') return result;
     const saved = cleanQueueState(result.value.state);
     return saved ? { kind: 'ok', value: saved } : { kind: 'unavailable', message: 'Resposta inválida.' };
+  }
+
+  delivery(): Promise<GemsResult<DeliveryState>> {
+    return this.deliveryCall({ action: 'gems-teams' });
+  }
+
+  finish(team: string): Promise<GemsResult<DeliveryState>> {
+    return this.deliveryCall({ action: 'gems-finish', team });
+  }
+
+  undo(team: string): Promise<GemsResult<DeliveryState>> {
+    return this.deliveryCall({ action: 'gems-undo', team });
+  }
+
+  private async deliveryCall(body: Record<string, unknown>): Promise<GemsResult<DeliveryState>> {
+    const result = await post(body);
+    if (result.kind !== 'ok') return result;
+    const state = cleanDelivery(result.value);
+    return state ? { kind: 'ok', value: state } : { kind: 'unavailable', message: 'Resposta inválida.' };
   }
 }

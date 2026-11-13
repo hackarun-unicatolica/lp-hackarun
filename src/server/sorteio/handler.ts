@@ -14,8 +14,10 @@ import {
   validSession,
 } from './session';
 
-// /gemas = tela dos NPCs das gemas (questões com gabarito): mesmo login da organização
-export const DRAW_PAGES = ['/sorteio', '/sorteio/nomes', '/sorteio/avaliacoes', '/gemas'] as const;
+// /insignias = tela dos NPCs das insígnias (questões com gabarito): mesmo login da organização. O endereço antigo
+// (/gemas) redireciona
+export const DRAW_PAGES = ['/sorteio', '/sorteio/nomes', '/sorteio/avaliacoes', '/insignias'] as const;
+const OLD_GEMS_PAGE = /^\/gemas(\.html|\/)?$/;
 export const API_PATH = '/api/sorteio';
 // feedback-report = dados do painel de avaliações (só leitura); gems-* = questões e fila dos NPCs
 const ALLOWED_ACTIONS = [
@@ -26,6 +28,9 @@ const ALLOWED_ACTIONS = [
   'feedback-report',
   'gems-load',
   'gems-sync',
+  'gems-teams',
+  'gems-finish',
+  'gems-undo',
 ];
 const MAX_BODY_BYTES = 256 * 1024;
 const UPSTREAM_TIMEOUT_MS = 30_000;
@@ -43,9 +48,12 @@ export interface SorteioDeps {
   sleep(ms: number): Promise<void>;
 }
 
-// o caminho é do sorteio? (/sorteio, /sorteio/..., /sorteio.html, /gemas, /api/sorteio)
+// o caminho é do sorteio? (/sorteio, /sorteio/..., /sorteio.html, /insignias, /gemas, /api/sorteio)
 export function isSorteioPath(pathname: string): boolean {
   return (
+    pathname === '/insignias' ||
+    pathname.startsWith('/insignias/') ||
+    pathname.startsWith('/insignias.') ||
     pathname === '/gemas' ||
     pathname.startsWith('/gemas/') ||
     pathname.startsWith('/gemas.') ||
@@ -117,12 +125,13 @@ export async function handleSorteio(request: Request, env: SorteioEnv, deps: Sor
   const { config } = state;
   const session = await validSession(config, readCookie(request, SESSION_COOKIE), deps.now());
 
+  if (OLD_GEMS_PAGE.test(url.pathname)) return redirect('/insignias');
   if (url.pathname === API_PATH) return api(request, config, session, deps);
   if (url.pathname === '/sorteio/entrar') return login(request, config, deps);
   if (url.pathname === '/sorteio/sair') {
     if (request.method !== 'POST' || !sameOrigin(request))
       return html(405, messagePage('Ops', 'Use o botão Sair.'));
-    // volta pro login da tela de onde saiu (sorteio ou gemas)
+    // volta pro login da tela de onde saiu (sorteio ou insígnias)
     const form = await request.formData().catch(() => null);
     const back = form?.get('voltar');
     return redirect((typeof back === 'string' && drawPage(back)) || '/sorteio', clearedCookie());

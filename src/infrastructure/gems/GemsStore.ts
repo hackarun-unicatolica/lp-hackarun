@@ -1,4 +1,4 @@
-import type { ColorData, GemsDeviceStore } from '@application/gems/GemsPorts';
+import type { ColorData, GemsDeviceStore, GemsMode } from '@application/gems/GemsPorts';
 import {
   cleanQuestion,
   cleanQueueState,
@@ -21,13 +21,13 @@ const dataKey = (color: GemColor) => `hackarun:gemas:${color}`;
 export class GemsStore implements GemsDeviceStore {
   constructor(private readonly storage: KeyValueStorage | null) {}
 
-  color(): GemColor | null {
+  mode(): GemsMode | null {
     const value = this.read(COLOR_KEY);
-    return isGemColor(value) ? value : null;
+    return isGemColor(value) || value === 'entrega' ? value : null;
   }
 
-  setColor(color: GemColor | null): void {
-    if (color) this.write(COLOR_KEY, color);
+  setMode(mode: GemsMode | null): void {
+    if (mode) this.write(COLOR_KEY, mode);
     else this.remove(COLOR_KEY);
   }
 

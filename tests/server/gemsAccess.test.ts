@@ -1,4 +1,4 @@
-// /gemas (tela dos NPCs, com gabarito): mesma porta do sorteio. Sem login, só a tela de login (com o olho da senha);
+// /insignias (tela dos NPCs, com gabarito; antes /gemas): mesma porta do sorteio. Sem login, só a tela de login (com o olho da senha);
 // com login, a página e as ações gems-*. A CSP libera só scripts do próprio site (o do olho)
 // @vitest-environment node
 import { readFileSync } from 'node:fs';
@@ -23,7 +23,7 @@ function harness() {
     Promise.resolve(new Response(JSON.stringify({ ok: true, echo: JSON.parse(String(init?.body)) }))),
   );
   const deps: SorteioDeps = {
-    next: () => Promise.resolve(new Response('<h1>gemas</h1>')),
+    next: () => Promise.resolve(new Response('<h1>tela</h1>')),
     notFound: () => Promise.resolve(new Response('<h1>404</h1>')),
     attempts: new MemoryAttemptStore(() => now),
     fetch: upstream as unknown as typeof fetch,
@@ -36,7 +36,7 @@ function harness() {
     const response = await send('/sorteio/entrar', {
       method: 'POST',
       headers: { Origin: ORIGIN, 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({ usuario: 'org', senha: 'Senha#Teste1', voltar: '/gemas' }).toString(),
+      body: new URLSearchParams({ usuario: 'org', senha: 'Senha#Teste1', voltar: '/insignias' }).toString(),
     });
     return { response, cookie: (response.headers.get('Set-Cookie') ?? '').split(';')[0] ?? '' };
   };
@@ -49,30 +49,40 @@ function harness() {
   return { send, login, api, upstream };
 }
 
-describe('/gemas atrás do login da organização', () => {
+describe('/insignias atrás do login da organização', () => {
   it('o caminho passa pela função (com e sem .html)', () => {
+    expect(isSorteioPath('/insignias')).toBe(true);
+    expect(isSorteioPath('/insignias.html')).toBe(true);
     expect(isSorteioPath('/gemas')).toBe(true);
-    expect(isSorteioPath('/gemas.html')).toBe(true);
-    expect(isSorteioPath('/gemasx')).toBe(false);
+    expect(isSorteioPath('/insigniasx')).toBe(false);
   });
 
-  it('sem sessão mostra o login com o título das gemas e volta para /gemas depois de entrar', async () => {
+  it('o endereço antigo /gemas redireciona para /insignias', async () => {
+    const { send } = harness();
+    for (const path of ['/gemas', '/gemas/', '/gemas.html']) {
+      const response = await send(path);
+      expect(response.status).toBe(303);
+      expect(response.headers.get('Location')).toBe('/insignias');
+    }
+  });
+
+  it('sem sessão mostra o login com o título das insígnias e volta para /insignias depois de entrar', async () => {
     const { send, login } = harness();
-    const page = await send('/gemas');
+    const page = await send('/insignias');
     const html = await page.text();
-    expect(html).toContain('<h1>Gemas dos NPCs</h1>');
-    expect(html).toContain('value="/gemas"');
-    expect(html).not.toContain('gemas</h1>');
+    expect(html).toContain('<h1>Insígnias dos NPCs</h1>');
+    expect(html).toContain('value="/insignias"');
+    expect(html).not.toContain('<h1>tela</h1>');
     const { response, cookie } = await login();
-    expect(response.headers.get('Location')).toBe('/gemas');
-    const screen = await send('/gemas', { headers: { Cookie: cookie } });
-    expect(await screen.text()).toContain('<h1>gemas</h1>');
+    expect(response.headers.get('Location')).toBe('/insignias');
+    const screen = await send('/insignias', { headers: { Cookie: cookie } });
+    expect(await screen.text()).toContain('<h1>tela</h1>');
     expect(screen.headers.get('Cache-Control')).toBe('no-store');
   });
 
   it('login tem o botão de olho, que vem de um arquivo do próprio site (a CSP só libera o site)', async () => {
     const { send } = harness();
-    const page = await send('/gemas');
+    const page = await send('/insignias');
     const html = await page.text();
     expect(html).toContain('data-eye');
     expect(html).toContain('aria-label="Mostrar senha"');
@@ -99,14 +109,14 @@ describe('/gemas atrás do login da organização', () => {
     expect(body.echo).toMatchObject({ action: 'gems-sync', color: 'azul', token: 't'.repeat(32) });
   });
 
-  it('sair da tela das gemas volta pro login das gemas', async () => {
+  it('sair da tela das insígnias volta pro login das insígnias', async () => {
     const { send } = harness();
     const response = await send('/sorteio/sair', {
       method: 'POST',
       headers: { Origin: ORIGIN, 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({ voltar: '/gemas' }).toString(),
+      body: new URLSearchParams({ voltar: '/insignias' }).toString(),
     });
-    expect(response.headers.get('Location')).toBe('/gemas');
+    expect(response.headers.get('Location')).toBe('/insignias');
     expect(response.headers.get('Set-Cookie')).toContain('Max-Age=0');
   });
 });

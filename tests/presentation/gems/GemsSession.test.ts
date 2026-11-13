@@ -3,7 +3,7 @@
 import { describe, expect, it } from 'vitest';
 import type { GemQuestion, QueueState } from '@domain/gems/GemQueue';
 import { GemsStore, type KeyValueStorage } from '@infrastructure/gems/GemsStore';
-import type { GemsGateway, GemsResult } from '@application/gems/GemsPorts';
+import type { DeliveryState, GemsGateway, GemsResult } from '@application/gems/GemsPorts';
 import { GemsSession, RETRY_STEPS_MS, type GemsView } from '@presentation/view-models/gems/GemsSession';
 
 const QUESTIONS: GemQuestion[] = [1, 2, 3].map((n) => ({
@@ -41,6 +41,16 @@ class FakeGateway implements GemsGateway {
     if (!this.online) return { kind: 'unavailable', message: 'offline' };
     this.server = state;
     return { kind: 'ok', value: state };
+  }
+  // a entrega final não entra na tela do NPC
+  delivery(): Promise<GemsResult<DeliveryState>> {
+    return Promise.resolve({ kind: 'unavailable', message: 'fora do teste' });
+  }
+  finish(): Promise<GemsResult<DeliveryState>> {
+    return this.delivery();
+  }
+  undo(): Promise<GemsResult<DeliveryState>> {
+    return this.delivery();
   }
 }
 

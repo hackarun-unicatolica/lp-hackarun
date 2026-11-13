@@ -1,5 +1,5 @@
 ---
-// tela dos NPCs das gemas: cada NPC escolhe a cor (azul, amarelo ou vermelho) e sorteia só as questões da palestra
+// tela dos NPCs das insígnias (no código, "gems"): cada NPC escolhe a cor (azul, amarelo ou vermelho) e sorteia só as questões da palestra
 // dele, sem repetir até todas saírem. Fica atrás do mesmo login do sorteio (functions/_middleware.ts): as questões e o
 // gabarito vêm da planilha só depois do login, nunca do código do site. Fora do menu e do sitemap, noindex
 import displayFont from '../assets/fonts/orbitron-pt-latin-wght.woff2?url';
@@ -21,17 +21,17 @@ const fontFaces = [
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex, nofollow" />
-    <title>Gemas dos NPCs · HackaRun 2026</title>
+    <title>Insígnias dos NPCs · HackaRun 2026</title>
     <style set:html={fontFaces}></style>
   </head>
   <body class="gems">
     <header class="gems__top">
       <div>
         <p class="gems__eyebrow">// HackaRun 2026 · organização</p>
-        <h1>Gemas dos NPCs</h1>
+        <h1>Insígnias dos NPCs</h1>
       </div>
       <form method="post" action="/sorteio/sair">
-        <input type="hidden" name="voltar" value="/gemas" />
+        <input type="hidden" name="voltar" value="/insignias" />
         <button class="gems__btn gems__btn--ghost gems__btn--small" type="submit">
           Sair
         </button>
@@ -45,9 +45,10 @@ const fontFaces = [
 
     <main>
       <section class="gems__pick" data-pick hidden aria-labelledby="pick-title">
-        <h2 id="pick-title">Qual é a cor deste NPC?</h2>
+        <h2 id="pick-title">O que este aparelho vai fazer?</h2>
         <p class="gems__lead">
-          A escolha fica guardada neste aparelho. Cada cor sorteia só as questões da sua palestra.
+          A escolha fica guardada neste aparelho. Cada cor sorteia só as questões da sua palestra; a entrega
+          final marca as equipes que mostraram as 3 fichas.
         </p>
         <div class="gems__colors">
           {GEM_COLORS.map((color) => (
@@ -57,7 +58,51 @@ const fontFaces = [
               <span>{GEM_TALKS[color].talk}</span>
             </button>
           ))}
+          <button class="gems__color gems__color--delivery" type="button" data-mode="entrega">
+            <span class="gems__gem gems__gem--all" aria-hidden="true" />
+            <strong>Entrega final</strong>
+            <span>Conferir as 3 insígnias</span>
+          </button>
         </div>
+      </section>
+
+      <section class="gems__npc" data-delivery hidden aria-label="Entrega final das insígnias">
+        <div class="gems__bar">
+          <p class="gems__badge gems__badge--delivery">Entrega final · conferir as 3 insígnias</p>
+          <button class="gems__btn gems__btn--ghost gems__btn--small" type="button" data-delivery-change>
+            Trocar
+          </button>
+        </div>
+        <p class="gems__progress" data-delivery-count>
+          Carregando as equipes…
+        </p>
+
+        <form class="gems__card gems__delivery-form" data-delivery-form>
+          <label for="delivery-team">Equipe que mostrou as fichas azul, amarela e vermelha</label>
+          <input
+            id="delivery-team"
+            data-delivery-input
+            list="delivery-teams"
+            autocomplete="off"
+            placeholder="Digite ou toque no nome na lista de quem falta"
+            required
+          />
+          <datalist id="delivery-teams" data-delivery-options></datalist>
+          <button class="gems__btn" type="submit" data-delivery-submit>
+            Completou as 3 insígnias
+          </button>
+        </form>
+        <p class="gems__sync" data-delivery-status role="status"></p>
+
+        <h2 class="gems__subtitle">Completaram</h2>
+        <ol class="gems__done-list" data-delivery-done></ol>
+
+        <h2 class="gems__subtitle">Faltam</h2>
+        <ul class="gems__chips" data-delivery-pending></ul>
+
+        <button class="gems__btn gems__btn--ghost gems__btn--small" type="button" data-delivery-refresh>
+          Atualizar lista
+        </button>
       </section>
 
       <section class="gems__npc" data-npc hidden aria-label="Sorteio de questões">

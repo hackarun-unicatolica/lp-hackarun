@@ -89,3 +89,80 @@ describe('Apps Script · gemas dos NPCs', () => {
     expect(post({ action: 'gems-load', color: 'azul' }).state?.used).toEqual([1]);
   });
 });
+
+interface DeliveryResponse {
+  ok: boolean;
+  error?: string;
+  teams?: string[];
+  done?: { team: string; at: string }[];
+}
+
+function deliverySetup() {
+  const { script, post } = setup();
+  script.seed(
+    [],
+    [
+      { Equipe: 'Equipe Muk', Status: 'confirmado' },
+      { Equipe: 'Equipe Poliwhirl', Status: 'confirmado' },
+      { Equipe: 'Equipe Rascunho', Status: 'pendente' },
+    ],
+  );
+  const send = (body: Record<string, unknown>) => post(body) as unknown as DeliveryResponse;
+  return { script, send };
+}
+
+describe('Apps Script · entrega final das insígnias', () => {
+  it('lista só as equipes confirmadas e cria a aba Insígnias completas formatada', () => {
+    const { script, send } = deliverySetup();
+    const res = send({ action: 'gems-teams' });
+    expect(res.teams).toEqual(['Equipe Muk', 'Equipe Poliwhirl']);
+    expect(res.done).toEqual([]);
+    const tab = script.tab('Insígnias completas');
+    expect(tab.rows[0]).toEqual(['Equipe', 'Completou em', 'Situação', 'Desmarcado em']);
+    expect(tab.frozen.rows).toBe(1);
+    expect(script.properties['INSIGNIAS_VERSAO']).toBe('1');
+  });
+
+  it('a aba Questões ganha uma cor por palestra (regra na linha inteira) e o título congelado', () => {
+    const { script, send } = deliverySetup();
+    send({ action: 'gems-teams' });
+    const questions = script.tab('Questões');
+    expect(questions.frozen.rows).toBe(1);
+    expect(questions.conditionalRules).toHaveLength(3);
+    expect(questions.columnWidths.get(3)).toBe(380);
+  });
+
+  it('marca a equipe com a hora, em ordem de chegada, e não marca duas vezes', () => {
+    const { script, send } = deliverySetup();
+    script.now = Date.parse('2026-11-13T20:00:00-03:00');
+    expect(send({ action: 'gems-finish', team: 'equipe poliwhirl' }).done?.map((d) => d.team)).toEqual([
+      'Equipe Poliwhirl',
+    ]);
+    script.now = Date.parse('2026-11-13T20:05:00-03:00');
+    const res = send({ action: 'gems-finish', team: 'Equipe Muk' });
+    expect(res.done?.map((d) => d.team)).toEqual(['Equipe Poliwhirl', 'Equipe Muk']);
+    expect(res.done?.[0]?.at).toBe(new Date('2026-11-13T20:00:00-03:00').toISOString());
+    expect(send({ action: 'gems-finish', team: 'Equipe Muk' }).error).toBe('already');
+  });
+
+  it('desmarcar não apaga: guarda a linha como desmarcado, e a equipe pode ser marcada de novo', () => {
+    const { script, send } = deliverySetup();
+    send({ action: 'gems-finish', team: 'Equipe Muk' });
+    const undone = send({ action: 'gems-undo', team: 'Equipe Muk' });
+    expect(undone.done).toEqual([]);
+    const tab = script.tab('Insígnias completas');
+    expect(tab.data[0]?.[2]).toBe('desmarcado');
+    expect(tab.data[0]?.[3]).toBeInstanceOf(Date);
+    expect(send({ action: 'gems-undo', team: 'Equipe Muk' }).error).toBe('not-done');
+    expect(send({ action: 'gems-finish', team: 'Equipe Muk' }).done?.map((d) => d.team)).toEqual([
+      'Equipe Muk',
+    ]);
+    expect(tab.data).toHaveLength(2);
+  });
+
+  it('equipe que não existe ou não está confirmada é recusada', () => {
+    const { send } = deliverySetup();
+    expect(send({ action: 'gems-finish', team: 'Equipe Fantasma' }).error).toBe('unknown-team');
+    expect(send({ action: 'gems-finish', team: 'Equipe Rascunho' }).error).toBe('unknown-team');
+  });
+});

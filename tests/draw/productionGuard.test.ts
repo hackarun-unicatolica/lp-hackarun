@@ -31,7 +31,7 @@ describe('sorteio no site · o que vai e o que não vai para produção', () => 
     const routes = JSON.parse(read('public/_routes.json')) as { include: string[]; exclude: string[] };
     expect(
       routes.include.every(
-        (path) => /^\/(api\/)?(sorteio|feedback|gemas)/.test(path) || path === '/api/equipes',
+        (path) => /^\/(api\/)?(sorteio|feedback|gemas|insignias)/.test(path) || path === '/api/equipes',
       ),
     ).toBe(true);
     expect(routes.include).toContain('/api/equipes');

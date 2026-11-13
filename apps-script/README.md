@@ -115,7 +115,8 @@ das inscrições ativas, e-mails dos credenciados, WhatsApps das inscrições at
    | `Mentors`    | Cadastro de mentores: abas Mentores e Resumo Mentores (seção 8)             |
    | `Draw`       | Sorteio das equipes pelo site (`/sorteio`): aba Sorteio (seção 7)           |
    | `Feedback`   | Avaliação entre colegas (`/feedback`) e painel da organização               |
-   | `Gems`       | Questões dos NPCs das gemas (`/gemas`): aba Questões (seção 9)              |
+   | `Gems`       | Questões dos NPCs das insígnias (`/insignias`): aba Questões (seção 9)      |
+   | `Insignias`  | Formatação da aba Questões e aba Insígnias completas (seção 9)              |
 
 4. Em **Configurações do projeto** (engrenagem), marque **Mostrar arquivo de manifesto "appsscript.json" no
    editor**. Volte ao editor e substitua o conteúdo do `appsscript.json` pelo de [`appsscript.json`](./appsscript.json)
@@ -257,19 +258,31 @@ cadastros). A única mudança fora do `Mentors.gs` é uma linha no `doPost` do `
 - **Fechar o cadastro:** crie a propriedade `MENTORES_FECHADOS` com o valor `sim` (apague para reabrir). Não afeta as
   inscrições.
 
-## 9. Gemas dos NPCs (página `/gemas`)
+## 9. Insígnias dos NPCs (página `/insignias`)
 
-Tela da organização, com o mesmo login do sorteio. Cada NPC escolhe a sua cor e sorteia só as questões da palestra
-correspondente: azul (Git e GitHub), amarelo (destravando ideias com IA) e vermelho (Design Thinking e Scrum). Quem
-acerta recebe a ficha física da cor; a tela não registra equipe.
+Tela da organização, com o mesmo login do sorteio (o endereço antigo `/gemas` redireciona). Cada aparelho escolhe uma
+vez o que vai fazer:
 
-- **Aba Questões:** colunas `Cor` (`azul`, `amarelo` ou `vermelho`), `Nº`, `Pergunta`, `A`, `B`, `C`, `D` e
-  `Resposta` (a letra). Linha incompleta fica de fora. As questões e o gabarito ficam só na planilha, nunca no
-  repositório.
+- **NPC de uma cor:** sorteia só as questões da palestra correspondente: azul (Git e GitHub), amarelo (destravando
+  ideias com IA) e vermelho (Design Thinking e Scrum). Quem acerta recebe a ficha física da cor.
+- **Entrega final:** quem confere as 3 fichas marca a equipe. A tela mostra quem completou, em ordem de chegada, e quem
+  falta. Marcou errado? **Desmarcar** na lista de quem completou.
+
+Abas:
+
+- **Questões:** colunas `Cor` (`azul`, `amarelo` ou `vermelho`), `Nº`, `Pergunta`, `A`, `B`, `C`, `D` e `Resposta` (a
+  letra). Cada palestra tem uma cor de fundo. Linha incompleta fica de fora. As questões e o gabarito ficam só na
+  planilha, nunca no repositório.
+- **Insígnias completas:** uma linha por marcação, com a equipe, a hora e a situação (`completou` ou `desmarcado`).
+  Desmarcar não apaga a linha: guarda a hora em que foi desmarcada.
+
+Funcionamento:
+
 - **Fila sem repetição:** a questão sorteada vai para o fim da fila da cor e só volta depois que todas as outras
   saírem. O sorteio acontece no aparelho do NPC (sem esperar a internet) e a fila é copiada nas propriedades do script
   (`GEMAS_FILA_AZUL`, `GEMAS_FILA_AMARELO`, `GEMAS_FILA_VERMELHO`). Sem internet, o aparelho guarda a fila e envia
   quando a conexão voltar.
+- **Formatação:** feita sozinha na primeira chamada depois de publicar (propriedade `INSIGNIAS_VERSAO`).
 - **Recomeçar a fila de uma cor:** apague a propriedade da cor e limpe os dados do navegador do aparelho daquele NPC.
 
 ## Testes
