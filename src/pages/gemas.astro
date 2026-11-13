@@ -1,0 +1,95 @@
+---
+// tela dos NPCs das gemas: cada NPC escolhe a cor (azul, amarelo ou vermelho) e sorteia só as questões da palestra
+// dele, sem repetir até todas saírem. Fica atrás do mesmo login do sorteio (functions/_middleware.ts): as questões e o
+// gabarito vêm da planilha só depois do login, nunca do código do site. Fora do menu e do sitemap, noindex
+import displayFont from '../assets/fonts/orbitron-pt-latin-wght.woff2?url';
+import bodyFont from '@fontsource-variable/montserrat/files/montserrat-latin-wght-normal.woff2?url';
+import { GEM_COLORS } from '@domain/gems/GemQueue';
+import { GEM_TALKS } from '@presentation/views/gems/gemTalks';
+import '@presentation/styles/tokens.css';
+import '@presentation/gems/gems.css';
+
+const fontFaces = [
+  `@font-face{font-family:'Orbitron Variable';font-style:normal;font-display:swap;font-weight:400 900;src:url(${displayFont}) format('woff2')}`,
+  `@font-face{font-family:'Montserrat Variable';font-style:normal;font-display:swap;font-weight:100 900;src:url(${bodyFont}) format('woff2')}`,
+].join('');
+---
+
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Gemas dos NPCs · HackaRun 2026</title>
+    <style set:html={fontFaces}></style>
+  </head>
+  <body class="gems">
+    <header class="gems__top">
+      <div>
+        <p class="gems__eyebrow">// HackaRun 2026 · organização</p>
+        <h1>Gemas dos NPCs</h1>
+      </div>
+      <form method="post" action="/sorteio/sair">
+        <input type="hidden" name="voltar" value="/gemas" />
+        <button class="gems__btn gems__btn--ghost gems__btn--small" type="submit">
+          Sair
+        </button>
+      </form>
+    </header>
+
+    <p class="gems__warning" data-storage-warning hidden>
+      Este navegador não está guardando dados (aba anônima ou armazenamento bloqueado). Use uma aba normal:
+      sem isso, a fila se perde se a internet cair.
+    </p>
+
+    <main>
+      <section class="gems__pick" data-pick hidden aria-labelledby="pick-title">
+        <h2 id="pick-title">Qual é a cor deste NPC?</h2>
+        <p class="gems__lead">
+          A escolha fica guardada neste aparelho. Cada cor sorteia só as questões da sua palestra.
+        </p>
+        <div class="gems__colors">
+          {GEM_COLORS.map((color) => (
+            <button class="gems__color" type="button" data-color={color} data-gem-color={color}>
+              <span class="gems__gem" aria-hidden="true" />
+              <strong>{GEM_TALKS[color].label}</strong>
+              <span>{GEM_TALKS[color].talk}</span>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <section class="gems__npc" data-npc hidden aria-label="Sorteio de questões">
+        <div class="gems__bar">
+          <p class="gems__badge" data-color-badge></p>
+          <button class="gems__btn gems__btn--ghost gems__btn--small" type="button" data-change>
+            Trocar cor
+          </button>
+        </div>
+        <p class="gems__progress" data-progress></p>
+        <p class="gems__load" data-load role="status"></p>
+
+        <article class="gems__card" data-card aria-live="polite"></article>
+
+        <div class="gems__actions">
+          <button class="gems__btn" type="button" data-draw disabled>
+            Sortear questão
+          </button>
+          <button class="gems__btn gems__btn--ghost" type="button" data-reveal aria-pressed="false" hidden>
+            Mostrar resposta
+          </button>
+        </div>
+        <p class="gems__sync" data-sync role="status"></p>
+      </section>
+    </main>
+
+    <script>
+      import { createGemsServices } from '@composition/gems';
+      import { mountGemsPage } from '@presentation/views/gems/mountGemsPage';
+
+      const { gateway, store } = createGemsServices();
+      mountGemsPage(gateway, store);
+    </script>
+  </body>
+</html>

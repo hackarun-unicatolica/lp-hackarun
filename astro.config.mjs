@@ -8,7 +8,8 @@ import sorteio from './tools/sorteio/integration.mjs';
 const site = process.env.PUBLIC_SITE_URL || 'https://hackarun.com.br';
 
 // páginas fora do sitemap (também têm noindex no Seo.astro): /equipes fica escondida até o sorteio,
-// /autorizacao é só o modelo para imprimir, /sorteio é da organização (com login) e /roleta é a tela da TV no evento
+// /autorizacao é só o modelo para imprimir, /sorteio é da organização (com login) /roleta é a tela da TV no evento e /gemas é a
+// tela dos NPCs (com login)
 export const UNLISTED_PATHS = [
   '/equipes',
   '/autorizacao',
@@ -18,6 +19,7 @@ export const UNLISTED_PATHS = [
   '/feedback',
   '/inscricao-excecao',
   '/roleta',
+  '/gemas',
 ];
 
 // a página entra no sitemap? (o filtro recebe a URL completa)

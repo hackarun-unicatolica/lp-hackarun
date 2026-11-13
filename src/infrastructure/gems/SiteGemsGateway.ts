@@ -1,0 +1,60 @@
+import type { GemsGateway, GemsResult } from '@application/gems/GemsPorts';
+import {
+  cleanQuestion,
+  cleanQueueState,
+  type GemColor,
+  type GemQuestion,
+  type QueueState,
+} from '@domain/gems/GemQueue';
+
+// mesma rota das ações do sorteio: a função da Cloudflare confere a sessão da organização e repassa com a chave
+const API = '/api/sorteio';
+const TIMEOUT_MS = 30_000;
+
+interface ApiBody {
+  ok?: boolean;
+  message?: string;
+  questions?: unknown;
+  state?: unknown;
+}
+
+async function post(body: Record<string, unknown>): Promise<GemsResult<ApiBody>> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+  try {
+    const response = await fetch(API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    });
+    if (response.status === 401) return { kind: 'login' };
+    const parsed = (await response.json()) as ApiBody;
+    if (parsed.ok === true) return { kind: 'ok', value: parsed };
+    return { kind: 'unavailable', message: parsed.message ?? 'A planilha não respondeu como esperado.' };
+  } catch {
+    return { kind: 'unavailable', message: 'Sem conexão com a planilha.' };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+export class SiteGemsGateway implements GemsGateway {
+  async load(color: GemColor): Promise<GemsResult<{ questions: GemQuestion[]; state: QueueState }>> {
+    const result = await post({ action: 'gems-load', color });
+    if (result.kind !== 'ok') return result;
+    const questions = Array.isArray(result.value.questions)
+      ? result.value.questions.map(cleanQuestion).filter((q): q is GemQuestion => q !== null)
+      : [];
+    const state = cleanQueueState(result.value.state);
+    if (!state) return { kind: 'unavailable', message: 'A planilha devolveu uma fila inválida.' };
+    return { kind: 'ok', value: { questions, state } };
+  }
+
+  async sync(color: GemColor, state: QueueState): Promise<GemsResult<QueueState>> {
+    const result = await post({ action: 'gems-sync', color, state });
+    if (result.kind !== 'ok') return result;
+    const saved = cleanQueueState(result.value.state);
+    return saved ? { kind: 'ok', value: saved } : { kind: 'unavailable', message: 'Resposta inválida.' };
+  }
+}
