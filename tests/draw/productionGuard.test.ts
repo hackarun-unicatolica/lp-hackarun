@@ -27,10 +27,12 @@ describe('sorteio no site · o que vai e o que não vai para produção', () => 
     expect(integration).toMatch(/apply: 'serve'/);
   });
 
-  it('a função da Cloudflare só roda nos caminhos do sorteio e da lista de equipes (o resto segue estático)', () => {
+  it('a função da Cloudflare só roda nos caminhos do sorteio, das gemas e da lista de equipes (o resto segue estático)', () => {
     const routes = JSON.parse(read('public/_routes.json')) as { include: string[]; exclude: string[] };
     expect(
-      routes.include.every((path) => /^\/(api\/)?(sorteio|feedback)/.test(path) || path === '/api/equipes'),
+      routes.include.every(
+        (path) => /^\/(api\/)?(sorteio|feedback|gemas)/.test(path) || path === '/api/equipes',
+      ),
     ).toBe(true);
     expect(routes.include).toContain('/api/equipes');
   });
@@ -47,6 +49,8 @@ describe('sorteio no site · o que vai e o que não vai para produção', () => 
     const browserFiles = [
       ...walk(join(ROOT, 'src/presentation/views/draw')),
       ...walk(join(ROOT, 'src/infrastructure/draw')),
+      ...walk(join(ROOT, 'src/infrastructure/gems')),
+      ...walk(join(ROOT, 'src/presentation/views/gems')),
       join(ROOT, 'src/composition/draw.ts'),
     ];
     for (const file of browserFiles) {

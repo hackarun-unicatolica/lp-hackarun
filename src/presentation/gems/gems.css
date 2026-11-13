@@ -1,0 +1,295 @@
+/* tela dos NPCs das gemas: pensada para celular ou notebook na mão do NPC, letras grandes e alto contraste */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body.gems {
+  --gem: var(--c-cyan);
+  --gem-ink: #02030b;
+  margin: 0;
+  min-height: 100vh;
+  padding: 1rem clamp(1rem, 4vw, 2.5rem) 3rem;
+  background:
+    radial-gradient(38rem 24rem at 0% -10%, color-mix(in srgb, var(--gem) 28%, transparent), transparent 65%),
+    radial-gradient(34rem 22rem at 100% 0%, rgb(148 27 255 / 0.2), transparent 60%), var(--c-void);
+  color: var(--c-ice);
+  font-family: 'Montserrat Variable', system-ui, 'Segoe UI', sans-serif;
+  line-height: 1.45;
+}
+
+body.gems[data-gem='azul'],
+.gems__color[data-gem-color='azul'] {
+  --gem: #3b8bff;
+  --gem-ink: #ffffff;
+}
+
+body.gems[data-gem='amarelo'],
+.gems__color[data-gem-color='amarelo'] {
+  --gem: #ffd23f;
+  --gem-ink: #1a1400;
+}
+
+body.gems[data-gem='vermelho'],
+.gems__color[data-gem-color='vermelho'] {
+  --gem: #ff3b5c;
+  --gem-ink: #ffffff;
+}
+
+.gems h1,
+.gems h2 {
+  margin: 0;
+  font-family: 'Orbitron Variable', system-ui, sans-serif;
+  letter-spacing: 0.02em;
+}
+
+.gems h1 {
+  font-size: clamp(1.25rem, 4vw, 1.75rem);
+}
+
+.gems main {
+  width: min(52rem, 100%);
+  margin: 0 auto;
+}
+
+.gems__top {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  width: min(52rem, 100%);
+  margin: 0 auto 1.25rem;
+}
+
+.gems__top form {
+  margin: 0;
+}
+
+.gems__eyebrow {
+  margin: 0 0 0.25rem;
+  font:
+    600 0.72rem/1 'JetBrains Mono Variable',
+    ui-monospace,
+    monospace;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--c-cyan);
+}
+
+.gems__warning {
+  width: min(52rem, 100%);
+  margin: 0 auto 1rem;
+  padding: 0.8rem 1rem;
+  border: 1px solid rgb(255 194 74 / 0.6);
+  border-radius: 0.75rem;
+  background: rgb(255 194 74 / 0.12);
+  color: #ffe6b0;
+}
+
+.gems__lead {
+  margin: 0.5rem 0 1.25rem;
+  color: #b9c3ea;
+}
+
+.gems__colors {
+  display: grid;
+  gap: 0.9rem;
+}
+
+@media (min-width: 40rem) {
+  .gems__colors {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.gems__color {
+  display: grid;
+  gap: 0.35rem;
+  justify-items: center;
+  padding: 1.4rem 1rem;
+  border: 2px solid color-mix(in srgb, var(--gem) 70%, transparent);
+  border-radius: 1rem;
+  background: color-mix(in srgb, var(--gem) 12%, rgb(10 14 40 / 0.9));
+  color: var(--c-ice);
+  font: inherit;
+  text-align: center;
+  cursor: pointer;
+}
+
+.gems__color strong {
+  font-family: 'Orbitron Variable', system-ui, sans-serif;
+  font-size: 1.2rem;
+  color: var(--gem);
+}
+
+.gems__color:hover,
+.gems__color:focus-visible {
+  background: color-mix(in srgb, var(--gem) 24%, rgb(10 14 40 / 0.9));
+  outline: none;
+}
+
+.gems__gem {
+  width: 2.6rem;
+  height: 2.6rem;
+  background: var(--gem);
+  clip-path: polygon(50% 0, 100% 38%, 80% 100%, 20% 100%, 0 38%);
+  box-shadow: 0 0 24px var(--gem);
+}
+
+.gems__bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.gems__badge {
+  margin: 0;
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  background: var(--gem);
+  color: var(--gem-ink);
+  font-weight: 800;
+}
+
+.gems__progress,
+.gems__load {
+  margin: 0.75rem 0 0;
+  color: #b9c3ea;
+}
+
+.gems__load {
+  color: #ffe6b0;
+}
+
+.gems__card {
+  margin-top: 1rem;
+  padding: clamp(1.1rem, 3vw, 1.75rem);
+  border: 1px solid color-mix(in srgb, var(--gem) 55%, transparent);
+  border-radius: 1.1rem;
+  background: rgb(10 14 40 / 0.88);
+  box-shadow: 0 18px 50px rgb(0 0 0 / 0.4);
+}
+
+.gems__empty {
+  margin: 0;
+  color: #b9c3ea;
+}
+
+.gems__number {
+  margin: 0 0 0.5rem;
+  font:
+    700 0.8rem/1 'JetBrains Mono Variable',
+    ui-monospace,
+    monospace;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--gem);
+}
+
+.gems .gems__question {
+  font-family: 'Montserrat Variable', system-ui, sans-serif;
+  font-size: clamp(1.15rem, 3.2vw, 1.5rem);
+  line-height: 1.35;
+  letter-spacing: 0;
+}
+
+.gems__options {
+  display: grid;
+  gap: 0.6rem;
+  margin: 1.1rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.gems__option {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.75rem;
+  align-items: start;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid rgb(130 160 255 / 0.25);
+  border-radius: 0.75rem;
+  font-size: clamp(1rem, 2.6vw, 1.1rem);
+}
+
+.gems__letter {
+  display: grid;
+  place-items: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 0.5rem;
+  background: rgb(130 160 255 / 0.18);
+  font-weight: 800;
+}
+
+.gems__option.is-answer {
+  border-color: var(--c-success);
+  background: rgb(44 245 180 / 0.14);
+}
+
+.gems__option.is-answer .gems__letter {
+  background: var(--c-success);
+  color: #02130c;
+}
+
+.gems__actions {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+@media (min-width: 36rem) {
+  .gems__actions {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.gems__btn {
+  min-height: 3.4rem;
+  padding: 0.8rem 1.2rem;
+  border: 0;
+  border-radius: 0.8rem;
+  background: var(--gem);
+  color: var(--gem-ink);
+  font:
+    800 1.05rem/1.2 'Montserrat Variable',
+    system-ui,
+    sans-serif;
+  cursor: pointer;
+}
+
+.gems__btn--ghost {
+  border: 1px solid rgb(130 160 255 / 0.45);
+  background: transparent;
+  color: var(--c-ice);
+}
+
+.gems__btn--small {
+  min-height: 2.4rem;
+  padding: 0.45rem 0.9rem;
+  font-size: 0.85rem;
+}
+
+.gems__btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.gems__btn:focus-visible {
+  outline: 3px solid var(--c-cyan);
+  outline-offset: 2px;
+}
+
+.gems__sync {
+  margin: 1rem 0 0;
+  font-size: 0.9rem;
+  color: #8d97c4;
+}
+
+.gems__sync[data-state='pending'],
+.gems__sync[data-state='login'] {
+  color: #ffe6b0;
+}

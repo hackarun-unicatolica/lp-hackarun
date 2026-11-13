@@ -3,7 +3,7 @@
 // as ações do sorteio ao Apps Script com a chave secreta (que nunca chega ao navegador). Desligado = 404
 import { MAX_FAILURES, type AttemptStore } from './attempts';
 import { readConfig, type SorteioConfig, type SorteioEnv } from './config';
-import { loginPage, messagePage, PAGE_HEADERS } from './pages';
+import { LOGIN_HEADERS, loginPage, messagePage, PAGE_HEADERS } from './pages';
 import {
   checkLogin,
   clearedCookie,
@@ -14,10 +14,19 @@ import {
   validSession,
 } from './session';
 
-export const DRAW_PAGES = ['/sorteio', '/sorteio/nomes', '/sorteio/avaliacoes'] as const;
+// /gemas = tela dos NPCs das gemas (questões com gabarito): mesmo login da organização
+export const DRAW_PAGES = ['/sorteio', '/sorteio/nomes', '/sorteio/avaliacoes', '/gemas'] as const;
 export const API_PATH = '/api/sorteio';
-// feedback-report = dados do painel de avaliações (só leitura)
-const ALLOWED_ACTIONS = ['draw-list', 'draw-save', 'draw-names', 'draw-publish', 'feedback-report'];
+// feedback-report = dados do painel de avaliações (só leitura); gems-* = questões e fila dos NPCs
+const ALLOWED_ACTIONS = [
+  'draw-list',
+  'draw-save',
+  'draw-names',
+  'draw-publish',
+  'feedback-report',
+  'gems-load',
+  'gems-sync',
+];
 const MAX_BODY_BYTES = 256 * 1024;
 const UPSTREAM_TIMEOUT_MS = 30_000;
 // atraso fixo em login errado: tentativa em massa fica lenta
@@ -34,9 +43,12 @@ export interface SorteioDeps {
   sleep(ms: number): Promise<void>;
 }
 
-// o caminho é do sorteio? (/sorteio, /sorteio/..., /sorteio.html, /api/sorteio)
+// o caminho é do sorteio? (/sorteio, /sorteio/..., /sorteio.html, /gemas, /api/sorteio)
 export function isSorteioPath(pathname: string): boolean {
   return (
+    pathname === '/gemas' ||
+    pathname.startsWith('/gemas/') ||
+    pathname.startsWith('/gemas.') ||
     pathname === '/sorteio' ||
     pathname.startsWith('/sorteio/') ||
     pathname.startsWith('/sorteio.') ||
@@ -64,6 +76,10 @@ const json = (status: number, body: unknown) =>
 
 const html = (status: number, body: string, extra: Record<string, string> = {}) =>
   new Response(body, { status, headers: { ...PAGE_HEADERS, ...extra } });
+
+// tela de login: a única com script (o olho da senha), liberado pelo hash na CSP
+const loginHtml = (status: number, body: string, extra: Record<string, string> = {}) =>
+  new Response(body, { status, headers: { ...LOGIN_HEADERS, ...extra } });
 
 const redirect = (location: string, cookie?: string) => {
   const headers: Record<string, string> = { Location: location, 'Cache-Control': 'no-store' };
@@ -106,12 +122,15 @@ export async function handleSorteio(request: Request, env: SorteioEnv, deps: Sor
   if (url.pathname === '/sorteio/sair') {
     if (request.method !== 'POST' || !sameOrigin(request))
       return html(405, messagePage('Ops', 'Use o botão Sair.'));
-    return redirect('/sorteio', clearedCookie());
+    // volta pro login da tela de onde saiu (sorteio ou gemas)
+    const form = await request.formData().catch(() => null);
+    const back = form?.get('voltar');
+    return redirect((typeof back === 'string' && drawPage(back)) || '/sorteio', clearedCookie());
   }
 
   const page = drawPage(url.pathname);
   if (!page || (request.method !== 'GET' && request.method !== 'HEAD')) return notFound(deps);
-  if (!session) return html(200, loginPage({ back: page }));
+  if (!session) return loginHtml(200, loginPage({ back: page }));
   const response = await deps.next();
   const headers = new Headers(response.headers);
   headers.set('Cache-Control', 'no-store');
@@ -131,7 +150,7 @@ async function login(request: Request, config: SorteioConfig, deps: SorteioDeps)
   const user = field('usuario');
   const ip = clientIp(request);
   if ((await deps.attempts.failures(ip)) >= MAX_FAILURES) {
-    return html(
+    return loginHtml(
       429,
       loginPage({ back, user, error: 'Muitas tentativas erradas. Espere 15 minutos e tente de novo.' }),
       { 'Retry-After': '900' },
@@ -143,7 +162,7 @@ async function login(request: Request, config: SorteioConfig, deps: SorteioDeps)
   }
   await deps.attempts.fail(ip);
   await deps.sleep(FAILURE_DELAY_MS);
-  return html(401, loginPage({ back, user, error: 'Login ou senha incorretos.' }));
+  return loginHtml(401, loginPage({ back, user, error: 'Login ou senha incorretos.' }));
 }
 
 async function api(
