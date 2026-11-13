@@ -104,7 +104,7 @@ export function mountGemsPage(
   };
 
   const deliverySection = find<HTMLElement>(root, '[data-delivery]');
-  const delivery = mountDeliveryPanel(gateway, root);
+  const delivery = mountDeliveryPanel(gateway, store, root);
 
   const backToPick = () => {
     meter.cancel();

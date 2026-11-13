@@ -84,7 +84,7 @@ const fontFaces = [
             data-delivery-input
             list="delivery-teams"
             autocomplete="off"
-            placeholder="Digite ou toque no nome na lista de quem falta"
+            placeholder="Digite o nome da equipe"
             required
           />
           <datalist id="delivery-teams" data-delivery-options></datalist>
@@ -97,7 +97,9 @@ const fontFaces = [
         <h2 class="gems__subtitle">Completaram</h2>
         <ol class="gems__done-list" data-delivery-done></ol>
 
-        <h2 class="gems__subtitle">Faltam</h2>
+        <h2 class="gems__subtitle">
+          Faltam <span class="gems__hint">(toque no nome para marcar)</span>
+        </h2>
         <ul class="gems__chips" data-delivery-pending></ul>
 
         <button class="gems__btn gems__btn--ghost gems__btn--small" type="button" data-delivery-refresh>
@@ -145,6 +147,13 @@ const fontFaces = [
         <p class="gems__sync" data-sync role="status"></p>
       </section>
     </main>
+
+    <div class="gems__toast" data-toast role="status" aria-live="polite" hidden>
+      <span data-toast-text></span>
+      <button class="gems__toast-undo" type="button" data-toast-undo>
+        Desfazer
+      </button>
+    </div>
 
     <script>
       import { createGemsServices } from '@composition/gems';

@@ -1,4 +1,10 @@
-import type { ColorData, GemsDeviceStore, GemsMode } from '@application/gems/GemsPorts';
+import type {
+  ColorData,
+  DeliveryData,
+  DeliveryOp,
+  GemsDeviceStore,
+  GemsMode,
+} from '@application/gems/GemsPorts';
 import {
   cleanQuestion,
   cleanQueueState,
@@ -17,6 +23,16 @@ export interface KeyValueStorage {
 
 const COLOR_KEY = 'hackarun:gemas:cor';
 const dataKey = (color: GemColor) => `hackarun:gemas:${color}`;
+const DELIVERY_KEY = 'hackarun:gemas:entrega';
+
+const isText = (v: unknown): v is string => typeof v === 'string' && v.trim() !== '';
+
+function cleanOp(value: unknown): DeliveryOp | null {
+  const op = value as Partial<Record<keyof DeliveryOp, unknown>> | null;
+  if (!op || !isText(op.id) || !isText(op.team) || !isText(op.at)) return null;
+  if (op.action !== 'finish' && op.action !== 'undo') return null;
+  return { id: op.id, action: op.action, team: op.team, at: op.at };
+}
 
 export class GemsStore implements GemsDeviceStore {
   constructor(private readonly storage: KeyValueStorage | null) {}
@@ -50,6 +66,36 @@ export class GemsStore implements GemsDeviceStore {
 
   saveData(color: GemColor, data: ColorData): boolean {
     return this.write(dataKey(color), JSON.stringify(data));
+  }
+
+  deliveryData(): DeliveryData {
+    const empty: DeliveryData = { server: null, queue: [] };
+    const raw = this.read(DELIVERY_KEY);
+    if (!raw) return empty;
+    try {
+      const parsed = JSON.parse(raw) as { server?: unknown; queue?: unknown };
+      const server = parsed.server as { teams?: unknown; done?: unknown } | null | undefined;
+      const validServer =
+        server && Array.isArray(server.teams) && Array.isArray(server.done)
+          ? {
+              teams: server.teams.filter(isText),
+              done: server.done.flatMap((d: unknown) => {
+                const item = d as { team?: unknown; at?: unknown };
+                return isText(item?.team) && isText(item.at) ? [{ team: item.team, at: item.at }] : [];
+              }),
+            }
+          : null;
+      const queue = Array.isArray(parsed.queue)
+        ? parsed.queue.map(cleanOp).filter((op): op is DeliveryOp => op !== null)
+        : [];
+      return { server: validServer, queue };
+    } catch {
+      return empty;
+    }
+  }
+
+  saveDeliveryData(data: DeliveryData): boolean {
+    return this.write(DELIVERY_KEY, JSON.stringify(data));
   }
 
   // aba anônima ou armazenamento bloqueado: a tela funciona, mas avisa que nada fica guardado

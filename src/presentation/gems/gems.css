@@ -10,7 +10,8 @@ body.gems {
   --gem-ink: #02030b;
   margin: 0;
   min-height: 100vh;
-  padding: 1rem clamp(1rem, 4vw, 2.5rem) 3rem;
+  /* folga embaixo para o aviso com Desfazer não cobrir o último botão */
+  padding: 1rem clamp(1rem, 4vw, 2.5rem) 6rem;
   background:
     radial-gradient(38rem 24rem at 0% -10%, color-mix(in srgb, var(--gem) 28%, transparent), transparent 65%),
     radial-gradient(34rem 22rem at 100% 0%, rgb(148 27 255 / 0.2), transparent 60%), var(--c-void);
@@ -393,18 +394,115 @@ body.gems[data-gem='entrega'],
 .gems__done {
   display: grid;
   grid-template-columns: 1fr auto auto;
-  gap: 0.75rem;
+  gap: 0.5rem 0.75rem;
   align-items: center;
   padding: 0.6rem 0.8rem;
   border: 1px solid rgb(44 245 180 / 0.45);
   border-radius: 0.75rem;
   background: rgb(44 245 180 / 0.08);
-  font-weight: 700;
 }
 
-.gems__done-time {
-  font-weight: 400;
+.gems__done-team {
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.gems__done-meta {
+  display: inline-flex;
+  gap: 0.5rem;
+  align-items: center;
   color: #b9c3ea;
+  font-size: 0.9rem;
+}
+
+.gems__sync-badge {
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.gems__sync-badge[data-sync='saved'] {
+  background: rgb(44 245 180 / 0.16);
+  color: var(--c-success);
+}
+
+.gems__sync-badge[data-sync='saving'] {
+  background: rgb(130 160 255 / 0.18);
+  color: #cfd8ff;
+}
+
+.gems__sync-badge[data-sync='waiting'] {
+  background: rgb(255 194 74 / 0.18);
+  color: #ffe6b0;
+}
+
+/* celular: nome em cima; hora, selo e botão embaixo */
+@media (max-width: 34rem) {
+  .gems__done {
+    grid-template-columns: 1fr auto;
+  }
+
+  .gems__done-team {
+    grid-column: 1 / -1;
+  }
+}
+
+.gems__hint {
+  font-family: 'Montserrat Variable', system-ui, sans-serif;
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: #8d97c4;
+  letter-spacing: 0;
+}
+
+/* aviso no rodapé com "Desfazer": não cobre a busca e some sozinho */
+.gems__toast {
+  position: fixed;
+  left: 50%;
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  z-index: 10;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  width: min(32rem, calc(100% - 2rem));
+  padding: 0.75rem 0.9rem 0.75rem 1.1rem;
+  border: 1px solid rgb(44 245 180 / 0.55);
+  border-radius: 0.9rem;
+  background: #0b1530;
+  box-shadow: 0 12px 40px rgb(0 0 0 / 0.55);
+  color: var(--c-ice);
+  font-weight: 600;
+  transform: translateX(-50%);
+}
+
+.gems__toast[hidden] {
+  display: none;
+}
+
+.gems__toast span {
+  flex: 1;
+  overflow-wrap: anywhere;
+}
+
+.gems__toast-undo {
+  min-height: 2.6rem;
+  padding: 0.4rem 0.9rem;
+  border: 0;
+  border-radius: 0.6rem;
+  background: var(--c-success);
+  color: #02130c;
+  font:
+    800 0.95rem/1 'Montserrat Variable',
+    system-ui,
+    sans-serif;
+  cursor: pointer;
+}
+
+.gems__toast-undo:focus-visible {
+  outline: 3px solid var(--c-cyan);
+  outline-offset: 2px;
 }
 
 .gems__chips {
@@ -417,7 +515,8 @@ body.gems[data-gem='entrega'],
 }
 
 .gems__chip {
-  padding: 0.45rem 0.8rem;
+  min-height: 2.6rem;
+  padding: 0.45rem 0.9rem;
   border: 1px solid rgb(130 160 255 / 0.35);
   border-radius: 999px;
   background: rgb(10 14 40 / 0.9);

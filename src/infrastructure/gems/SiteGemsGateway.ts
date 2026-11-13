@@ -13,6 +13,7 @@ const TIMEOUT_MS = 30_000;
 
 interface ApiBody {
   ok?: boolean;
+  error?: string;
   message?: string;
   questions?: unknown;
   state?: unknown;
@@ -46,8 +47,10 @@ async function post(body: Record<string, unknown>): Promise<GemsResult<ApiBody>>
     if (response.status === 401) return { kind: 'login' };
     const parsed = (await response.json()) as ApiBody;
     if (parsed.ok === true) return { kind: 'ok', value: parsed };
-    if (parsed.message) return { kind: 'unavailable', message: parsed.message };
-    return { kind: 'unavailable', message: parsed.message ?? 'A planilha não respondeu como esperado.' };
+    const message = parsed.message ?? 'A planilha não respondeu como esperado.';
+    return parsed.error
+      ? { kind: 'unavailable', message, code: parsed.error }
+      : { kind: 'unavailable', message };
   } catch {
     return { kind: 'unavailable', message: 'Sem conexão com a planilha.' };
   } finally {
@@ -78,8 +81,8 @@ export class SiteGemsGateway implements GemsGateway {
     return this.deliveryCall({ action: 'gems-teams' });
   }
 
-  finish(team: string): Promise<GemsResult<DeliveryState>> {
-    return this.deliveryCall({ action: 'gems-finish', team });
+  finish(team: string, at: string): Promise<GemsResult<DeliveryState>> {
+    return this.deliveryCall({ action: 'gems-finish', team, at });
   }
 
   undo(team: string): Promise<GemsResult<DeliveryState>> {
