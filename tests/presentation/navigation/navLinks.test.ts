@@ -44,15 +44,15 @@ describe('origem do CTA de inscrição', () => {
     }
   });
 
-  it('CTAs da LP: inscrição aberta ou em breve vai pra /inscricao; encerrada, pro aviso na mesma página', () => {
+  it('CTAs da LP: inscrição aberta ou em breve vai pra /inscricao; encerrada, vira "Ver equipes"', () => {
     const copy = new RegistrationCopy();
     expect(copy.cta('open', 'hero').href).toBe('/inscricao?origem=hero');
     expect(copy.cta('soon', 'about').href).toBe('/inscricao?origem=about');
     expect(copy.cta('closing', 'menu').href).toBe('/inscricao?origem=menu');
-    // encerrada não marca origem (não é inscrição) e nunca leva pra /equipes, escondida até o sorteio
+    // encerrada não marca origem (não é inscrição) e leva pra lista de equipes, já no ar depois do sorteio
     expect(copy.cta('closed', 'hero')).toEqual({
-      label: 'Inscrições encerradas',
-      href: '/inscricao',
+      label: 'Ver equipes',
+      href: '/equipes',
       isRegistration: false,
     });
   });
@@ -62,9 +62,10 @@ describe('origem do CTA de inscrição', () => {
     expect(copy.actionLabel('soon')).toBe('Quero participar');
     expect(copy.actionLabel('open')).toBe('Fazer minha inscrição');
     expect(copy.actionLabel('closing')).toBe('Fazer minha inscrição');
-    expect(copy.actionLabel('closed')).toBe('Inscrições encerradas');
-    expect(copy.headerLabel('closed')).toBe('Encerradas');
-    const statuses = ['soon', 'open', 'closing', 'closed'] as const;
+    expect(copy.actionLabel('closed')).toBe('Ver equipes');
+    expect(copy.headerLabel('closed')).toBe('Ver equipes');
+    // encerrada o botão é "Ver equipes" (navegação); a regra vale enquanto a inscrição está de pé
+    const statuses = ['soon', 'open', 'closing'] as const;
     for (const status of statuses) {
       const labels = [copy.actionLabel(status), copy.headerLabel(status), copy.cta(status, 'hero').label];
       expect(labels.join(' ')).not.toMatch(/equipe/i);
@@ -126,10 +127,10 @@ describe('header, menu e rodapé', () => {
     });
   });
 
-  it('inscrições encerradas: o CTA leva pro aviso em /inscricao, atual só lá', () => {
-    expect(headerCtaLink(closed, 'registration')).toEqual({ href: '/inscricao', ariaCurrent: 'page' });
-    expect(headerCtaLink(closed, 'home')).toEqual({ href: '/inscricao', ariaCurrent: undefined });
-    expect(headerCtaLink(closed, 'teams').ariaCurrent).toBeUndefined();
+  it('inscrições encerradas: o CTA leva pra /equipes, atual só lá', () => {
+    expect(headerCtaLink(closed, 'home')).toEqual({ href: '/equipes', ariaCurrent: undefined });
+    expect(headerCtaLink(closed, 'registration')).toEqual({ href: '/equipes', ariaCurrent: undefined });
+    expect(headerCtaLink(closed, 'teams')).toEqual({ href: '/equipes', ariaCurrent: 'page' });
   });
 
   it('na página atual o botão perde o preenchimento e não marca origem', () => {

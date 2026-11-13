@@ -97,6 +97,8 @@ describe('/equipes escondida: nenhum link do site leva pra lá', () => {
     'presentation/components/teams/',
     'presentation/sections/TeamsDirectorySection.astro',
     'presentation/components/seo/teamsPageSeo.ts',
+    // inscrição encerrada: o CTA da LP e do header vira "Ver equipes" (a lista já saiu do sorteio)
+    'presentation/formatters/RegistrationCopy.ts',
     // telas do sorteio (só a organização, com login): depois de publicar, o link leva à página pública
     'presentation/views/draw/',
     'presentation/draw/',

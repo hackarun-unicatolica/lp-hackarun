@@ -2,7 +2,6 @@
 import type { LandingPageDTO } from '@application/index';
 import Button from '@presentation/components/ui/Button.astro';
 import Icon from '@presentation/components/ui/Icon.astro';
-import { mentorHref } from '@presentation/view-models/mentor/mentorOrigin';
 // import { ScheduleLookup } from '@presentation/formatters/ScheduleLookup';
 import SectionHeader from './shared/SectionHeader.astro';
 import './sections.css';
@@ -74,8 +73,9 @@ const { data: _data } = Astro.props;
           perfil por e-mail.
         </p>
       </div>
-      <Button href={mentorHref('crew')} variant="ghost">
-        Quero ser mentor
+      {/* cadastro de mentores encerrado: o botão fica desativado e não leva ao formulário */}
+      <Button variant="ghost" disabled>
+        Inscrições para mentores encerradas
       </Button>
     </div>
   </div>
