@@ -26,7 +26,12 @@ function gemsAction_(body) {
       PropertiesService.getScriptProperties().getProperty(INSIGNIAS_SETUP_PROPERTY) !==
       INSIGNIAS_SETUP_VERSION
     ) {
-      gemsLocked_(() => insigniasSetup_(book));
+      // formatação nunca impede o NPC de carregar as questões
+      try {
+        gemsLocked_(() => insigniasSetup_(book));
+      } catch (err) {
+        console.error(err);
+      }
     }
     if (GEMS_DELIVERY_ACTIONS.indexOf(body.action) !== -1) {
       if (body.action === 'gems-teams') return json_(insigniasState_(book));
