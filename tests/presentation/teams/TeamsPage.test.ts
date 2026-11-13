@@ -65,9 +65,10 @@ describe('/equipes escondida até o sorteio', () => {
     expect(topHref('teams')).toBe('#conteudo');
   });
 
-  it('inscrição encerrada: o CTA não leva pra página de equipes', () => {
+  it('inscrição encerrada: o CTA vira "Ver equipes" e leva pra página de equipes', () => {
     expect(new RegistrationCopy().cta('closed', 'teams')).toMatchObject({
-      href: '/inscricao',
+      label: 'Ver equipes',
+      href: '/equipes',
       isRegistration: false,
     });
   });

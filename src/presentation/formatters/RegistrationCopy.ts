@@ -15,11 +15,12 @@ export interface CtaCopy {
 
 // texto dos CTAs e da linha de status conforme o momento da inscrição (individual: as equipes saem do sorteio).
 // Todo CTA de inscrição leva pra página /inscricao com a origem no endereço (a planilha guarda de onde cada
-// inscrito veio). Encerrada, o CTA vira só navegação pra mesma página, que mostra o aviso de encerramento
+// inscrito veio). Encerrada, o CTA vira "Ver equipes": as equipes já saíram do sorteio e a lista está no ar
+const TEAMS_HREF = '/equipes';
+
 export class RegistrationCopy {
   cta(status: Status, origin: RegistrationOrigin): CtaCopy {
-    if (status === 'closed')
-      return { label: 'Inscrições encerradas', href: registrationHref(), isRegistration: false };
+    if (status === 'closed') return { label: 'Ver equipes', href: TEAMS_HREF, isRegistration: false };
     const href = registrationHref(origin);
     if (status === 'soon') return { label: 'Quero participar', href, isRegistration: true };
     return { label: 'Garantir minha vaga', href, isRegistration: true };
@@ -28,14 +29,14 @@ export class RegistrationCopy {
   // rótulo longo dos CTAs de inscrição no corpo da página (fim da LP, seção de equipes, 404). Em breve convida
   // em vez de prometer o envio: a página de inscrição mostra o que preparar e quando abre
   actionLabel(status: Status): string {
-    if (status === 'closed') return 'Inscrições encerradas';
+    if (status === 'closed') return 'Ver equipes';
     if (status === 'soon') return 'Quero participar';
     return 'Fazer minha inscrição';
   }
 
   // versão curta pro header, que não tem espaço
   headerLabel(status: Status): string {
-    if (status === 'closed') return 'Encerradas';
+    if (status === 'closed') return 'Ver equipes';
     if (status === 'soon') return 'Participar';
     return 'Inscrever';
   }
