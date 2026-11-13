@@ -293,3 +293,36 @@ body.gems[data-gem='vermelho'],
 .gems__sync[data-state='login'] {
   color: #ffe6b0;
 }
+
+.gems__meter {
+  margin-top: 1rem;
+}
+
+.gems__meter-label {
+  margin: 0 0 0.5rem;
+  font-weight: 700;
+  color: var(--c-ice);
+}
+
+.gems__meter-track {
+  height: 0.75rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgb(130 160 255 / 0.18);
+}
+
+.gems__meter-fill {
+  display: block;
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--gem);
+  box-shadow: 0 0 14px var(--gem);
+  transition: width 0.12s linear;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gems__meter-fill {
+    transition: none;
+  }
+}

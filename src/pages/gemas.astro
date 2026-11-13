@@ -68,6 +68,23 @@ const fontFaces = [
           </button>
         </div>
         <p class="gems__progress" data-progress></p>
+        <div
+          class="gems__meter"
+          data-meter
+          role="progressbar"
+          aria-label="Carregando as questões"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          aria-valuenow="0"
+          hidden
+        >
+          <p class="gems__meter-label" data-meter-label>
+            Carregando as questões… 0%
+          </p>
+          <div class="gems__meter-track">
+            <span class="gems__meter-fill" data-meter-fill></span>
+          </div>
+        </div>
         <p class="gems__load" data-load role="status"></p>
 
         <article class="gems__card" data-card aria-live="polite"></article>
