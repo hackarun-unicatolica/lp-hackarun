@@ -199,6 +199,16 @@ export class FakeSheet {
     return new FakeRange(this, r1, c1, r2 - r1 + 1, c2 - c1 + 1);
   }
 
+  deleteRow(row: number): this {
+    this.rows.splice(row - 1, 1);
+    return this;
+  }
+
+  deleteColumn(col: number): this {
+    this.rows.forEach((line) => line.splice(col - 1, 1));
+    return this;
+  }
+
   clear(): this {
     this.rows.length = 0;
     this.formulas.clear();

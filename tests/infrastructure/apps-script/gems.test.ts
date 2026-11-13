@@ -118,9 +118,9 @@ describe('Apps Script · entrega final das insígnias', () => {
     expect(res.teams).toEqual(['Equipe Muk', 'Equipe Poliwhirl']);
     expect(res.done).toEqual([]);
     const tab = script.tab('Insígnias completas');
-    expect(tab.rows[0]).toEqual(['Equipe', 'Completou em', 'Situação', 'Desmarcado em']);
+    expect(tab.rows[0]).toEqual(['Equipe', 'Completou em', 'Situação']);
     expect(tab.frozen.rows).toBe(1);
-    expect(script.properties['INSIGNIAS_VERSAO']).toBe('1');
+    expect(script.properties['INSIGNIAS_VERSAO']).toBe('2');
   });
 
   it('a aba Questões ganha uma cor por palestra (regra na linha inteira) e o título congelado', () => {
@@ -132,32 +132,58 @@ describe('Apps Script · entrega final das insígnias', () => {
     expect(questions.columnWidths.get(3)).toBe(380);
   });
 
-  it('marca a equipe com a hora, em ordem de chegada, e não marca duas vezes', () => {
+  it('marca com a hora da marcação feita na tela (não a do envio), em ordem de chegada', () => {
     const { script, send } = deliverySetup();
-    script.now = Date.parse('2026-11-13T20:00:00-03:00');
-    expect(send({ action: 'gems-finish', team: 'equipe poliwhirl' }).done?.map((d) => d.team)).toEqual([
-      'Equipe Poliwhirl',
-    ]);
-    script.now = Date.parse('2026-11-13T20:05:00-03:00');
+    script.now = Date.parse('2026-11-13T21:00:00-03:00');
+    const marked = '2026-11-13T20:00:00.000-03:00';
+    send({ action: 'gems-finish', team: 'equipe poliwhirl', at: marked });
     const res = send({ action: 'gems-finish', team: 'Equipe Muk' });
     expect(res.done?.map((d) => d.team)).toEqual(['Equipe Poliwhirl', 'Equipe Muk']);
-    expect(res.done?.[0]?.at).toBe(new Date('2026-11-13T20:00:00-03:00').toISOString());
-    expect(send({ action: 'gems-finish', team: 'Equipe Muk' }).error).toBe('already');
+    expect(res.done?.[0]?.at).toBe(new Date(marked).toISOString());
+    expect(res.done?.[1]?.at).toBe(new Date('2026-11-13T21:00:00-03:00').toISOString());
   });
 
-  it('desmarcar não apaga: guarda a linha como desmarcado, e a equipe pode ser marcada de novo', () => {
+  it('hora no futuro ou velha demais vira a hora do servidor', () => {
+    const { script, send } = deliverySetup();
+    script.now = Date.parse('2026-11-13T21:00:00-03:00');
+    send({ action: 'gems-finish', team: 'Equipe Muk', at: '2026-11-13T22:00:00-03:00' });
+    const res = send({ action: 'gems-finish', team: 'Equipe Poliwhirl', at: '2026-11-01T10:00:00-03:00' });
+    const server = new Date(script.now).toISOString();
+    expect(res.done?.map((d) => d.at)).toEqual([server, server]);
+  });
+
+  it('reenvio do mesmo pedido nunca duplica: marcar de novo e desmarcar de novo respondem ok sem mudar nada', () => {
     const { script, send } = deliverySetup();
     send({ action: 'gems-finish', team: 'Equipe Muk' });
-    const undone = send({ action: 'gems-undo', team: 'Equipe Muk' });
-    expect(undone.done).toEqual([]);
+    const again = send({ action: 'gems-finish', team: 'Equipe Muk' });
+    expect(again.ok).toBe(true);
+    expect(script.tab('Insígnias completas').data).toHaveLength(1);
+    send({ action: 'gems-undo', team: 'Equipe Muk' });
+    const undoAgain = send({ action: 'gems-undo', team: 'Equipe Muk' });
+    expect(undoAgain.ok).toBe(true);
+    expect(undoAgain.done).toEqual([]);
+  });
+
+  it('desmarcar apaga a linha da aba e não mexe nas outras', () => {
+    const { script, send } = deliverySetup();
+    send({ action: 'gems-finish', team: 'Equipe Muk' });
+    send({ action: 'gems-finish', team: 'Equipe Poliwhirl' });
+    send({ action: 'gems-undo', team: 'Equipe Muk' });
     const tab = script.tab('Insígnias completas');
-    expect(tab.data[0]?.[2]).toBe('desmarcado');
-    expect(tab.data[0]?.[3]).toBeInstanceOf(Date);
-    expect(send({ action: 'gems-undo', team: 'Equipe Muk' }).error).toBe('not-done');
-    expect(send({ action: 'gems-finish', team: 'Equipe Muk' }).done?.map((d) => d.team)).toEqual([
-      'Equipe Muk',
-    ]);
-    expect(tab.data).toHaveLength(2);
+    expect(tab.data.map((r) => r[0])).toEqual(['Equipe Poliwhirl']);
+  });
+
+  it('a aba da versão anterior perde a coluna Desmarcado em e as linhas desmarcadas', () => {
+    const { script, send } = deliverySetup();
+    const old = script.book.add(new FakeSheet('Insígnias completas'));
+    old.appendRow(['Equipe', 'Completou em', 'Situação', 'Desmarcado em']);
+    old.appendRow(['Equipe Muk', new Date(), 'desmarcado', new Date()]);
+    old.appendRow(['Equipe Poliwhirl', new Date(), 'completou', '']);
+    script.properties['INSIGNIAS_VERSAO'] = '1';
+    const res = send({ action: 'gems-teams' });
+    expect(res.done?.map((d) => d.team)).toEqual(['Equipe Poliwhirl']);
+    expect(old.rows[0]).toEqual(['Equipe', 'Completou em', 'Situação']);
+    expect(old.data).toHaveLength(1);
   });
 
   it('equipe que não existe ou não está confirmada é recusada', () => {
