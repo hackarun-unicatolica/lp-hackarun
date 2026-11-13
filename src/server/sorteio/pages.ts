@@ -40,16 +40,14 @@ function page(title: string, body: string): string {
   return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>${escapeHtml(title)} · HackaRun 2026</title><style>${STYLE}</style></head><body><main>${body}</main></body></html>`;
 }
 
-// botão de olho da senha: o único script destas telas, liberado na CSP pelo resumo (hash) dele
-export const PASSWORD_TOGGLE_SCRIPT =
-  "document.querySelectorAll('[data-eye]').forEach(function(b){b.hidden=false;b.addEventListener('click',function(){var i=document.getElementById(b.getAttribute('aria-controls'));var show=i.type==='password';i.type=show?'text':'password';b.setAttribute('aria-pressed',String(show));b.setAttribute('aria-label',show?'Esconder senha':'Mostrar senha');i.focus();});});";
-// sha256 do script acima em base64 (um teste confere que bate)
-export const PASSWORD_TOGGLE_HASH = 'sha256-sMCAbgo43p3pTWQL+r9hUiaPs+Uzsf+fdLyauHievGo=';
+// botão de olho da senha: o único script destas telas, num arquivo estático do site (public/login-senha.js). Escrito
+// aqui dentro da função, a Cloudflare recusava publicar ("Unknown internal error")
+export const PASSWORD_TOGGLE_SRC = '/login-senha.js';
 
-// headers das telas com o login (as outras ficam sem script nenhum)
+// headers das telas com o login (as outras ficam sem script nenhum): só scripts do próprio site
 export const LOGIN_HEADERS: Record<string, string> = {
   ...PAGE_HEADERS,
-  'Content-Security-Policy': `default-src 'none'; style-src 'unsafe-inline'; script-src '${PASSWORD_TOGGLE_HASH}'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'`,
+  'Content-Security-Policy': `default-src 'none'; style-src 'unsafe-inline'; script-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'`,
 };
 
 const EYE_ICON =
@@ -70,7 +68,7 @@ export function loginPage(options: { back: string; error?: string; user?: string
 <label for="senha">Senha</label>
 <div class="pass"><input id="senha" name="senha" type="password" autocomplete="current-password" required><button type="button" class="eye" data-eye aria-controls="senha" aria-pressed="false" aria-label="Mostrar senha" hidden>${EYE_ICON}</button></div>
 <button type="submit">Entrar</button>
-</form><p class="note">Acesso só da organização. A sessão vale por 12 horas neste navegador.</p><script>${PASSWORD_TOGGLE_SCRIPT}</script>`,
+</form><p class="note">Acesso só da organização. A sessão vale por 12 horas neste navegador.</p><script src="${PASSWORD_TOGGLE_SRC}" defer></script>`,
   );
 }
 

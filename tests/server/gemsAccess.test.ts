@@ -1,12 +1,12 @@
 // /gemas (tela dos NPCs, com gabarito): mesma porta do sorteio. Sem login, só a tela de login (com o olho da senha);
-// com login, a página e as ações gems-*. A CSP libera só o script do olho, pelo resumo dele
+// com login, a página e as ações gems-*. A CSP libera só scripts do próprio site (o do olho)
 // @vitest-environment node
-import { createHash } from 'node:crypto';
+import { readFileSync } from 'node:fs';
 import { describe, expect, it, vi } from 'vitest';
 import { MemoryAttemptStore } from '../../src/server/sorteio/attempts';
 import type { SorteioEnv } from '../../src/server/sorteio/config';
 import { handleSorteio, isSorteioPath, type SorteioDeps } from '../../src/server/sorteio/handler';
-import { PASSWORD_TOGGLE_HASH, PASSWORD_TOGGLE_SCRIPT } from '../../src/server/sorteio/pages';
+import { PASSWORD_TOGGLE_SRC } from '../../src/server/sorteio/pages';
 
 const ORIGIN = 'https://hackarun.com.br';
 const ENV: SorteioEnv = {
@@ -70,16 +70,23 @@ describe('/gemas atrás do login da organização', () => {
     expect(screen.headers.get('Cache-Control')).toBe('no-store');
   });
 
-  it('login tem o botão de olho e a CSP libera só aquele script (pelo resumo)', async () => {
+  it('login tem o botão de olho, que vem de um arquivo do próprio site (a CSP só libera o site)', async () => {
     const { send } = harness();
     const page = await send('/gemas');
     const html = await page.text();
     expect(html).toContain('data-eye');
     expect(html).toContain('aria-label="Mostrar senha"');
-    const hash = `sha256-${createHash('sha256').update(PASSWORD_TOGGLE_SCRIPT, 'utf8').digest('base64')}`;
-    expect(PASSWORD_TOGGLE_HASH).toBe(hash);
-    expect(page.headers.get('Content-Security-Policy')).toContain(`script-src '${hash}'`);
-    expect(html).toContain(`<script>${PASSWORD_TOGGLE_SCRIPT}</script>`);
+    expect(html).toContain(`<script src="${PASSWORD_TOGGLE_SRC}" defer></script>`);
+    expect(page.headers.get('Content-Security-Policy')).toContain("script-src 'self'");
+    // o arquivo existe em public/ e fora das rotas da função (é servido como estático)
+    const file = readFileSync(new URL(`../../public${PASSWORD_TOGGLE_SRC}`, import.meta.url), 'utf8');
+    expect(file).toContain('data-eye');
+    const routes = JSON.parse(
+      readFileSync(new URL('../../public/_routes.json', import.meta.url), 'utf8'),
+    ) as {
+      include: string[];
+    };
+    expect(routes.include).not.toContain(PASSWORD_TOGGLE_SRC);
   });
 
   it('gems-load e gems-sync só chegam na planilha com sessão, e com a chave do sorteio', async () => {
