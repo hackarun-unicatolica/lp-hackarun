@@ -125,6 +125,11 @@
     "types": ["fire"]
   },
   {
+    "id": 61,
+    "name": "Poliwhirl",
+    "types": ["water"]
+  },
+  {
     "id": 62,
     "name": "Poliwrath",
     "types": ["water", "fighting"]
