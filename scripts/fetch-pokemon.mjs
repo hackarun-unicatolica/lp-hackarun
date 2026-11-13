@@ -5,7 +5,7 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import sharp from 'sharp';
 
-// 100 Pokémon das gerações 1 e 2 com cara de equipe de competição (sem os fofinhos, como Igglybuff e Celebi):
+// 101 Pokémon das gerações 1 e 2 com cara de equipe de competição (sem os fofinhos, como Igglybuff e Celebi):
 // número da Pokédex -> nome como aparece na tela
 const POKEMON = {
   1: 'Bulbasaur',
@@ -33,6 +33,7 @@ const POKEMON = {
   57: 'Primeape',
   58: 'Growlithe',
   59: 'Arcanine',
+  61: 'Poliwhirl',
   62: 'Poliwrath',
   64: 'Kadabra',
   65: 'Alakazam',
