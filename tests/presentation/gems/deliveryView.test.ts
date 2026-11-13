@@ -14,8 +14,8 @@ describe('lista da entrega final', () => {
   it('quem completou sai em ordem de chegada, com a posição; quem falta mantém a ordem da planilha', () => {
     const view = deliveryView(STATE, (iso) => iso.slice(11, 16));
     expect(view.done).toEqual([
-      { position: 1, team: 'Equipe Muk', time: '23:05' },
-      { position: 2, team: 'Equipe Golem', time: '23:10' },
+      { position: 1, team: 'Equipe Muk', time: '23:05', sync: 'saved' },
+      { position: 2, team: 'Equipe Golem', time: '23:10', sync: 'saved' },
     ]);
     expect(view.pending).toEqual(['Equipe Poliwhirl']);
     expect([view.count, view.total]).toEqual([2, 3]);

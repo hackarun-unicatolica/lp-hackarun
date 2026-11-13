@@ -35,7 +35,7 @@ function gemsAction_(body) {
     }
     if (GEMS_DELIVERY_ACTIONS.indexOf(body.action) !== -1) {
       if (body.action === 'gems-teams') return json_(insigniasState_(book));
-      return json_(gemsLocked_(() => insigniasChange_(book, body.action, body.team)));
+      return json_(gemsLocked_(() => insigniasChange_(book, body.action, body.team, body.at)));
     }
     const color = gemsColor_(body.color);
     if (!color) return json_({ ok: false, error: 'invalid' });
