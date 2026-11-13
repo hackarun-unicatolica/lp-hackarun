@@ -97,12 +97,6 @@ body.gems[data-gem='vermelho'],
   gap: 0.9rem;
 }
 
-@media (min-width: 40rem) {
-  .gems__colors {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
 .gems__color {
   display: grid;
   gap: 0.35rem;
@@ -325,4 +319,117 @@ body.gems[data-gem='vermelho'],
   .gems__meter-fill {
     transition: none;
   }
+}
+
+body.gems[data-gem='entrega'],
+.gems__color--delivery {
+  --gem: #2cf5b4;
+  --gem-ink: #02130c;
+}
+
+@media (min-width: 40rem) {
+  .gems__colors {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 60rem) {
+  .gems__colors {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.gems__gem--all {
+  background: conic-gradient(#3b8bff 0 33%, #ffd23f 0 66%, #ff3b5c 0);
+  box-shadow: 0 0 24px rgb(44 245 180 / 0.6);
+}
+
+.gems__delivery-form {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.gems__delivery-form label {
+  font-weight: 700;
+}
+
+.gems__delivery-form input {
+  width: 100%;
+  min-height: 3.2rem;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid rgb(130 160 255 / 0.4);
+  border-radius: 0.75rem;
+  background: #070b22;
+  color: var(--c-ice);
+  font: inherit;
+  font-size: 1.05rem;
+}
+
+.gems__delivery-form input:focus-visible {
+  outline: 3px solid var(--gem);
+  outline-offset: 1px;
+}
+
+.gems__sync[data-tone='ok'] {
+  color: var(--c-success);
+}
+
+.gems__sync[data-tone='error'] {
+  color: #ffb3c4;
+}
+
+.gems .gems__subtitle {
+  margin: 1.5rem 0 0.6rem;
+  font-size: 1rem;
+}
+
+.gems__done-list {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.gems__done {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid rgb(44 245 180 / 0.45);
+  border-radius: 0.75rem;
+  background: rgb(44 245 180 / 0.08);
+  font-weight: 700;
+}
+
+.gems__done-time {
+  font-weight: 400;
+  color: #b9c3ea;
+}
+
+.gems__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0 0 1rem;
+  padding: 0;
+  list-style: none;
+}
+
+.gems__chip {
+  padding: 0.45rem 0.8rem;
+  border: 1px solid rgb(130 160 255 / 0.35);
+  border-radius: 999px;
+  background: rgb(10 14 40 / 0.9);
+  color: var(--c-ice);
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.gems__chip:hover,
+.gems__chip:focus-visible {
+  border-color: var(--gem);
+  outline: none;
 }

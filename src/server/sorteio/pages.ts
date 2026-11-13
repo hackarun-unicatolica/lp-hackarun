@@ -54,7 +54,7 @@ const EYE_ICON =
   '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
 
 // título da tela de login conforme a tela de destino
-const LOGIN_TITLES: Record<string, string> = { '/gemas': 'Gemas dos NPCs' };
+const LOGIN_TITLES: Record<string, string> = { '/insignias': 'Insígnias dos NPCs' };
 
 export function loginPage(options: { back: string; error?: string; user?: string }): string {
   const error = options.error ? `<p class="error" role="alert">${escapeHtml(options.error)}</p>` : '';

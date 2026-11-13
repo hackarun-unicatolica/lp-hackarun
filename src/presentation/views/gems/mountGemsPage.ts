@@ -1,10 +1,11 @@
 import { GEM_LETTERS, type GemColor, type GemQuestion } from '@domain/gems/GemQueue';
-import type { GemsDeviceStore, GemsGateway } from '@application/gems/GemsPorts';
+import type { GemsDeviceStore, GemsGateway, GemsMode } from '@application/gems/GemsPorts';
 import { GemsSession, type GemsView, type SyncStatus } from '@presentation/view-models/gems/GemsSession';
 import { GEM_TALKS } from './gemTalks';
 import { LoadingMeter } from './LoadingMeter';
+import { mountDeliveryPanel } from './mountDeliveryPanel';
 
-// tela /gemas: o NPC escolhe a cor uma vez (fica guardada no aparelho), sorteia e mostra a resposta para conferir.
+// tela /insignias: o NPC escolhe a cor uma vez (fica guardada no aparelho), sorteia e mostra a resposta para conferir.
 // Nada de equipe: quem acerta recebe a ficha física da cor
 
 const SYNC_TEXT: Record<SyncStatus, string> = {
@@ -102,9 +103,29 @@ export function mountGemsPage(
     renderQuestion(card, view.question, reveal);
   };
 
-  const open = (color: GemColor) => {
-    store.setColor(color);
+  const deliverySection = find<HTMLElement>(root, '[data-delivery]');
+  const delivery = mountDeliveryPanel(gateway, root);
+
+  const backToPick = () => {
+    meter.cancel();
+    store.setMode(null);
+    session = null;
+    delete document.body.dataset['gem'];
+    npc.hidden = true;
+    deliverySection.hidden = true;
+    pick.hidden = false;
+  };
+
+  const open = (mode: GemsMode) => {
+    store.setMode(mode);
     pick.hidden = true;
+    if (mode === 'entrega') {
+      document.body.dataset['gem'] = 'entrega';
+      deliverySection.hidden = false;
+      delivery.open();
+      return;
+    }
+    const color = mode;
     npc.hidden = false;
     session = new GemsSession(
       color,
@@ -127,6 +148,8 @@ export function mountGemsPage(
       open(color);
     });
   });
+  find<HTMLButtonElement>(root, '[data-mode="entrega"]').addEventListener('click', () => open('entrega'));
+  find<HTMLButtonElement>(root, '[data-delivery-change]').addEventListener('click', backToPick);
   drawButton.addEventListener('click', () => {
     reveal = false;
     session?.draw();
@@ -135,20 +158,13 @@ export function mountGemsPage(
     reveal = !reveal;
     if (session) render(session.view());
   });
-  changeButton.addEventListener('click', () => {
-    meter.cancel();
-    store.setColor(null);
-    session = null;
-    delete document.body.dataset['gem'];
-    npc.hidden = true;
-    pick.hidden = false;
-  });
+  changeButton.addEventListener('click', backToPick);
   window.addEventListener('online', () => session?.retryNow());
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') session?.retryNow();
   });
 
-  const saved = store.color();
+  const saved = store.mode();
   if (saved) open(saved);
   else pick.hidden = false;
 
