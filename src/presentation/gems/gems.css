@@ -327,15 +327,14 @@ body.gems[data-gem='entrega'],
   --gem-ink: #02130c;
 }
 
+/* as 3 cores numa linha; a entrega final embaixo, na largura das 3 */
 @media (min-width: 40rem) {
   .gems__colors {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
   }
-}
 
-@media (min-width: 60rem) {
-  .gems__colors {
-    grid-template-columns: repeat(4, 1fr);
+  .gems__color--delivery {
+    grid-column: 1 / -1;
   }
 }
 
