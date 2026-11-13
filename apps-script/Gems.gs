@@ -1,11 +1,13 @@
-// gemas dos NPCs (hackarun.com.br/gemas): cada NPC tem uma cor e sorteia só as questões da palestra dele. As questões
+// insígnias dos NPCs (hackarun.com.br/insignias; no código, "gems"): cada NPC tem uma cor e sorteia só as questões da palestra dele. As questões
 // e o gabarito ficam na aba "Questões" desta planilha (nunca no repositório, que é público). O site não fala direto
 // com este script: a função da Cloudflare confere o login da organização e repassa com a chave SORTEIO_TOKEN.
 // A fila de cada cor (quais questões já saíram na rodada) fica nas propriedades do script; o sorteio acontece no
 // aparelho do NPC, que só manda a fila atualizada para cá (sem pressa: a tela não espera a resposta).
 
 const GEMS_SHEET = 'Questões';
-const GEMS_ACTIONS = ['gems-load', 'gems-sync'];
+const GEMS_ACTIONS = ['gems-load', 'gems-sync', 'gems-teams', 'gems-finish', 'gems-undo'];
+// ações da entrega final (Insignias.gs): não dependem de cor
+const GEMS_DELIVERY_ACTIONS = ['gems-teams', 'gems-finish', 'gems-undo'];
 const GEMS_COLORS = ['azul', 'amarelo', 'vermelho'];
 const GEMS_HEADERS = ['Cor', 'Nº', 'Pergunta', 'A', 'B', 'C', 'D', 'Resposta'];
 const GEMS_LETTERS = ['A', 'B', 'C', 'D'];
@@ -17,11 +19,23 @@ const GEMS_LOCK_MS = 10000;
 function gemsAction_(body) {
   if (!drawAuthorized_(body.token)) return json_({ ok: false, error: 'unauthorized' });
   if (GEMS_ACTIONS.indexOf(body.action) === -1) return json_({ ok: false, error: 'unknown-action' });
-  const color = gemsColor_(body.color);
-  if (!color) return json_({ ok: false, error: 'invalid' });
   try {
+    const book = SpreadsheetApp.getActiveSpreadsheet();
+    // formata as abas na primeira chamada de cada versão (Insignias.gs)
+    if (
+      PropertiesService.getScriptProperties().getProperty(INSIGNIAS_SETUP_PROPERTY) !==
+      INSIGNIAS_SETUP_VERSION
+    ) {
+      gemsLocked_(() => insigniasSetup_(book));
+    }
+    if (GEMS_DELIVERY_ACTIONS.indexOf(body.action) !== -1) {
+      if (body.action === 'gems-teams') return json_(insigniasState_(book));
+      return json_(gemsLocked_(() => insigniasChange_(book, body.action, body.team)));
+    }
+    const color = gemsColor_(body.color);
+    if (!color) return json_({ ok: false, error: 'invalid' });
     if (body.action === 'gems-load') {
-      const questions = gemsQuestions_(SpreadsheetApp.getActiveSpreadsheet(), color);
+      const questions = gemsQuestions_(book, color);
       return json_({ ok: true, color: color, questions: questions, state: gemsState_(color) });
     }
     const incoming = gemsCleanState_(body.state);
@@ -105,6 +119,14 @@ function gemsMerge_(a, b) {
 }
 
 function gemsSave_(color, incoming) {
+  return gemsLocked_(() => {
+    const merged = gemsMerge_(gemsState_(color), incoming);
+    PropertiesService.getScriptProperties().setProperty(GEMS_STATE_PREFIX + color, JSON.stringify(merged));
+    return merged;
+  });
+}
+
+function gemsLocked_(work) {
   const lock = LockService.getScriptLock();
   try {
     lock.waitLock(GEMS_LOCK_MS);
@@ -114,9 +136,7 @@ function gemsSave_(color, incoming) {
     throw busy;
   }
   try {
-    const merged = gemsMerge_(gemsState_(color), incoming);
-    PropertiesService.getScriptProperties().setProperty(GEMS_STATE_PREFIX + color, JSON.stringify(merged));
-    return merged;
+    return work();
   } finally {
     lock.releaseLock();
   }
