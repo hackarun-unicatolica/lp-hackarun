@@ -2,6 +2,7 @@ import { GEM_LETTERS, type GemColor, type GemQuestion } from '@domain/gems/GemQu
 import type { GemsDeviceStore, GemsGateway } from '@application/gems/GemsPorts';
 import { GemsSession, type GemsView, type SyncStatus } from '@presentation/view-models/gems/GemsSession';
 import { GEM_TALKS } from './gemTalks';
+import { LoadingMeter } from './LoadingMeter';
 
 // tela /gemas: o NPC escolhe a cor uma vez (fica guardada no aparelho), sorteia e mostra a resposta para conferir.
 // Nada de equipe: quem acerta recebe a ficha física da cor
@@ -67,6 +68,11 @@ export function mountGemsPage(
   const revealButton = find<HTMLButtonElement>(root, '[data-reveal]');
   const changeButton = find<HTMLButtonElement>(root, '[data-change]');
   const loadLine = find<HTMLElement>(root, '[data-load]');
+  const meter = new LoadingMeter({
+    box: find<HTMLElement>(root, '[data-meter]'),
+    fill: find<HTMLElement>(root, '[data-meter-fill]'),
+    label: find<HTMLElement>(root, '[data-meter-label]'),
+  });
   find<HTMLElement>(root, '[data-storage-warning]').hidden = store.available;
 
   let session: GemsSession | null = null;
@@ -79,13 +85,11 @@ export function mountGemsPage(
     document.body.dataset['gem'] = view.color;
     if (view.question?.n !== shownQuestion) reveal = false;
     shownQuestion = view.question?.n ?? null;
-    loadLine.hidden = view.load === 'ready';
+    if (view.load === 'loading') meter.start();
+    else meter.finish();
+    loadLine.hidden = view.load === 'ready' || view.load === 'loading';
     loadLine.textContent =
-      view.load === 'loading'
-        ? 'Carregando as questões…'
-        : view.load === 'empty'
-          ? 'A aba Questões da planilha não tem questões desta cor.'
-          : view.loadMessage;
+      view.load === 'empty' ? 'A aba Questões da planilha não tem questões desta cor.' : view.loadMessage;
     progress.textContent =
       view.total > 0 ? `Rodada ${view.round} · faltam ${view.remaining} de ${view.total} questões` : '';
     syncLine.textContent = SYNC_TEXT[view.sync];
@@ -132,6 +136,7 @@ export function mountGemsPage(
     if (session) render(session.view());
   });
   changeButton.addEventListener('click', () => {
+    meter.cancel();
     store.setColor(null);
     session = null;
     delete document.body.dataset['gem'];
