@@ -238,7 +238,7 @@
           "venueId": "capim-dourado",
           "audience": "final",
           "description": "Etapa final do HackaRun: apresentação das soluções desenvolvidas pelas equipes, atividades de entretenimento e cerimônia de premiação.",
-          "note": "A partir das 10h, o painel de LED do shopping exibe conteúdos do evento.",
+          "note": "A partir das 12h, o painel de LED do shopping exibe conteúdos do evento.",
           "activities": [
             {
               "id": "retrospective",
@@ -260,11 +260,11 @@
             },
             {
               "id": "band",
-              "title": "Show da Banda da Terra",
+              "title": "Show da cantora Misha",
               "kind": "show",
               "start": "18:30",
               "end": "19:00",
-              "summary": "Banda convidada, com entretenimento e interação com o público presente."
+              "summary": "Cantora convidada, com entretenimento e interação com o público presente."
             },
             {
               "id": "awards",
@@ -276,11 +276,11 @@
             },
             {
               "id": "closing-music",
-              "title": "Show da Banda da Terra",
+              "title": "Show da cantora Misha",
               "kind": "show",
               "start": "19:30",
               "end": "20:00",
-              "summary": "Encerramento do evento com a confraternização entre participantes, organização, parceiros e visitantes."
+              "summary": "Encerramento do evento com a cantora Misha e a confraternização entre participantes, organização, parceiros e visitantes."
             }
           ]
         }
