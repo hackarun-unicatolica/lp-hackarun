@@ -68,11 +68,27 @@ const { data: _data } = Astro.props;
     }
   }
 
+  /* placas médias em flex: a última fileira incompleta fica centralizada (11 = 4 + 4 + 3 no desktop) */
+  .sponsors__grid:not(.sponsors__grid--featured) {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .sponsors__grid:not(.sponsors__grid--featured) > :global(*) {
+    flex: 0 0 100%;
+    min-width: 0;
+  }
+
+  @media (min-width: 640px) {
+    .sponsors__grid:not(.sponsors__grid--featured) > :global(*) {
+      flex-basis: calc((100% - var(--space-5)) / 2);
+    }
+  }
+
   @media (min-width: 1024px) {
-    /* placas médias: 5 por fileira (10 patrocinadores = 2 fileiras cheias), abaixo dos destaques */
-    .sponsors__grid {
-      grid-template-columns: repeat(5, minmax(0, 1fr));
-      gap: var(--space-4);
+    .sponsors__grid:not(.sponsors__grid--featured) > :global(*) {
+      flex-basis: calc((100% - 3 * var(--space-5)) / 4);
     }
 
     .sponsors__grid--featured {

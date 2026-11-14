@@ -2,7 +2,7 @@
 import { Image } from 'astro:assets';
 import Icon from '@presentation/components/ui/Icon.astro';
 import SponsorAbout from './SponsorAbout.astro';
-import type { Sponsor } from './sponsors';
+import { linkKind, type Sponsor } from './sponsors';
 
 // um patrocinador: selo HUD em cima, logo no centro (no brilho da cor da marca) e, embaixo, o "Sobre" (abre
 // o painel com o texto e o site) e o atalho direto pro site
@@ -54,7 +54,7 @@ const aboutId = `sobre-${id}`;
       <Icon name="arrow-right" size={14} />
     </button>
     <a class="sponsor__action" href={url} target="_blank" rel="noopener noreferrer">
-      Site
+      {linkKind(url)}
       <span class="sr-only"> de {name} (abre em nova aba)</span>
       <Icon name="external" size={14} />
     </a>
