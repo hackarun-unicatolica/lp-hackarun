@@ -12,6 +12,7 @@ import maxdataLogo from '../../../assets/brand/maxdata.png';
 import quantumLogo from '../../../assets/brand/quantum-white.png';
 import duebcLogo from '../../../assets/brand/duebc-eventos.png';
 import i3Logo from '../../../assets/brand/i3-sistemas.png';
+import reiLogo from '../../../assets/brand/rei-das-impressoes.png';
 
 // patrocinadores na ordem da seção: os 3 em destaque (featured) primeiro, depois as placas médias.
 // Novo patrocinador: logo sem fundo (versão clara) em src/assets/brand e mais um item aqui. height = altura da logo no desktop em rem (marca larga pede menos, quadrada pede mais);
@@ -193,10 +194,29 @@ export const SPONSORS: readonly Sponsor[] = [
       'A empresa se destaca por oferecer tecnologia própria, integração entre sistemas e suporte técnico realizado por sua equipe. Seu objetivo é simplificar a rotina dos empreendedores por meio da tecnologia, proporcionando mais organização, produtividade e eficiência na gestão dos negócios. Atualmente, atende empresas de diferentes regiões do Brasil, consolidando sua atuação no mercado de soluções tecnológicas para o comércio.',
     ],
   },
+  {
+    id: 'rei-das-impressoes',
+    name: 'Rei das Impressões',
+    logo: reiLogo,
+    height: 4.2,
+    accent: '#2a8ccc',
+    url: 'https://www.instagram.com/reidasimpressoesgrafica/',
+    about: [
+      'Uma empresa especializada em soluções gráficas e serviços de impressão, oferecendo praticidade, qualidade e atendimento personalizado. Com serviços que incluem impressões, cópias, encadernações e acabamentos gráficos, a empresa atende às necessidades de estudantes, profissionais e negócios.',
+    ],
+  },
 ];
-// "https://www.lojabrinformatica.com.br/" -> "lojabrinformatica.com.br" (rótulo curto do botão do site)
-export const siteLabel = (url: string): string =>
-  url.replace(/^https?:\/\/(www\.)?/, '').split('/')[0] ?? url;
+const INSTAGRAM = /^https?:\/\/(www\.)?instagram\.com\/([^/?#]+)/;
+
+// "https://www.lojabrinformatica.com.br/" -> "lojabrinformatica.com.br"; Instagram -> "@perfil" (rótulo do link)
+export const siteLabel = (url: string): string => {
+  const instagram = INSTAGRAM.exec(url)?.[2];
+  if (instagram) return `@${instagram}`;
+  return url.replace(/^https?:\/\/(www\.)?/, '').split('/')[0] ?? url;
+};
+
+// botão da placa: quem só tem Instagram mostra "Instagram" em vez de "Site"
+export const linkKind = (url: string): string => (INSTAGRAM.test(url) ? 'Instagram' : 'Site');
 
 export const FEATURED_SPONSORS = SPONSORS.filter((sponsor) => sponsor.featured);
 export const OTHER_SPONSORS = SPONSORS.filter((sponsor) => !sponsor.featured);
