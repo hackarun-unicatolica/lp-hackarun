@@ -98,5 +98,20 @@
       "Engenheiro Civil (UTFPR), Empreendedor da construção civil, Coord. de Operações do Capim Dourado Shopping e “Vibecoder” nas horas vagas."
     ],
     "linkedin": "https://www.linkedin.com/in/lucaswendel/"
+  },
+  {
+    "id": "judge-8",
+    "name": "Luiz Carvalho",
+    "role": "judge",
+    "roleLabel": "Avaliador",
+    "headline": "Diretor de Tecnologia e Inovação · Startup Tocantins",
+    "topic": null,
+    "avatarUrl": "/convidados/luiz-carvalho.jpg",
+    "bio": [
+      "Cientista da computação, apaixonado por inovação e tendências tecnológicas, desenvolvedor há 20 anos, com quase 100 palestras realizadas em todo o Brasil nas áreas de tecnologia, inovação e empreendedorismo. Palestrou em grandes eventos como TEDx, Campus Party São Paulo, SW Campo Grande, Ideatho-GO e Tropical On Rails 7 - SP, dentre outros.",
+      "Atualmente, é Diretor de Tecnologia e Inovação da Associação Startup Tocantins, fundador da Tocantins IA e Analista na DPE-TO, onde coordena a equipe de inovação em Inteligência Artificial. Co-founder da InvestObra, fintech que atua no setor imobiliário, onde está à frente de vários projetos de IA para melhoria da eficiência operacional e tecnológica da startup.",
+      "Tem uma vasta experiência em empreendimento inovador: já passou por 10 startups e atuou como mentor e jurado em eventos de inovação e tecnologia mais de 20 vezes."
+    ],
+    "linkedin": "https://www.linkedin.com/in/luizcarvalhodev/"
   }
 ]
